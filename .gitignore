@@ -42,12 +42,6 @@
 *.map
 *.exp
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
 # Debug files
 *.dSYM/
 *.su
@@ -62,3 +56,12 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+.vscode/
+.idea/
+*.iml
+cmake-build-*/
+CMakeFiles/
+build/
+*.cmake
+CMakeCache.txt
