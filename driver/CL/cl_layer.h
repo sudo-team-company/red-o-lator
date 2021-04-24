@@ -19,7 +19,7 @@
 #ifndef OPENCL_CL_LAYER_H
 #define OPENCL_CL_LAYER_H
 
-#include <CL/cl_icd.h>
+#include "cl_icd.h"
 
 #ifdef __cplusplus
 extern "C" {

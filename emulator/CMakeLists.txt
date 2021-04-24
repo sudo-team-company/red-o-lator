@@ -1,5 +1,3 @@
-include_directories(src)
-
 set (EMULATOR_SOURCES
   main.cpp
 )

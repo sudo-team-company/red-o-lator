@@ -17,7 +17,7 @@
 #ifndef __OPENCL_CL_EGL_H
 #define __OPENCL_CL_EGL_H
 
-#include <CL/cl.h>
+#include "cl.h"
 
 #ifdef __cplusplus
 extern "C" {

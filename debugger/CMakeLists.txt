@@ -1,5 +1,3 @@
-include_directories(src)
-
 set(DEBUGGER_SOURCES
   main.cpp
 )

@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <CL/cl.h>
+#include "cl.h"
 
 /* cl_khr_fp64 extension - no extension #define since it has no functions  */
 /* CL_DEVICE_DOUBLE_FP_CONFIG is defined in CL.h for OpenCL >= 120 */
