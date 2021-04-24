@@ -22,3 +22,9 @@ add_subdirectory(common)
 add_subdirectory(driver)
 add_subdirectory(emulator)
 add_subdirectory(debugger)
+
+add_executable(red_o_lator
+       emulator/instruction_set/instruction.cpp
+       emulator/instruction_set/register.cpp
+       emulator/instruction_set/register_type.h)
+
