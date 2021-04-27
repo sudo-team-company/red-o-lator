@@ -1,5 +1,15 @@
+find_package(PkgConfig REQUIRED)
+
+set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig")
+message(STATUS "Looking for CLRX .pc files in $ENV{PKG_CONFIG_PATH}")
+pkg_check_modules(LIB_CLRX_AMD_ASM REQUIRED IMPORTED_TARGET clrxamdasm)
+pkg_check_modules(LIB_CLRX_AMD_BIN REQUIRED IMPORTED_TARGET clrxamdbin)
+pkg_check_modules(LIB_CLRX_UTILS REQUIRED IMPORTED_TARGET clrxutils)
+
+
 include_directories(CL)
 include_directories(src)
+
 
 set(OCL_RUNTIME_SOURCES
         src/runtime/runtime-platform.cpp
@@ -31,7 +41,16 @@ target_include_directories(driver PUBLIC src/runtime)
 add_executable(driver-exec ${OCL_RUNTIME_SOURCES} src/main.cpp)
 
 set(OCL_TEST_SOURCES
-        test/driver-call-test.cpp)
+        test/driver-call-test.cpp
+        )
 
 add_executable(driver-test ${OCL_TEST_SOURCES})
-target_link_libraries(driver-test PRIVATE driver)
+target_link_libraries(driver-test driver)
+
+
+add_executable(driver-disasm-test test/disasm-test.cpp)
+target_link_libraries(driver-disasm-test
+        PkgConfig::LIB_CLRX_AMD_ASM
+        PkgConfig::LIB_CLRX_AMD_BIN
+        PkgConfig::LIB_CLRX_UTILS
+        )
