@@ -1,5 +1,5 @@
-#include <opencl.h>
 #include <iostream>
+#include "icd.h"
 
 CL_API_ENTRY cl_context CL_API_CALL
 clCreateContext(const cl_context_properties* properties,
@@ -11,7 +11,7 @@ clCreateContext(const cl_context_properties* properties,
                                               void* user_data),
                 void* user_data,
                 cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCreateContext" << std::endl;
     return nullptr;
 }
 
@@ -24,17 +24,18 @@ clCreateContextFromType(const cl_context_properties* properties,
                                                       void* user_data),
                         void* user_data,
                         cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCreateContextFromType"
+              << std::endl;
     return nullptr;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainContext(cl_context context) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clRetainContext" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseContext(cl_context context) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clReleaseContext" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -43,6 +44,6 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
                                                  size_t param_value_size,
                                                  void* param_value,
                                                  size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clGetContextInfo" << std::endl;
     return CL_INVALID_PLATFORM;
 }

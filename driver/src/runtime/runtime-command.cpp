@@ -1,5 +1,5 @@
-#include <opencl.h>
 #include <iostream>
+#include "icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueReadBuffer(cl_command_queue command_queue,
@@ -11,7 +11,8 @@ clEnqueueReadBuffer(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueReadBuffer"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -30,7 +31,8 @@ clEnqueueReadBufferRect(cl_command_queue command_queue,
                         cl_uint num_events_in_wait_list,
                         const cl_event* event_wait_list,
                         cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueReadBufferRect"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -44,7 +46,8 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
                      cl_uint num_events_in_wait_list,
                      const cl_event* event_wait_list,
                      cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueWriteBuffer"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -63,7 +66,8 @@ clEnqueueWriteBufferRect(cl_command_queue command_queue,
                          cl_uint num_events_in_wait_list,
                          const cl_event* event_wait_list,
                          cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueWriteBufferRect"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -77,7 +81,8 @@ clEnqueueFillBuffer(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueFillBuffer"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -91,7 +96,8 @@ clEnqueueCopyBuffer(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyBuffer"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -109,7 +115,8 @@ clEnqueueCopyBufferRect(cl_command_queue command_queue,
                         cl_uint num_events_in_wait_list,
                         const cl_event* event_wait_list,
                         cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyBufferRect"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -125,7 +132,8 @@ clEnqueueReadImage(cl_command_queue command_queue,
                    cl_uint num_events_in_wait_list,
                    const cl_event* event_wait_list,
                    cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueReadImage"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -141,7 +149,8 @@ clEnqueueWriteImage(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueWriteImage"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -154,7 +163,8 @@ clEnqueueFillImage(cl_command_queue command_queue,
                    cl_uint num_events_in_wait_list,
                    const cl_event* event_wait_list,
                    cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueFillImage"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -168,7 +178,8 @@ clEnqueueCopyImage(cl_command_queue command_queue,
                    cl_uint num_events_in_wait_list,
                    const cl_event* event_wait_list,
                    cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyImage"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -182,7 +193,8 @@ clEnqueueCopyImageToBuffer(cl_command_queue command_queue,
                            cl_uint num_events_in_wait_list,
                            const cl_event* event_wait_list,
                            cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyImageToBuffer"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -196,7 +208,8 @@ clEnqueueCopyBufferToImage(cl_command_queue command_queue,
                            cl_uint num_events_in_wait_list,
                            const cl_event* event_wait_list,
                            cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyBufferToImage"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -211,7 +224,8 @@ clEnqueueMapBuffer(cl_command_queue command_queue,
                    const cl_event* event_wait_list,
                    cl_event* event,
                    cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueMapBuffer"
+              << std::endl;
     return nullptr;
 }
 
@@ -228,7 +242,8 @@ clEnqueueMapImage(cl_command_queue command_queue,
                   const cl_event* event_wait_list,
                   cl_event* event,
                   cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueMapImage"
+              << std::endl;
     return nullptr;
 }
 
@@ -239,7 +254,8 @@ clEnqueueUnmapMemObject(cl_command_queue command_queue,
                         cl_uint num_events_in_wait_list,
                         const cl_event* event_wait_list,
                         cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueUnmapMemObject"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -251,7 +267,8 @@ clEnqueueMigrateMemObjects(cl_command_queue command_queue,
                            cl_uint num_events_in_wait_list,
                            const cl_event* event_wait_list,
                            cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueMigrateMemObjects"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -265,7 +282,8 @@ clEnqueueNDRangeKernel(cl_command_queue command_queue,
                        cl_uint num_events_in_wait_list,
                        const cl_event* event_wait_list,
                        cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueNDRangeKernel"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -280,7 +298,8 @@ clEnqueueNativeKernel(cl_command_queue command_queue,
                       cl_uint num_events_in_wait_list,
                       const cl_event* event_wait_list,
                       cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueNativeKernel"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -289,7 +308,8 @@ clEnqueueMarkerWithWaitList(cl_command_queue command_queue,
                             cl_uint num_events_in_wait_list,
                             const cl_event* event_wait_list,
                             cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueMarkerWithWaitList"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -298,7 +318,8 @@ clEnqueueBarrierWithWaitList(cl_command_queue command_queue,
                              cl_uint num_events_in_wait_list,
                              const cl_event* event_wait_list,
                              cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueBarrierWithWaitList"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -308,13 +329,13 @@ clEnqueueTask(cl_command_queue command_queue,
               cl_uint num_events_in_wait_list,
               const cl_event* event_wait_list,
               cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueTask" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY CL_API_SUFFIX__VERSION_1_1_DEPRECATED cl_int CL_API_CALL
 clEnqueueMarker(cl_command_queue command_queue, cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueMarker" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -322,12 +343,13 @@ CL_API_ENTRY CL_API_SUFFIX__VERSION_1_1_DEPRECATED cl_int CL_API_CALL
 clEnqueueWaitForEvents(cl_command_queue command_queue,
                        cl_uint num_events,
                        const cl_event* event_list) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueWaitForEvents"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY CL_API_SUFFIX__VERSION_1_1_DEPRECATED cl_int CL_API_CALL
 clEnqueueBarrier(cl_command_queue command_queue) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueBarrier" << std::endl;
     return CL_INVALID_PLATFORM;
 }

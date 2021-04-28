@@ -1,12 +1,12 @@
-#include <opencl.h>
 #include <iostream>
+#include "icd.h"
 
 CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
                                                cl_mem_flags flags,
                                                size_t size,
                                                void* host_ptr,
                                                cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCreateBuffer" << std::endl;
     return nullptr;
 }
 
@@ -16,7 +16,8 @@ clCreateSubBuffer(cl_mem buffer,
                   cl_buffer_create_type buffer_create_type,
                   const void* buffer_create_info,
                   cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCreateSubBuffer"
+              << std::endl;
     return nullptr;
 }
 
@@ -27,17 +28,19 @@ clCreateImage(cl_context context,
               const cl_image_desc* image_desc,
               void* host_ptr,
               cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCreateImage" << std::endl;
     return nullptr;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clRetainMemObject"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseMemObject(cl_mem memobj) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clReleaseMemObject"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -48,7 +51,8 @@ clGetSupportedImageFormats(cl_context context,
                            cl_uint num_entries,
                            cl_image_format* image_formats,
                            cl_uint* num_image_formats) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clGetSupportedImageFormats"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -58,7 +62,8 @@ clGetMemObjectInfo(cl_mem memobj,
                    size_t param_value_size,
                    void* param_value,
                    size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clGetMemObjectInfo"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -67,13 +72,15 @@ CL_API_ENTRY cl_int CL_API_CALL clGetImageInfo(cl_mem image,
                                                size_t param_value_size,
                                                void* param_value,
                                                size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clGetImageInfo" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clSetMemObjectDestructorCallback(
     cl_mem memobj, void (*pfn_notify)(cl_mem, void*), void* user_data) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr
+        << "Unimplemented OpenCL API call: clSetMemObjectDestructorCallback"
+        << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -86,7 +93,7 @@ clCreateImage2D(cl_context context,
                 size_t image_row_pitch,
                 void* host_ptr,
                 cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCreateImage2D" << std::endl;
     return nullptr;
 }
 
@@ -103,6 +110,6 @@ clCreateImage3D(cl_context context,
                 size_t image_slice_pitch,
                 void* host_ptr,
                 cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCreateImage3D" << std::endl;
     return nullptr;
 }
