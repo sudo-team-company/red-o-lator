@@ -1,9 +1,11 @@
 #include <iostream>
-#include "opencl.h"
+#include "runtime/icd.h"
 
 int main() {
     cl_uint num_platforms;
-    cl_int error = clGetPlatformIDs(0, nullptr, &num_platforms);
-
+    CLPlatformId* platforms;
+    cl_int error = clGetPlatformIDs(1, &platforms, &num_platforms);
     std::cout << "error: " << error << std::endl;
+    std::cout << "platforms: " << platforms->vendor << std::endl;
+    std::cout << "num_platforms: " << num_platforms << std::endl;
 }

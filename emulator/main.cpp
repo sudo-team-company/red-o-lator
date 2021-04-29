@@ -1,5 +1,5 @@
 #include <iostream>
-#include "runtime/runtime-impl.cpp"
+#include "runtime/runtime-other.cpp"
 
 int main() {
     std::cout << "Hello from emulator";
