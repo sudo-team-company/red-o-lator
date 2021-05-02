@@ -1,6 +1,8 @@
 #include <cstring>
 #include <iostream>
+
 #include "icd.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY CL_API_PREFIX__VERSION_1_1_DEPRECATED void* CL_API_CALL
 clGetExtensionFunctionAddress(const char* func_name) {
@@ -31,14 +33,15 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
 
     if (platforms) {
         const auto platform = new CLPlatformId();
-        platform->dispatchTable = mDispatchTable;
+        platform->dispatchTable = kDispatchTable;
         platform->version = "OpenCL 1.2 red-o-lator";
         platform->name = "red-o-lator";
         platform->vendor = "sudo-team-company";
         platform->extensions = "cl_khr_icd";
         platform->suffix = "red-o-lator";
         platform->profile = "FULL_PROFILE";
-        platforms[0] = platform;
+        kPlatform = platform;
+        platforms[0] = kPlatform;
     }
 
     if (num_platforms) {
