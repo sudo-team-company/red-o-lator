@@ -1,4 +1,9 @@
-#include "icd.h"
+#include "runtime-commons.h"
 
-IcdDispatchTable* mDispatchTable =  // NOLINT(cert-err58-cpp)
+IcdDispatchTable* kDispatchTable =  // NOLINT(cert-err58-cpp)
     IcdDispatchTableProvider().get();
+
+DeviceConfigurationParser kDeviceConfigurationParser =
+    DeviceConfigurationParser();
+
+CLPlatformId* kPlatform = nullptr;
