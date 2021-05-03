@@ -1,7 +1,7 @@
 #ifndef RED_O_LATOR_ICDDISPATCHTABLE_H
 #define RED_O_LATOR_ICDDISPATCHTABLE_H
 
-// TODO(newuserkk): change to singleton with static method?
+// TODO(IcdDispatchTable): change to singleton with static method?
 struct IcdDispatchTable {
     void* entries[256];
     int entryCount;

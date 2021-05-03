@@ -10,48 +10,83 @@
 
 #include <opencl.h>
 #include <string>
+#include <optional>
 
 #include "IcdDispatchTable.h"
 
+using CLContextCallback = void(CL_CALLBACK*)(const char* errinfo,
+                                             const void* private_info,
+                                             size_t cb,
+                                             void* user_data);
+
 struct CLPlatformId {
-    IcdDispatchTable* dispatchTable;
-    const char* profile;
-    const char* openClVersion;
-    const char* driverVersion;
-    const char* name;
-    const char* vendor;
-    const char* extensions;
-    const char* suffix;
+    explicit CLPlatformId(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
+    const char* profile = "";
+    const char* openClVersion = "";
+    const char* driverVersion = "";
+    const char* name = "";
+    const char* vendor = "";
+    const char* extensions = "";
+    const char* suffix = "";
 };
 
 struct CLDeviceId {
-    IcdDispatchTable* dispatchTable;
+    explicit CLDeviceId(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
 };
 
 struct CLContext {
-    IcdDispatchTable* dispatchTable;
+    explicit CLContext(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
+    std::optional<CLContextCallback> callback = std::nullopt;
+    void* callbackUserData = nullptr;
+    unsigned int referenceCount = 0;
 };
 
 struct CLCommandQueue {
-    IcdDispatchTable* dispatchTable;
+    explicit CLCommandQueue(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
 };
 
 struct CLMem {
-    IcdDispatchTable* dispatchTable;
+    explicit CLMem(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
 };
 
 struct CLProgram {
-    IcdDispatchTable* dispatchTable;
+    explicit CLProgram(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+    IcdDispatchTable* const dispatchTable;
 };
 
 struct CLKernel {
-    IcdDispatchTable* dispatchTable;
+    explicit CLKernel(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
 };
 
 struct CLEvent {
-    IcdDispatchTable* dispatchTable;
+    explicit CLEvent(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
 };
 
 struct CLSampler {
-    IcdDispatchTable* dispatchTable;
+    explicit CLSampler(IcdDispatchTable* dispatchTable)
+        : dispatchTable(dispatchTable) {}
+
+    IcdDispatchTable* const dispatchTable;
 };

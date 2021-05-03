@@ -3,8 +3,10 @@
 #include <algorithm>
 #include <cctype>
 #include <locale>
+#include <optional>
 #include <vector>
 
+namespace utils {
 static std::vector<std::string> split(const std::string& line,
                                       const char separator) {
     if (line.empty()) {
@@ -87,3 +89,9 @@ static inline void insertOrUpdate(std::unordered_map<K, V>& map,
         map.emplace(key, value);
     }
 }
+
+template <typename T>
+static std::optional<T*> optionalOf(T* value) {
+    return value ? std::make_optional(value) : std::nullopt;
+}
+}  // namespace utils
