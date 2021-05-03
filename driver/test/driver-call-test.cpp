@@ -8,4 +8,6 @@ int main() {
     std::cout << "error: " << error << std::endl;
     std::cout << "platforms: " << platforms->vendor << std::endl;
     std::cout << "num_platforms: " << num_platforms << std::endl;
+
+    return 0;
 }

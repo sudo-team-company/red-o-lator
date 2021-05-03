@@ -13,7 +13,7 @@ clCreateContext(const cl_context_properties* properties,
                 CLContextCallback pfn_notify,
                 void* user_data,
                 cl_int* errcode_ret) {
-    cl_int error;
+    cl_int error = 0;
 
     if (!num_devices || !devices) {
         error = CL_INVALID_VALUE;
@@ -39,8 +39,10 @@ clCreateContext(const cl_context_properties* properties,
 
     std::unordered_map<cl_context_properties, cl_context_properties>
         passedProperties;
-    for (int i = 0; properties[i] != 0; i += 2) {
-        passedProperties.emplace(properties[i], properties[i + 1]);
+    if (properties) {
+        for (int i = 0; properties[i] != 0; i += 2) {
+            passedProperties.emplace(properties[i], properties[i + 1]);
+        }
     }
 
     // TODO(clCreateContext, future): parse props

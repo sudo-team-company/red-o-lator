@@ -1,5 +1,4 @@
-#ifndef RED_O_LATOR_DEVICECONFIGURATIONPARSER_H
-#define RED_O_LATOR_DEVICECONFIGURATIONPARSER_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -54,5 +53,3 @@ struct DeviceConfigurationParseException : public std::runtime_error {
     explicit DeviceConfigurationParseException(const std::string& message)
         : std::runtime_error(message){};
 };
-
-#endif  // RED_O_LATOR_DEVICECONFIGURATIONPARSER_H
