@@ -9,15 +9,27 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                                                cl_uint num_entries,
                                                cl_device_id* devices,
                                                cl_uint* num_devices) {
-    if (devices) {
+    if (platform && platform != kPlatform) {
+        return CL_INVALID_PLATFORM;
+    }
+
+    if (devices && num_entries == 0) {
+        return CL_INVALID_VALUE;
+    }
+
+    if (!kDevice) {
         const auto deviceConfigurationFile =
             "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/resources/"
             "rx-570.ini";
         kDeviceConfigurationParser.load(deviceConfigurationFile);
 
-        const auto device = new CLDeviceId();
-        device->dispatchTable = kDispatchTable;
-        devices[0] = device;
+        kDevice = new CLDeviceId(kDispatchTable);
+    }
+
+    // TODO(clGetDeviceIDs, future): handle num_devices
+
+    if (devices) {
+        devices[0] = kDevice;
     }
 
     if (num_devices) {
@@ -32,6 +44,10 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
                                                 size_t param_value_size,
                                                 void* param_value,
                                                 size_t* param_value_size_ret) {
+    if (device != kDevice) {
+        return CL_INVALID_DEVICE;
+    }
+
     if (!param_value && !param_value_size_ret) {
         return CL_SUCCESS;
     }
@@ -41,7 +57,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
         return CL_SUCCESS;
     }
 
-    // TODO: parameters validation according to OpenCL spec
+    // TODO(clGetDeviceInfo, future): parameters validation according to
+    //  OpenCL spec
     const auto maybeResult =
         kDeviceConfigurationParser.getParameter(param_name);
 

@@ -48,34 +48,34 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
             continue;
         }
 
-        const auto [parameterName, parameterValue] = splitTwo(line, '=');
-        const auto parsedParameter =
-            parseParameter(trim(parameterName), trim(parameterValue));
+        const auto [parameterName, parameterValue] = utils::splitTwo(line, '=');
+        const auto parsedParameter = parseParameter(
+            utils::trim(parameterName), utils::trim(parameterValue));
 
         parameters.emplace(parsedParameter.name, parsedParameter.value);
     }
 
-    insertOrUpdate<cl_device_info>(
+    utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_PLATFORM,
         DeviceConfigurationParameterValue(kPlatform, sizeof(cl_platform_id)));
 
-    insertOrUpdate<cl_device_info>(
+    utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_PARENT_DEVICE,
         DeviceConfigurationParameterValue(nullptr, sizeof(cl_device_id)));
 
-    insertOrUpdate<cl_device_info>(
+    utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_OPENCL_C_VERSION,
         DeviceConfigurationParameterValue(
             kPlatform->openClVersion, strlen(kPlatform->openClVersion) + 1));
 
-    insertOrUpdate<cl_device_info>(
+    utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DRIVER_VERSION,
         DeviceConfigurationParameterValue(
             kPlatform->driverVersion, strlen(kPlatform->driverVersion) + 1));
 
     const auto deviceVersion = std::string(kPlatform->openClVersion) +
                                " AMD (" + kPlatform->driverVersion + ")";
-    insertOrUpdate<cl_device_info>(
+    utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_VERSION,
         DeviceConfigurationParameterValue(deviceVersion.c_str(),
                                           strlen(deviceVersion.c_str()) + 1));
@@ -163,8 +163,9 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
 
     PARSE_PARAMETER(CL_DEVICE_TYPE, cl_device_type, parseDeviceType)
     PARSE_STRING_PARAMETER(CL_DEVICE_NAME)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_VENDOR_ID,
-                           cl_uint)  // TODO: parse hex correctly
+    PARSE_NUMBER_PARAMETER(
+        CL_DEVICE_VENDOR_ID,
+        cl_uint)  // TODO(parseParameter): parse hex correctly
     PARSE_STRING_PARAMETER(CL_DEVICE_VENDOR)
     PARSE_STRING_PARAMETER(CL_DEVICE_PROFILE)
     PARSE_STRING_PARAMETER(CL_DEVICE_VERSION)
@@ -262,8 +263,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
         clParameter, DeviceConfigurationParameterValue(result, resultSize));
 }
 
-// TODO: ignore PARENT_DEVICE_ID, cl_platform_id
-
 template <typename T>
 T parseNumber(const std::string& value) {
     try {
@@ -276,11 +275,11 @@ T parseNumber(const std::string& value) {
 
 cl_bitfield parseBitfield(const std::string& value,
                           cl_bitfield parseFunction(const std::string& value)) {
-    // TODO: parse 0xNN?
-    const auto splitBitfield = split(value, '|');
+    // TODO(parseBitfield): parse 0xNN?
+    const auto splitBitfield = utils::split(value, '|');
 
     const auto accumulator = [&](cl_bitfield acc, const auto& value) {
-        return acc | parseFunction(trim(value));
+        return acc | parseFunction(utils::trim(value));
     };
 
     return std::accumulate(splitBitfield.begin(), splitBitfield.end(), 0,
@@ -290,12 +289,12 @@ cl_bitfield parseBitfield(const std::string& value,
 template <typename T>
 std::vector<T> parseArray(const std::string& value,
                           T parseFunction(const std::string&)) {
-    const auto splitValue = split(value, ' ');
+    const auto splitValue = utils::split(value, ' ');
 
     std::vector<T> result;
     std::transform(splitValue.begin(), splitValue.end(),
                    std::back_inserter(result), [&](auto& value) {
-                       return parseFunction(trim(value));
+                       return parseFunction(utils::trim(value));
                    });
 
     return result;
@@ -391,7 +390,7 @@ cl_device_mem_cache_type parseDeviceMemCacheType(const std::string& value) {
 
 cl_device_partition_property parseDevicePartitionProperty(
     const std::string& value) {
-    // TODO: parse array
+    // TODO(parseDevicePartitionProperty): parse array
 
     if (value == "CL_DEVICE_PARTITION_EQUALLY") {
         return CL_DEVICE_PARTITION_EQUALLY;

@@ -7,3 +7,4 @@ DeviceConfigurationParser kDeviceConfigurationParser =
     DeviceConfigurationParser();
 
 CLPlatformId* kPlatform = nullptr;
+CLDeviceId* kDevice = nullptr;

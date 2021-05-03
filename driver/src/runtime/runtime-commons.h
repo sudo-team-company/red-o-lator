@@ -5,3 +5,4 @@
 extern IcdDispatchTable* kDispatchTable;
 extern DeviceConfigurationParser kDeviceConfigurationParser;
 extern CLPlatformId* kPlatform;
+extern CLDeviceId* kDevice;
