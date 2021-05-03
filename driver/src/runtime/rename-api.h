@@ -1,5 +1,4 @@
-#ifndef _RENAME_API_H_
-#define _RENAME_API_H_
+#pragma once
 
 /* Rename OpenCL API functions to avoid clashes with ICD library
  * Without it implemented functions will not be visible to outer programs.
@@ -119,5 +118,3 @@
 #define CLKernel _cl_kernel
 #define CLEvent _cl_event
 #define CLSampler _cl_sampler
-
-#endif /* __RENAME_API_H__ */

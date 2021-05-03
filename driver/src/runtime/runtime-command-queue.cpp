@@ -32,7 +32,7 @@ CL_API_ENTRY cl_int CL_API_CALL clSetCommandQueueProperty() {
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY CL_API_PREFIX__VERSION_1_2_DEPRECATED cl_command_queue CL_API_CALL
+CL_API_ENTRY cl_command_queue CL_API_CALL
 clCreateCommandQueue(cl_context context,
                      cl_device_id device,
                      cl_command_queue_properties properties,

@@ -323,7 +323,7 @@ clEnqueueBarrierWithWaitList(cl_command_queue command_queue,
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY CL_API_PREFIX__VERSION_1_2_DEPRECATED cl_int CL_API_CALL
+CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueTask(cl_command_queue command_queue,
               cl_kernel kernel,
               cl_uint num_events_in_wait_list,
@@ -333,13 +333,13 @@ clEnqueueTask(cl_command_queue command_queue,
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY CL_API_SUFFIX__VERSION_1_1_DEPRECATED cl_int CL_API_CALL
+CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueMarker(cl_command_queue command_queue, cl_event* event) {
     std::cerr << "Unimplemented OpenCL API call: clEnqueueMarker" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY CL_API_SUFFIX__VERSION_1_1_DEPRECATED cl_int CL_API_CALL
+CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueWaitForEvents(cl_command_queue command_queue,
                        cl_uint num_events,
                        const cl_event* event_list) {
@@ -348,7 +348,7 @@ clEnqueueWaitForEvents(cl_command_queue command_queue,
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY CL_API_SUFFIX__VERSION_1_1_DEPRECATED cl_int CL_API_CALL
+CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueBarrier(cl_command_queue command_queue) {
     std::cerr << "Unimplemented OpenCL API call: clEnqueueBarrier" << std::endl;
     return CL_INVALID_PLATFORM;

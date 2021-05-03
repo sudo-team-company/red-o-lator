@@ -84,7 +84,7 @@ CL_API_ENTRY cl_int CL_API_CALL clSetMemObjectDestructorCallback(
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY CL_API_SUFFIX__VERSION_1_1_DEPRECATED cl_mem CL_API_CALL
+CL_API_ENTRY cl_mem CL_API_CALL
 clCreateImage2D(cl_context context,
                 cl_mem_flags flags,
                 const cl_image_format* image_format,
@@ -98,7 +98,6 @@ clCreateImage2D(cl_context context,
 }
 
 CL_API_ENTRY
-CL_API_PREFIX__VERSION_1_1_DEPRECATED
 CL_API_ENTRY cl_mem CL_API_CALL
 clCreateImage3D(cl_context context,
                 cl_mem_flags flags,

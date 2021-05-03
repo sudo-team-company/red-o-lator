@@ -1,3 +1,5 @@
+find_package(OpenCL REQUIRED)
+
 add_executable(emulator
         util/util.cpp
         flow/wavefront.cpp
@@ -13,7 +15,9 @@ add_executable(emulator
         cu/scalar_unit.cpp
         cu/compute_unit.cpp
         cu/simd_unit.cpp
-        main.cpp
+        main/KernelLoader.cpp
+        main/KernelLoader.h
+        main/main.cpp
         )
 
 add_executable(util_test
@@ -28,4 +32,4 @@ add_executable(alu_test
         test/alu/alu_test.cpp
         )
 
-target_link_libraries(emulator driver)
+target_link_libraries(emulator OpenCL::OpenCL)

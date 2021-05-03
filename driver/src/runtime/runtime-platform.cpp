@@ -1,10 +1,9 @@
 #include <cstring>
 #include <iostream>
 
-#include "icd.h"
 #include "runtime-commons.h"
 
-CL_API_ENTRY CL_API_PREFIX__VERSION_1_1_DEPRECATED void* CL_API_CALL
+CL_API_ENTRY void* CL_API_CALL
 clGetExtensionFunctionAddress(const char* func_name) {
     if (strcmp(func_name, "clIcdGetPlatformIDsKHR") == 0) {
         return (void*) clIcdGetPlatformIDsKHR;
@@ -35,7 +34,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
         kPlatform = new CLPlatformId(kDispatchTable);
         kPlatform->openClVersion = "OpenCL 1.2";
         kPlatform->driverVersion = "0.1";
-        kPlatform->name = "red-o-lator";
+        kPlatform->name = "AMD Accelerated Parallel Processing";
         kPlatform->vendor = "sudo-team-company";
         kPlatform->extensions = "cl_khr_icd";
         kPlatform->suffix = "red-o-lator";
