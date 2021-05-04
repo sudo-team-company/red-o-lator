@@ -28,6 +28,9 @@ class DeviceConfigurationParser {
     std::optional<DeviceConfigurationParameterValue> getParameter(
         cl_device_info parameter) const;
 
+    template <class T>
+    T requireParameter(cl_device_info parameter) const;
+
    private:
     struct ParsedParameter {
         ParsedParameter(cl_device_info name,
@@ -53,3 +56,5 @@ struct DeviceConfigurationParseException : public std::runtime_error {
     explicit DeviceConfigurationParseException(const std::string& message)
         : std::runtime_error(message){};
 };
+
+#include "DeviceConfigurationParser.tpp"

@@ -58,10 +58,6 @@ clGetPlatformInfo(cl_platform_id platform,
                   size_t param_value_size,
                   void* param_value,
                   size_t* param_value_size_ret) {
-    if (platform != kPlatform) {
-        return CL_INVALID_PLATFORM;
-    }
-
     std::string returnString;
 
     switch (param_name) {
@@ -72,7 +68,7 @@ clGetPlatformInfo(cl_platform_id platform,
 
         case CL_PLATFORM_VERSION: {
             returnString =
-                platform->openClVersion + std::string(" ") + platform->name;
+                platform->openClVersion + " " + platform->name;
             break;
         }
 
@@ -99,7 +95,7 @@ clGetPlatformInfo(cl_platform_id platform,
         default: return CL_INVALID_VALUE;
     }
 
-    const auto cReturnString = returnString.c_str();
+    const char* cReturnString = returnString.c_str();
     const auto returnStringSize = strlen(cReturnString) + 1;
 
     if (param_value_size && param_value_size < returnStringSize) {

@@ -33,16 +33,22 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/runtime-device.cpp
         src/runtime/runtime-commons.h
         src/runtime/runtime-commons.cpp
-        src/common/common.hpp)
+        src/common/common.hpp
+        src/runtime/device/DeviceConfigurationParser.tpp)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
+
 add_library(red-o-lator-icd SHARED ${OCL_RUNTIME_SOURCES})
-target_link_libraries(red-o-lator-icd INTERFACE OpenCL::OpenCL)
+target_link_libraries(red-o-lator-icd INTERFACE
+        OpenCL::OpenCL
+        )
+target_link_libraries(red-o-lator-icd PRIVATE
+        PkgConfig::LIB_CLRX_AMD_ASM
+        )
 target_include_directories(red-o-lator-icd PRIVATE src/runtime)
 
 install(TARGETS red-o-lator-icd DESTINATION lib)
 
-add_executable(driver-exec ${OCL_RUNTIME_SOURCES} src/main.cpp)
 
 set(OCL_TEST_SOURCES
         test/driver-call-test.cpp
@@ -51,9 +57,8 @@ set(OCL_TEST_SOURCES
 add_executable(driver-test ${OCL_TEST_SOURCES})
 target_link_libraries(driver-test PRIVATE red-o-lator-icd)
 
-add_executable(driver-disasm-test test/disasm-test.cpp)
+add_executable(driver-disasm-test test/disasm/disasm-test.cpp)
 target_link_libraries(driver-disasm-test
-        PkgConfig::LIB_CLRX_AMD_ASM
+        red-o-lator-icd
         PkgConfig::LIB_CLRX_AMD_BIN
-        PkgConfig::LIB_CLRX_UTILS
         )

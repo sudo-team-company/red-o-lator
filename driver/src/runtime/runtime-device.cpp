@@ -23,7 +23,14 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
             "rx-570.ini";
         kDeviceConfigurationParser.load(deviceConfigurationFile);
 
-        kDevice = new CLDeviceId(kDispatchTable);
+        kDevice =
+            new CLDeviceId(kDispatchTable,
+                           kDeviceConfigurationParser.requireParameter<size_t>(
+                               CL_DEVICE_GLOBAL_MEM_SIZE),
+                           kDeviceConfigurationParser.requireParameter<size_t>(
+                               CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE),
+                           kDeviceConfigurationParser.requireParameter<size_t>(
+                               CL_DEVICE_LOCAL_MEM_SIZE));
     }
 
     // TODO(clGetDeviceIDs, future): handle num_devices
@@ -91,17 +98,17 @@ clCreateSubDevices(cl_device_id in_device,
                    cl_uint num_devices,
                    cl_device_id* out_devices,
                    cl_uint* num_devices_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateSubDevices"
+    std::cerr << "clCreateSubDevices: sub-devices are not supported!"
               << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainDevice(cl_device_id device) {
-    std::cerr << "Unimplemented OpenCL API call: clRetainDevice" << std::endl;
+    std::cerr << "clRetainDevice: sub-devices are not supported!" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseDevice(cl_device_id device) {
-    std::cerr << "Unimplemented OpenCL API call: clReleaseDevice" << std::endl;
+    std::cerr << "clReleaseDevice: sub-devices are not supported!" << std::endl;
     return CL_INVALID_PLATFORM;
 }
