@@ -35,20 +35,25 @@ clCreateContext(const cl_context_properties* properties,
         return nullptr;
     }
 
-    auto clContext = new CLContext(kDispatchTable);
+    auto clContext = new CLContext(kDispatchTable, devices[0]);
 
     std::unordered_map<cl_context_properties, cl_context_properties>
         passedProperties;
+
     if (properties) {
         for (int i = 0; properties[i] != 0; i += 2) {
             passedProperties.emplace(properties[i], properties[i + 1]);
         }
-    }
 
-    // TODO(clCreateContext, future): parse props
+        // TODO(clCreateContext, future): parse props
+    }
 
     clContext->callback = utils::optionalOf(pfn_notify);
     clContext->callbackUserData = user_data;
+
+    if (errcode_ret) {
+        *errcode_ret = CL_SUCCESS;
+    }
 
     return clContext;
 }

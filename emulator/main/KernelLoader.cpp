@@ -1,5 +1,7 @@
 #include <CL/opencl.h>
+#include <fstream>
 #include <iostream>
+#include <vector>
 
 #include "KernelLoader.h"
 
@@ -8,6 +10,12 @@
         throw KernelLoadException(std::string(message) + "\nError code: " + \
                                   std::to_string(errorCode));               \
     }
+
+std::vector<unsigned char> readBinaryFile(const std::string& path) {
+    std::ifstream input(path, std::ios::binary);
+    return std::vector<unsigned char>(std::istreambuf_iterator<char>(input),
+                                      {});
+}
 
 void KernelLoader::executeKernel(const std::string& kernelPath) {
     cl_int errorCode;
@@ -55,21 +63,31 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         clCreateContext(nullptr, 1, &device, nullptr, nullptr, &errorCode);
     CHECK_ERROR("Failed to create context")
 
-    //    cl_command_queue commandQueue = clCreateCommandQueue(
-    //        context, device, CL_QUEUE_PROFILING_ENABLE, &errorCode);
-    //    CHECK_ERROR("Failed to create command queue")
-    //
-    //    const auto binary = readBinaryFile(
-    //        "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/disasm/"
-    //        "linear_kernels/addition/addition.bin");
-    //    const size_t binarySize[1] = {binary.size()};
-    //    const unsigned char* binaryData[1] = {binary.data()};
-    //
-    //    cl_program program = clCreateProgramWithBinary(
-    //        context, 1, &device, binarySize, binaryData, nullptr, &errorCode);
-    cl_program program = clCreateProgramWithBinary(
-        context, 1, &device, nullptr, nullptr, nullptr, &errorCode);
+    //    const size_t arraySize = 1000;
+    //    cl_mem mem1 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize,
+    //    nullptr,
+    //                                 &errorCode);
+    //    CHECK_ERROR("Error creating buffer 1");
+    //    cl_mem mem2 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize,
+    //    nullptr,
+    //                                 &errorCode);
+    //    CHECK_ERROR("Error creating buffer 2");
+    //    cl_mem mem3 = clCreateBuffer(context, CL_MEM_WRITE_ONLY, arraySize,
+    //    nullptr,
+    //                                 &errorCode);
+    //    CHECK_ERROR("Error creating buffer 3");
 
+    cl_command_queue commandQueue = clCreateCommandQueue(
+        context, device, CL_QUEUE_PROFILING_ENABLE, &errorCode);
+    CHECK_ERROR("Failed to create command queue")
+
+    const auto binary = readBinaryFile(
+        "../driver/test/disasm/linear_kernels/addition/addition.bin");
+    const size_t binarySize[1] = {binary.size()};
+    const unsigned char* binaryData[1] = {binary.data()};
+
+    cl_program program = clCreateProgramWithBinary(
+        context, 1, &device, binarySize, binaryData, nullptr, &errorCode);
     CHECK_ERROR("Failed to create program")
 
     errorCode = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);

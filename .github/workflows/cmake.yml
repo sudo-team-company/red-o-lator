@@ -34,19 +34,19 @@ jobs:
 
       - name: Install ICD Loader
         run: cmake --install ${{github.workspace}}/OpenCL-ICD-Loader/build
-          --prefix ${{github.workspace}}/OpenCL-ICD-Loader
-          --config Debug
+             --prefix ${{github.workspace}}/OpenCL-ICD-Loader
+             --config Debug
 
       - name: Git clone CLRX
         run: git clone https://github.com/CLRX/CLRX-mirror
 
       - name: Configure CLRX
         run: cmake -H${{github.workspace}}/CLRX-mirror -B ${{github.workspace}}/CLRX-mirror/build
-          -DCMAKE_BUILD_TYPE=Debug
-          -DCMAKE_INSTALL_PREFIX=CLRX
-          -DLIB_INSTALL_DIR=lib
-          -DNO_CLWRAPPER=ON
-          -DBUILD_STATIC_EXE=OFF
+             -DCMAKE_BUILD_TYPE=Debug
+             -DCMAKE_INSTALL_PREFIX=CLRX
+             -DLIB_INSTALL_DIR=lib
+             -DNO_CLWRAPPER=ON
+             -DBUILD_STATIC_EXE=OFF
 
       - name: Build CLRX
         run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Debug -j 16
@@ -56,9 +56,9 @@ jobs:
 
       - name: Configure red-o-lator
         run: cmake -H${{github.workspace}} -B ${{github.workspace}}/build
-          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-          -DCMAKE_LIBRARY_PATH=${{github.workspace}}/OpenCL-ICD-Loader/lib
-          -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
+              -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+              -DCMAKE_LIBRARY_PATH=${{github.workspace}}/OpenCL-ICD-Loader/lib
+              -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
 
       - name: Build red-o-lator
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j 16

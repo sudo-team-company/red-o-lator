@@ -13,8 +13,10 @@
 #include "rename-api.h"
 
 #include <CL/opencl.h>
-#include <string>
 #include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "IcdDispatchTable.h"
 
@@ -28,37 +30,52 @@ struct CLPlatformId {
         : dispatchTable(dispatchTable) {}
 
     IcdDispatchTable* const dispatchTable;
-    const char* profile = "";
-    const char* openClVersion = "";
-    const char* driverVersion = "";
-    const char* name = "";
-    const char* vendor = "";
-    const char* extensions = "";
-    const char* suffix = "";
+    std::string profile;
+    std::string openClVersion;
+    std::string driverVersion;
+    std::string name;
+    std::string vendor;
+    std::string extensions;
+    std::string suffix;
 };
 
 struct CLDeviceId {
-    explicit CLDeviceId(IcdDispatchTable* dispatchTable)
-        : dispatchTable(dispatchTable) {}
+    CLDeviceId(IcdDispatchTable* const dispatchTable,
+               size_t globalMemorySize,
+               size_t constantMemorySize,
+               size_t localMemorySize)
+        : dispatchTable(dispatchTable),
+          globalMemorySize(globalMemorySize),
+          constantMemorySize(constantMemorySize),
+          localMemorySize(localMemorySize) {}
 
     IcdDispatchTable* const dispatchTable;
+    size_t globalMemorySize;
+    size_t constantMemorySize;
+    size_t localMemorySize;
 };
 
 struct CLContext {
-    explicit CLContext(IcdDispatchTable* dispatchTable)
-        : dispatchTable(dispatchTable) {}
+    CLContext(IcdDispatchTable* dispatchTable, CLDeviceId* device)
+        : dispatchTable(dispatchTable), device(device) {}
 
     IcdDispatchTable* const dispatchTable;
+    CLDeviceId* device;
+
     std::optional<CLContextCallback> callback = std::nullopt;
     void* callbackUserData = nullptr;
     unsigned int referenceCount = 0;
 };
+
+struct Command {};
 
 struct CLCommandQueue {
     explicit CLCommandQueue(IcdDispatchTable* dispatchTable)
         : dispatchTable(dispatchTable) {}
 
     IcdDispatchTable* const dispatchTable;
+    std::vector<Command> commands = std::vector<Command>();
+    unsigned int referenceCount = 0;
 };
 
 struct CLMem {
@@ -71,7 +88,9 @@ struct CLMem {
 struct CLProgram {
     explicit CLProgram(IcdDispatchTable* dispatchTable)
         : dispatchTable(dispatchTable) {}
+
     IcdDispatchTable* const dispatchTable;
+    unsigned int referenceCount = 0;
 };
 
 struct CLKernel {

@@ -65,13 +65,13 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
 
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_OPENCL_C_VERSION,
-        DeviceConfigurationParameterValue(
-            kPlatform->openClVersion, strlen(kPlatform->openClVersion) + 1));
+        DeviceConfigurationParameterValue(kPlatform->openClVersion,
+                                          kPlatform->openClVersion.size() + 1));
 
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DRIVER_VERSION,
-        DeviceConfigurationParameterValue(
-            kPlatform->driverVersion, strlen(kPlatform->driverVersion) + 1));
+        DeviceConfigurationParameterValue(kPlatform->driverVersion,
+                                          kPlatform->driverVersion.size() + 1));
 
     const auto deviceVersion = std::string(kPlatform->openClVersion) +
                                " AMD (" + kPlatform->driverVersion + ")";

@@ -6,7 +6,11 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
                                                size_t size,
                                                void* host_ptr,
                                                cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateBuffer" << std::endl;
+
+
+    if (errcode_ret) {
+        *errcode_ret = CL_SUCCESS;
+    }
     return nullptr;
 }
 
