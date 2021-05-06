@@ -24,6 +24,7 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/runtime-commons.cpp
         src/common/common.hpp)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 add_library(driver SHARED ${OCL_RUNTIME_SOURCES})
 target_include_directories(driver PUBLIC src/runtime)
 
