@@ -1,0 +1,5 @@
+aaaa ICON "olive.ico"
+icon ICON "olive.ico"
+
+#define wxUSE_NO_MANIFEST 0
+#include "wx/msw/wx.rc"

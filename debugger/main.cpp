@@ -1,5 +1,5 @@
-#include <iostream>
+#include "wx.h"
+#include "EmulatorWindow.h"
 
-int main() {
-  std::cout << "Hello from debugger";
-}
+
+wxIMPLEMENT_APP_CONSOLE(EmulatorWindow);
