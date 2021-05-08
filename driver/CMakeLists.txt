@@ -1,6 +1,5 @@
 find_package(PkgConfig REQUIRED)
 
-set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig")
 message(STATUS "Looking for CLRX .pc files in $ENV{PKG_CONFIG_PATH}")
 pkg_check_modules(LIB_CLRX_AMD_ASM REQUIRED IMPORTED_TARGET clrxamdasm)
 pkg_check_modules(LIB_CLRX_AMD_BIN REQUIRED IMPORTED_TARGET clrxamdbin)
