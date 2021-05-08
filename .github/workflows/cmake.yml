@@ -7,6 +7,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  PKG_CONFIG_PATH: ${{github.workspace}}/CLRX/lib/pkgconfig
 
 jobs:
   build:
@@ -22,11 +23,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Git clone CLRX
+        run: git clone https://github.com/CLRX/CLRX-mirror
+
+      - name: Configure CLRX
+        run: cmake -H${{github.workspace}}/CLRX-mirror -B ${{github.workspace}}/CLRX-mirror/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=CLRX -DLIB_INSTALL_DIR=lib
+
+      - name: Build CLRX
+        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Release
+
+      - name: Install CLRX
+        run: cmake --install ${{github.workspace}}/CLRX-mirror/build/ --config Release --prefix ${{github.workspace}}/CLRX
+
       - name: Configure CMake
-        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
       - name: Build
-        # Build your program with the given configuration
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
