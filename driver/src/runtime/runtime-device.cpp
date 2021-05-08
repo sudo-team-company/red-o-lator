@@ -12,7 +12,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
     if (devices) {
         const auto deviceConfigurationFile =
             "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/resources/"
-            "rx-550.ini";
+            "rx-570.ini";
         kDeviceConfigurationParser.load(deviceConfigurationFile);
 
         const auto device = new CLDeviceId();
