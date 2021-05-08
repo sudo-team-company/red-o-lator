@@ -4,9 +4,9 @@
 #include <numeric>
 #include <unordered_set>
 
-#include "runtime/runtime-commons.h"
 #include "DeviceConfigurationParser.h"
 #include "common/common.hpp"
+#include "runtime/runtime-commons.h"
 
 template <typename T>
 T parseNumber(const std::string& value);
@@ -44,7 +44,7 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     std::string line;
 
     while (getline(configurationFile, line)) {
-        if (line.empty() || line[0] == '#') {
+        if (line.empty() || line[0] == '#' || line[0] == ';') {
             continue;
         }
 
@@ -55,13 +55,30 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
         parameters.emplace(parsedParameter.name, parsedParameter.value);
     }
 
-    parameters.emplace(
-        CL_DEVICE_PLATFORM,
+    insertOrUpdate<cl_device_info>(
+        parameters, CL_DEVICE_PLATFORM,
         DeviceConfigurationParameterValue(kPlatform, sizeof(cl_platform_id)));
 
-    parameters.emplace(
-        CL_DEVICE_PARENT_DEVICE,
+    insertOrUpdate<cl_device_info>(
+        parameters, CL_DEVICE_PARENT_DEVICE,
         DeviceConfigurationParameterValue(nullptr, sizeof(cl_device_id)));
+
+    insertOrUpdate<cl_device_info>(
+        parameters, CL_DEVICE_OPENCL_C_VERSION,
+        DeviceConfigurationParameterValue(
+            kPlatform->openClVersion, strlen(kPlatform->openClVersion) + 1));
+
+    insertOrUpdate<cl_device_info>(
+        parameters, CL_DRIVER_VERSION,
+        DeviceConfigurationParameterValue(
+            kPlatform->driverVersion, strlen(kPlatform->driverVersion) + 1));
+
+    const auto deviceVersion = std::string(kPlatform->openClVersion) +
+                               " AMD (" + kPlatform->driverVersion + ")";
+    insertOrUpdate<cl_device_info>(
+        parameters, CL_DEVICE_VERSION,
+        DeviceConfigurationParameterValue(deviceVersion.c_str(),
+                                          strlen(deviceVersion.c_str()) + 1));
 
     mConfigurationPath = configurationFilePath;
     mParameters = parameters;
@@ -120,16 +137,16 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         result = reinterpret_cast<void*>(parseClBool(parameterValue)); \
     }
 
-#define PARSE_STRING_PARAMETER(param) \
-    if (parameterName == #param) {    \
-        clParameter = param;          \
-        result = parameterValue;      \
+#define PARSE_STRING_PARAMETER(param)                            \
+    if (parameterName == #param) {                               \
+        clParameter = param;                                     \
+        result = parameterValue == "\"\"" ? "" : parameterValue; \
     }
 
 #define IGNORE_PARAMETER(param)    \
     if (parameterName == #param) { \
         clParameter = param;       \
-        result = nullptr;        \
+        result = nullptr;          \
     }
 
 DeviceConfigurationParser::ParsedParameter
@@ -141,25 +158,25 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
 
     IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
     IGNORE_PARAMETER(CL_DEVICE_PARENT_DEVICE)
+    IGNORE_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
+    IGNORE_PARAMETER(CL_DRIVER_VERSION)
 
     PARSE_PARAMETER(CL_DEVICE_TYPE, cl_device_type, parseDeviceType)
     PARSE_STRING_PARAMETER(CL_DEVICE_NAME)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_VENDOR_ID,
                            cl_uint)  // TODO: parse hex correctly
     PARSE_STRING_PARAMETER(CL_DEVICE_VENDOR)
-    PARSE_STRING_PARAMETER(CL_DRIVER_VERSION)
     PARSE_STRING_PARAMETER(CL_DEVICE_PROFILE)
     PARSE_STRING_PARAMETER(CL_DEVICE_VERSION)
-    PARSE_STRING_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
     PARSE_STRING_PARAMETER(CL_DEVICE_EXTENSIONS)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_COMPUTE_UNITS, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, cl_uint)
     PARSE_PARAMETER_WITH_BODY(CL_DEVICE_MAX_WORK_ITEM_SIZES, [&]() {
         // TODO: get actual CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS value
-        // TODO: CL_DEVICE_MAX_WORK_ITEM_SIZES not working
-        const int maxWorkItemDimensions = 3;
-        resultSize = maxWorkItemDimensions * sizeof(size_t);
-        result = &parseArray(parameterValue, parseNumber<size_t>)[0];
+        // TODO: CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS not working
+        const auto values = parseArray(parameterValue, parseNumber<size_t>);
+        result = static_cast<void*>(const_cast<size_t*>(values.data()));
+        resultSize = values.size() * sizeof(size_t);
     })
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_WORK_GROUP_SIZE, size_t)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, cl_uint)
@@ -234,8 +251,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_REFERENCE_COUNT, cl_uint)
 
     if (!clParameter) {
-        throw DeviceConfigurationParseException("Invalid parameterName: " +
-                                                parameterName);
+        std::cout << "Unknown parameter: " << parameterName << std::endl;
     }
 
     if (std::holds_alternative<std::string>(result)) {
@@ -274,7 +290,7 @@ cl_bitfield parseBitfield(const std::string& value,
 template <typename T>
 std::vector<T> parseArray(const std::string& value,
                           T parseFunction(const std::string&)) {
-    const auto splitValue = split(value, ',');
+    const auto splitValue = split(value, ' ');
 
     std::vector<T> result;
     std::transform(splitValue.begin(), splitValue.end(),
@@ -286,9 +302,9 @@ std::vector<T> parseArray(const std::string& value,
 }
 
 cl_bool parseClBool(const std::string& value) {
-    if (value == "true") {
+    if (value == "CL_TRUE") {
         return CL_TRUE;
-    } else if (value == "false") {
+    } else if (value == "CL_FALSE") {
         return CL_FALSE;
     }
 
@@ -386,6 +402,9 @@ cl_device_partition_property parseDevicePartitionProperty(
     } else if (value == "CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN") {
         return CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN;
 
+    } else if (value == "CL_NONE") {
+        return CL_NONE;
+
     } else if (value == "0") {
         return 0;
     }
@@ -440,8 +459,11 @@ cl_device_fp_config parseDeviceFpConfig(const std::string& value) {
     } else if (value == "CL_FP_FMA") {
         return CL_FP_FMA;
 
-    } else if (value == "CL_FP_SOFT_FLO") {
+    } else if (value == "CL_FP_SOFT_FLOAT") {
         return CL_FP_SOFT_FLOAT;
+
+    } else if (value == "CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT") {
+        return CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT;
 
     } else if (value == "0") {
         return 0;

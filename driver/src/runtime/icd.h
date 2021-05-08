@@ -9,13 +9,15 @@
 #include "rename-api.h"
 
 #include <opencl.h>
+#include <string>
 
 #include "IcdDispatchTable.h"
 
 struct CLPlatformId {
     IcdDispatchTable* dispatchTable;
     const char* profile;
-    const char* version;
+    const char* openClVersion;
+    const char* driverVersion;
     const char* name;
     const char* vendor;
     const char* extensions;

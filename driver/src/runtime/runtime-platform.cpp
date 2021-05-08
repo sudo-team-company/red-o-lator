@@ -34,7 +34,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
     if (platforms) {
         const auto platform = new CLPlatformId();
         platform->dispatchTable = kDispatchTable;
-        platform->version = "OpenCL 1.2 red-o-lator";
+        platform->openClVersion = "OpenCL 1.2";
+        platform->driverVersion = "0.1";
         platform->name = "red-o-lator";
         platform->vendor = "sudo-team-company";
         platform->extensions = "cl_khr_icd";
@@ -60,26 +61,38 @@ clGetPlatformInfo(cl_platform_id platform,
     std::string returnString;
 
     switch (param_name) {
-        case CL_PLATFORM_PROFILE:
+        case CL_PLATFORM_PROFILE: {
             returnString = platform->profile;
             break;
-        case CL_PLATFORM_VERSION:
-            returnString = platform->version;
+        }
+
+        case CL_PLATFORM_VERSION: {
+            returnString =
+                platform->openClVersion + std::string(" ") + platform->name;
             break;
-        case CL_PLATFORM_NAME:
+        }
+
+        case CL_PLATFORM_NAME: {
             returnString = platform->name;
             break;
-        case CL_PLATFORM_VENDOR:
+        }
+
+        case CL_PLATFORM_VENDOR: {
             returnString = platform->vendor;
             break;
-        case CL_PLATFORM_EXTENSIONS:
+        }
+
+        case CL_PLATFORM_EXTENSIONS: {
             returnString = platform->extensions;
             break;
-        case CL_PLATFORM_ICD_SUFFIX_KHR:
+        }
+
+        case CL_PLATFORM_ICD_SUFFIX_KHR: {
             returnString = platform->suffix;
             break;
-        default:
-            return CL_INVALID_VALUE;
+        }
+
+        default: return CL_INVALID_VALUE;
     }
 
     const auto cReturnString = returnString.c_str();
