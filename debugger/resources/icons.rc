@@ -1,5 +1,10 @@
-aaaa ICON "olive.ico"
-icon ICON "olive.ico"
+aaaa        ICON    "olive.ico"
+icon        ICON    "olive.ico"
+play        RCDATA  "play.png"
+forward     RCDATA  "forward.png"
+pause       RCDATA  "pause.png"
+stop        RCDATA  "abort.png"
+next        RCDATA  "next.png"
 
 #define wxUSE_NO_MANIFEST 0
 #include "wx/msw/wx.rc"
