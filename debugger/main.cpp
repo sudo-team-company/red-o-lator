@@ -1,5 +1,8 @@
-#include "wx.h"
-#include "EmulatorWindow.h"
+#include "gui/EmulatorApp.h"
+#include "gui/wx.h"
 
+wxIMPLEMENT_APP_NO_MAIN(EmulatorApp);
 
-wxIMPLEMENT_APP_CONSOLE(EmulatorWindow);
+int main(int argc, char** argv) {
+    wxEntry(argc, argv);
+}
