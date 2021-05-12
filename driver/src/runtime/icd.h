@@ -13,6 +13,7 @@
 #include "rename-api.h"
 
 #include <CL/opencl.h>
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <utility>
@@ -50,9 +51,12 @@ struct CLDeviceId {
           localMemorySize(localMemorySize) {}
 
     IcdDispatchTable* const dispatchTable;
-    size_t globalMemorySize;
-    size_t constantMemorySize;
-    size_t localMemorySize;
+    size_t globalMemorySize = 0;
+    size_t constantMemorySize = 0;
+    size_t localMemorySize = 0;
+
+    size_t usedGlobalMemory = 0;
+    size_t usedLocalMemory = 0;
 };
 
 struct CLContext {
@@ -64,7 +68,7 @@ struct CLContext {
 
     std::optional<CLContextCallback> callback = std::nullopt;
     void* callbackUserData = nullptr;
-    unsigned int referenceCount = 0;
+    unsigned int referenceCount = 1;
 };
 
 struct Command {};
@@ -75,14 +79,26 @@ struct CLCommandQueue {
 
     IcdDispatchTable* const dispatchTable;
     std::vector<Command> commands = std::vector<Command>();
-    unsigned int referenceCount = 0;
+    unsigned int referenceCount = 1;
 };
 
 struct CLMem {
-    explicit CLMem(IcdDispatchTable* dispatchTable)
-        : dispatchTable(dispatchTable) {}
+    explicit CLMem(IcdDispatchTable* dispatchTable, CLContext* context)
+        : dispatchTable(dispatchTable), context(context) {}
 
     IcdDispatchTable* const dispatchTable;
+    CLContext const * context;
+
+    std::byte* address = nullptr;
+    size_t size = 0;
+
+    bool kernelCanRead = false;
+    bool kernelCanWrite = false;
+
+    bool hostCanRead = false;
+    bool hostCanWrite = false;
+
+    unsigned int referenceCount = 1;
 };
 
 struct CLProgram {
@@ -90,7 +106,7 @@ struct CLProgram {
         : dispatchTable(dispatchTable) {}
 
     IcdDispatchTable* const dispatchTable;
-    unsigned int referenceCount = 0;
+    unsigned int referenceCount = 1;
 };
 
 struct CLKernel {

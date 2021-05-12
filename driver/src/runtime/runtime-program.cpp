@@ -25,28 +25,15 @@ clCreateProgramWithBinary(cl_context context,
                           const unsigned char** binaries,
                           cl_int* binary_status,
                           cl_int* errcode_ret) {
-    cl_int error = 0;
-
     if (!device_list || !num_devices) {
-        error = CL_INVALID_VALUE;
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "device_list is null or num_devices == 0.")
     }
 
     if (!lengths || !binaries) {
-        error = CL_INVALID_VALUE;
-    }
-
-    if (error) {
-        if (errcode_ret) {
-            *errcode_ret = error;
-        }
-
-        return nullptr;
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "Source lengths or binaries is null.")
     }
 
     const auto program = new CLProgram(kDispatchTable);
-
-    std::cout << lengths[0] << std::endl;
-    std::cout << binaries[0] << std::endl;
 
     const auto amdInput = CLRX::AmdCL2MainGPUBinary64(
         lengths[0], const_cast<unsigned char*>(binaries[0]));
@@ -58,11 +45,9 @@ clCreateProgramWithBinary(cl_context context,
     CLRX::Disassembler disasm(amdInput, disasmOss, disasmFlags);
     disasm.disassemble();
     resultStr = disasmOss.str();
-    std::cout << resultStr << std::endl;
+//    std::cout << resultStr << std::endl;
 
-    if (errcode_ret) {
-        *errcode_ret = CL_SUCCESS;
-    }
+    SET_SUCCESS()
 
     return program;
 }

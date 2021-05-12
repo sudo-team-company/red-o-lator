@@ -9,12 +9,12 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                                                cl_uint num_entries,
                                                cl_device_id* devices,
                                                cl_uint* num_devices) {
-    if (platform && platform != kPlatform) {
-        return CL_INVALID_PLATFORM;
+    if (!platform || platform != kPlatform) {
+        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.")
     }
 
     if (devices && num_entries == 0) {
-        return CL_INVALID_VALUE;
+        RETURN_ERROR(CL_INVALID_VALUE, "Devices is set but num_entries == 0.");
     }
 
     if (!kDevice) {
@@ -52,7 +52,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
                                                 void* param_value,
                                                 size_t* param_value_size_ret) {
     if (device != kDevice) {
-        return CL_INVALID_DEVICE;
+        RETURN_ERROR(CL_INVALID_DEVICE, "Device is null or not valid.")
     }
 
     if (!param_value && !param_value_size_ret) {
@@ -70,13 +70,13 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
         kDeviceConfigurationParser.getParameter(param_name);
 
     if (!maybeResult) {
-        return CL_INVALID_VALUE;
+        RETURN_ERROR(CL_INVALID_VALUE, "Unknown parameter.")
     }
 
     const auto& [result, resultSize] = maybeResult.value();
 
     if (param_value_size < resultSize) {
-        return CL_INVALID_VALUE;
+        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.");
     }
 
     if (std::holds_alternative<void*>(result)) {

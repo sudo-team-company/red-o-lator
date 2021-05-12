@@ -19,6 +19,7 @@ IcdDispatchTable* IcdDispatchTableProvider::get() {
 }
 
 void initDispatchTable(IcdDispatchTable* dispatchTable) {
+    // OpenCL 1.0
     ICD_DISPATCH_TABLE_ENTRY(clGetPlatformIDs);
     ICD_DISPATCH_TABLE_ENTRY(clGetPlatformInfo);
     ICD_DISPATCH_TABLE_ENTRY(clGetDeviceIDs);
@@ -32,6 +33,7 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(clRetainCommandQueue);
     ICD_DISPATCH_TABLE_ENTRY(clReleaseCommandQueue);
     ICD_DISPATCH_TABLE_ENTRY(clGetCommandQueueInfo);
+    ICD_DISPATCH_TABLE_ENTRY(/* clSetCommandQueueProperty */ NULL);
     ICD_DISPATCH_TABLE_ENTRY(clCreateBuffer);
     ICD_DISPATCH_TABLE_ENTRY(clCreateImage2D);
     ICD_DISPATCH_TABLE_ENTRY(clCreateImage3D);
@@ -84,26 +86,26 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueWaitForEvents);
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueBarrier);
     ICD_DISPATCH_TABLE_ENTRY(clGetExtensionFunctionAddress);
-//    ICD_DISPATCH_TABLE_ENTRY(clCreateFromGLBuffer);
-//    ICD_DISPATCH_TABLE_ENTRY(clCreateFromGLTexture2D);
-//    ICD_DISPATCH_TABLE_ENTRY(clCreateFromGLTexture3D);
-//    ICD_DISPATCH_TABLE_ENTRY(clCreateFromGLRenderbuffer);
-//    ICD_DISPATCH_TABLE_ENTRY(clGetGLObjectInfo);
-//    ICD_DISPATCH_TABLE_ENTRY(clGetGLTextureInfo);
-//    ICD_DISPATCH_TABLE_ENTRY(clEnqueueAcquireGLObjects);
-//    ICD_DISPATCH_TABLE_ENTRY(clEnqueueReleaseGLObjects);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLBuffer*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLTexture2D*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLTexture3D*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLRenderbuffer*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clGetGLObjectInfo*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clGetGLTextureInfo*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clEnqueueAcquireGLObjects*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clEnqueueReleaseGLObjects*/ NULL);
 
     // cl_khr_gl_sharing
-//    ICD_DISPATCH_TABLE_ENTRY(clGetGLContextInfoKHR);
+    ICD_DISPATCH_TABLE_ENTRY(/* clGetGLContextInfoKHR */ NULL);
 
     // cl_khr_d3d10_sharing (windows-only)
 #if 0 && defined(_WIN32)
-    ICD_DISPATCH_TABLE_ENTRY(clGetDeviceIDsFromD3D10KHR);
-    ICD_DISPATCH_TABLE_ENTRY(clCreateFromD3D10BufferKHR);
-    ICD_DISPATCH_TABLE_ENTRY(clCreateFromD3D10Texture2DKHR);
-    ICD_DISPATCH_TABLE_ENTRY(clCreateFromD3D10Texture3DKHR);
-    ICD_DISPATCH_TABLE_ENTRY(clEnqueueAcquireD3D10ObjectsKHR);
-    ICD_DISPATCH_TABLE_ENTRY(clEnqueueReleaseD3D10ObjectsKHR);
+    ICD_DISPATCH_TABLE_ENTRY ( clGetDeviceIDsFromD3D10KHR      );
+    ICD_DISPATCH_TABLE_ENTRY ( clCreateFromD3D10BufferKHR      );
+    ICD_DISPATCH_TABLE_ENTRY ( clCreateFromD3D10Texture2DKHR   );
+    ICD_DISPATCH_TABLE_ENTRY ( clCreateFromD3D10Texture3DKHR   );
+    ICD_DISPATCH_TABLE_ENTRY ( clEnqueueAcquireD3D10ObjectsKHR );
+    ICD_DISPATCH_TABLE_ENTRY ( clEnqueueReleaseD3D10ObjectsKHR );
 #else
     ICD_DISPATCH_TABLE_ENTRY(NULL);
     ICD_DISPATCH_TABLE_ENTRY(NULL);
@@ -129,7 +131,7 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(/*clReleaseDevice*/ NULL);
 
     /* cl_khr_gl_event */
-//    ICD_DISPATCH_TABLE_ENTRY(clCreateEventFromGLsyncKHR);
+    ICD_DISPATCH_TABLE_ENTRY(/* clCreateEventFromGLsyncKHR */ NULL);
 
     /* OpenCL 1.2 */
     ICD_DISPATCH_TABLE_ENTRY(clCreateSubDevices);
@@ -147,58 +149,5 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueMarkerWithWaitList);
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueBarrierWithWaitList);
     ICD_DISPATCH_TABLE_ENTRY(clGetExtensionFunctionAddressForPlatform);
-//    ICD_DISPATCH_TABLE_ENTRY(clCreateFromGLTexture);
-
-    /* cl_khr_d3d11_sharing */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-
-    /* cl_khr_dx9_media_sharing */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-
-    /* cl_khr_egl_image */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-
-    /* cl_khr_egl_event */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-
-    /* OpenCL 2.0 */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-
-    /* cl_khr_sub_groups */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-
-    /* OpenCL 2.1 */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-
-    /* OpenCL 2.2 */
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/* clCreateFromGLTexture */ NULL);
 }
