@@ -14,12 +14,21 @@ clCreateCommandQueue(cl_context context,
 
 CL_API_ENTRY cl_int CL_API_CALL
 clRetainCommandQueue(cl_command_queue command_queue) {
+    if (!command_queue) {
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
+    }
+
     command_queue->referenceCount++;
+
     return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
 clReleaseCommandQueue(cl_command_queue command_queue) {
+    if (!command_queue) {
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
+    }
+
     command_queue->referenceCount--;
 
     if (command_queue->referenceCount == 0) {

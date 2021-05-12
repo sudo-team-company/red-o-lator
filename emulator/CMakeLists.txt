@@ -32,4 +32,4 @@ add_executable(alu_test
         test/alu/alu_test.cpp
         )
 
-target_link_libraries(emulator OpenCL::OpenCL)
+target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)

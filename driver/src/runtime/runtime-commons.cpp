@@ -1,6 +1,6 @@
 #include "runtime-commons.h"
 
-Logger kLogger = Logger();  // NOLINT(cert-err58-cpp)
+Logger kLogger = Logger("[red-o-lator driver] ---");  // NOLINT(cert-err58-cpp)
 
 IcdDispatchTable* kDispatchTable =  // NOLINT(cert-err58-cpp)
     IcdDispatchTableProvider().get();
@@ -10,7 +10,6 @@ DeviceConfigurationParser kDeviceConfigurationParser =
 
 CLPlatformId* kPlatform = nullptr;
 CLDeviceId* kDevice = nullptr;
-
 
 bool utils::isMutuallyExclusive(cl_bitfield flags,
                                 std::initializer_list<cl_int> checkFlags) {

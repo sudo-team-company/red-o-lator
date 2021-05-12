@@ -34,9 +34,9 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/device/DeviceConfigurationParser.tpp
         src/model/GPUModel.cpp
         src/model/GPUModel.h
-        src/common/common.hpp
-        src/common/Logger.cpp
-        src/common/Logger.h src/runtime/runtime-memory-buffer.cpp src/runtime/runtime-memory-image.cpp)
+        ../common/common/common.hpp
+        ../common/common/Logger.cpp
+        ../common/common/Logger.h src/runtime/runtime-memory-buffer.cpp src/runtime/runtime-memory-image.cpp)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
@@ -45,6 +45,7 @@ target_link_libraries(red-o-lator-icd INTERFACE
         OpenCL::OpenCL
         )
 target_link_libraries(red-o-lator-icd PRIVATE
+        red-o-lator-common
         PkgConfig::LIB_CLRX_AMD_ASM
         )
 target_include_directories(red-o-lator-icd PRIVATE src/runtime)
@@ -57,7 +58,7 @@ set(OCL_TEST_SOURCES
         )
 
 add_executable(driver-test ${OCL_TEST_SOURCES})
-target_link_libraries(driver-test PRIVATE red-o-lator-icd)
+target_link_libraries(driver-test PRIVATE red-o-lator-icd red-o-lator-common)
 
 add_executable(driver-disasm-test test/disasm/disasm-test.cpp)
 target_link_libraries(driver-disasm-test

@@ -1,7 +1,9 @@
 #include <CL/opencl.h>
+#include <common/Logger.h>
 #include <cstddef>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "KernelLoader.h"
@@ -19,14 +21,15 @@ std::vector<unsigned char> readBinaryFile(const std::string& path) {
 }
 
 void KernelLoader::executeKernel(const std::string& kernelPath) {
+    Logger kLogger = Logger("[red-o-lator emulator] ---");
+
     cl_int errorCode;
 
     cl_uint platformCount;
     errorCode = clGetPlatformIDs(0, nullptr, &platformCount);
     CHECK_ERROR("Failed to load platform count")
 
-    std::cout << "KernelLoader::executeKernel --- "
-              << "found " << platformCount << " platforms" << std::endl;
+    kLogger.log("found " + std::to_string(platformCount) + " platforms");
 
     cl_platform_id platformList[platformCount];
     errorCode = clGetPlatformIDs(platformCount, platformList, nullptr);
@@ -40,8 +43,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         errorCode = clGetPlatformInfo(currentPlatform, CL_PLATFORM_NAME, 128,
                                       &platformName, nullptr);
         CHECK_ERROR("Failed to get platform name")
-        std::cout << "KernelLoader::executeKernel --- "
-                  << "found platform: " << platformName << std::endl;
+        kLogger.log("found platform: " + std::string(platformName));
     }
 
     cl_uint num_devices;
@@ -55,9 +57,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, nullptr);
     CHECK_ERROR("Failed to get device name")
 
-    // TODO(executeKernel): logger?
-    std::cout << "KernelLoader::executeKernel --- "
-              << "using device '" << deviceName << "'" << std::endl;
+    kLogger.log("using device '" + std::string(deviceName) + "'");
 
     cl_context context =
         clCreateContext(nullptr, 1, &device, nullptr, nullptr, &errorCode);
@@ -69,7 +69,6 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
 
     const size_t n = 1000;
     const size_t arraySize = n * sizeof(cl_uint);
-
 
     cl_mem mem1 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize, nullptr,
                                  &errorCode);
@@ -101,7 +100,6 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         std::cout << std::to_string(item) << " ";
     }
     std::cout << std::endl;
-
 
     cl_mem mem2 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize, nullptr,
                                  &errorCode);
