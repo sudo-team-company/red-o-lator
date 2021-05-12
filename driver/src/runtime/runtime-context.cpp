@@ -13,26 +13,17 @@ clCreateContext(const cl_context_properties* properties,
                 CLContextCallback pfn_notify,
                 void* user_data,
                 cl_int* errcode_ret) {
-    cl_int error = 0;
-
     if (!num_devices || !devices) {
-        error = CL_INVALID_VALUE;
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
+                  "Either num_devices == 0 or devices is null.")
     }
 
     if (!pfn_notify && user_data) {
-        error = CL_INVALID_VALUE;
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "user_data is set without pfn_notify.")
     }
 
     if (devices[0] != kDevice) {
-        error = CL_INVALID_DEVICE;
-    }
-
-    if (error) {
-        if (errcode_ret) {
-            *errcode_ret = error;
-        }
-
-        return nullptr;
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "Invalid device.")
     }
 
     auto clContext = new CLContext(kDispatchTable, devices[0]);
@@ -51,9 +42,7 @@ clCreateContext(const cl_context_properties* properties,
     clContext->callback = utils::optionalOf(pfn_notify);
     clContext->callbackUserData = user_data;
 
-    if (errcode_ret) {
-        *errcode_ret = CL_SUCCESS;
-    }
+    SET_SUCCESS()
 
     return clContext;
 }
@@ -71,7 +60,7 @@ clCreateContextFromType(const cl_context_properties* properties,
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainContext(cl_context context) {
     if (!context) {
-        return CL_INVALID_CONTEXT;
+        RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.")
     }
 
     context->referenceCount++;
@@ -81,7 +70,7 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainContext(cl_context context) {
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseContext(cl_context context) {
     if (!context) {
-        return CL_INVALID_CONTEXT;
+        RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.")
     }
 
     context->referenceCount--;
@@ -99,7 +88,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
                                                  void* param_value,
                                                  size_t* param_value_size_ret) {
     if (!context) {
-        return CL_INVALID_CONTEXT;
+        RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.")
     }
 
     void* result;
@@ -135,7 +124,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
     }
 
     if (param_value_size < resultSize) {
-        return CL_INVALID_VALUE;
+        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.");
     }
 
     if (param_value) {

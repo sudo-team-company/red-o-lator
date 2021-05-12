@@ -252,7 +252,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_REFERENCE_COUNT, cl_uint)
 
     if (!clParameter) {
-        std::cout << "Unknown parameter: " << parameterName << std::endl;
+        kLogger.log("Unknown parameter: " + parameterName);
     }
 
     if (std::holds_alternative<std::string>(result)) {

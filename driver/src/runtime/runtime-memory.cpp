@@ -1,63 +1,31 @@
 #include <iostream>
 #include "icd.h"
-
-CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
-                                               cl_mem_flags flags,
-                                               size_t size,
-                                               void* host_ptr,
-                                               cl_int* errcode_ret) {
-
-
-    if (errcode_ret) {
-        *errcode_ret = CL_SUCCESS;
-    }
-    return nullptr;
-}
-
-CL_API_ENTRY cl_mem CL_API_CALL
-clCreateSubBuffer(cl_mem buffer,
-                  cl_mem_flags flags,
-                  cl_buffer_create_type buffer_create_type,
-                  const void* buffer_create_info,
-                  cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateSubBuffer"
-              << std::endl;
-    return nullptr;
-}
-
-CL_API_ENTRY cl_mem CL_API_CALL
-clCreateImage(cl_context context,
-              cl_mem_flags flags,
-              const cl_image_format* image_format,
-              const cl_image_desc* image_desc,
-              void* host_ptr,
-              cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateImage" << std::endl;
-    return nullptr;
-}
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
-    std::cerr << "Unimplemented OpenCL API call: clRetainMemObject"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    if (!memobj) {
+        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.")
+    }
+
+    memobj->referenceCount++;
+
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseMemObject(cl_mem memobj) {
-    std::cerr << "Unimplemented OpenCL API call: clReleaseMemObject"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
-}
+    if (!memobj) {
+        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.")
+    }
 
-CL_API_ENTRY cl_int CL_API_CALL
-clGetSupportedImageFormats(cl_context context,
-                           cl_mem_flags flags,
-                           cl_mem_object_type image_type,
-                           cl_uint num_entries,
-                           cl_image_format* image_formats,
-                           cl_uint* num_image_formats) {
-    std::cerr << "Unimplemented OpenCL API call: clGetSupportedImageFormats"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    memobj->referenceCount--;
+
+    if (memobj->referenceCount == 0) {
+        delete[] memobj->address;
+    }
+
+    memobj->context->device->usedGlobalMemory -= memobj->size;
+
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
@@ -71,12 +39,28 @@ clGetMemObjectInfo(cl_mem memobj,
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY cl_int CL_API_CALL clGetImageInfo(cl_mem image,
-                                               cl_image_info param_name,
-                                               size_t param_value_size,
-                                               void* param_value,
-                                               size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clGetImageInfo" << std::endl;
+CL_API_ENTRY cl_int CL_API_CALL
+clEnqueueUnmapMemObject(cl_command_queue command_queue,
+                        cl_mem memobj,
+                        void* mapped_ptr,
+                        cl_uint num_events_in_wait_list,
+                        const cl_event* event_wait_list,
+                        cl_event* event) {
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueUnmapMemObject"
+              << std::endl;
+    return CL_INVALID_PLATFORM;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL
+clEnqueueMigrateMemObjects(cl_command_queue command_queue,
+                           cl_uint num_mem_objects,
+                           const cl_mem* mem_objects,
+                           cl_mem_migration_flags flags,
+                           cl_uint num_events_in_wait_list,
+                           const cl_event* event_wait_list,
+                           cl_event* event) {
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueMigrateMemObjects"
+              << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -86,33 +70,4 @@ CL_API_ENTRY cl_int CL_API_CALL clSetMemObjectDestructorCallback(
         << "Unimplemented OpenCL API call: clSetMemObjectDestructorCallback"
         << std::endl;
     return CL_INVALID_PLATFORM;
-}
-
-CL_API_ENTRY cl_mem CL_API_CALL
-clCreateImage2D(cl_context context,
-                cl_mem_flags flags,
-                const cl_image_format* image_format,
-                size_t image_width,
-                size_t image_height,
-                size_t image_row_pitch,
-                void* host_ptr,
-                cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateImage2D" << std::endl;
-    return nullptr;
-}
-
-CL_API_ENTRY
-CL_API_ENTRY cl_mem CL_API_CALL
-clCreateImage3D(cl_context context,
-                cl_mem_flags flags,
-                const cl_image_format* image_format,
-                size_t image_width,
-                size_t image_height,
-                size_t image_depth,
-                size_t image_row_pitch,
-                size_t image_slice_pitch,
-                void* host_ptr,
-                cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateImage3D" << std::endl;
-    return nullptr;
 }

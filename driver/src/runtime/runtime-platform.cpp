@@ -23,11 +23,13 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
                                                  cl_platform_id* platforms,
                                                  cl_uint* num_platforms) {
     if (!platforms && !num_platforms) {
-        return CL_INVALID_VALUE;
+        RETURN_ERROR(CL_INVALID_VALUE,
+                     "platforms is null and num_platforms == 0.")
     }
 
     if (platforms && num_entries == 0) {
-        return CL_INVALID_VALUE;
+        RETURN_ERROR(CL_INVALID_VALUE,
+                     "platforms is not null and num_entries == 0.")
     }
 
     if (!kPlatform) {
@@ -67,8 +69,7 @@ clGetPlatformInfo(cl_platform_id platform,
         }
 
         case CL_PLATFORM_VERSION: {
-            returnString =
-                platform->openClVersion + " " + platform->name;
+            returnString = platform->openClVersion + " " + platform->name;
             break;
         }
 
@@ -99,7 +100,7 @@ clGetPlatformInfo(cl_platform_id platform,
     const auto returnStringSize = strlen(cReturnString) + 1;
 
     if (param_value_size && param_value_size < returnStringSize) {
-        return CL_INVALID_VALUE;
+        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.")
     }
 
     if (param_value) {
