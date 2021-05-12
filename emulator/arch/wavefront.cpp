@@ -1,7 +1,0 @@
-/**
- * @author dkudaiberdieva
- */
-
-struct Wavefront {
-
-};
