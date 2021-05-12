@@ -66,4 +66,4 @@ add_executable(wf_exec_test
         ../common/common/common.hpp
         )
 
-target_link_libraries(emulator OpenCL::OpenCL)
+target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)

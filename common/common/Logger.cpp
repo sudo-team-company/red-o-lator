@@ -20,5 +20,5 @@ void Logger::error(const std::string& message) {
 }
 
 std::string Logger::appendPrefix(const char* message) {
-    return mPrefix + message;
+    return mPrefix + " " + message;
 }

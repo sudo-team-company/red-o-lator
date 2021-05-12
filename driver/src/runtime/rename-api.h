@@ -16,7 +16,7 @@
 #define clReleaseContext _clReleaseContext_
 #define clGetContextInfo _clGetContextInfo_
 #define clCreateCommandQueue _clCreateCommandQueue_
-#define clSetCommandQueueProperty _clSetCommandQueueProperty__
+#define clSetCommandQueueProperty _clSetCommandQueueProperty_
 #define clRetainCommandQueue _clRetainCommandQueue_
 #define clReleaseCommandQueue _clReleaseCommandQueue_
 #define clGetCommandQueueInfo _clGetCommandQueueInfo_

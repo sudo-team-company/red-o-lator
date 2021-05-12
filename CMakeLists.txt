@@ -14,6 +14,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 include_directories(${CMAKE_INCLUDE_PATH})
 
+add_subdirectory(common)
 add_subdirectory(driver)
 add_subdirectory(emulator)
 add_subdirectory(debugger)
