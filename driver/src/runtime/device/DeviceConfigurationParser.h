@@ -5,6 +5,8 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <optional>
+#include <stdexcept>
 #include <variant>
 
 #include "runtime/icd.h"

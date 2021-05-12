@@ -4,6 +4,12 @@ Emulator for GCN GPUs
 
 ## Configuration
 
+1. Install CLRX from https://github.com/CLRX/CLRX-mirror
+2. Either:
+   * set environment variable PKG_CONFIG_PATH to include *.pc files from this installation 
+   (will be found in CLRX `make install` logs)
+   * copy CLRX *.pc files to `./driver/pkgconfig`
+
 ### CLion
 #### clang-format
 Project uses google-style clang-format.
