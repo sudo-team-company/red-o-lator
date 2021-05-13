@@ -6,11 +6,15 @@
 #define RED_O_LATOR_COMPUTE_UNIT_H
 
 #include <array>
+#include <memory>
+#include "simd_unit.h"
+#include "scalar_unit.h"
 
-class ComputeUnit {
+struct ComputeUnit {
+    std::unique_ptr<ScalarUnit> scalarUnit;
 
+    std::array<std::unique_ptr<SimdUnit>, 4> simds;
 
-    std::array<
 };
 
 #endif  // RED_O_LATOR_COMPUTE_UNIT_H

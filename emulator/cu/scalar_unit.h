@@ -5,6 +5,10 @@
 #ifndef RED_O_LATOR_SCALAR_UNIT_H
 #define RED_O_LATOR_SCALAR_UNIT_H
 
-class ScalarUnit {};
+struct ComputeUnit;
+
+struct ScalarUnit {
+    ComputeUnit* cu;
+};
 
 #endif  // RED_O_LATOR_SCALAR_UNIT_H

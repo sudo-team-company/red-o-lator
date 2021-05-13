@@ -10,14 +10,18 @@ add_executable(emulator
         instr/instruction.cpp
         instr/instr_info.cpp
         instr/temp.cpp
+        cu/scalar_unit.cpp
+        cu/compute_unit.cpp
+        cu/simd_unit.cpp
+        main.cpp
         )
 
-add_executable(emulator_test
+add_executable(util_test
         test/util/util_test.cpp
         util/util.cpp
         )
 
-add_executable(more_tests
+add_executable(alu_test
         alu/alu_sop1.cpp
         alu/alu_sop2.cpp
         util/util.cpp
