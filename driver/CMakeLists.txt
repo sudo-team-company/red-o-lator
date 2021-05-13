@@ -1,10 +1,17 @@
+find_package(PkgConfig REQUIRED)
+
+message(STATUS "Looking for CLRX .pc files in $ENV{PKG_CONFIG_PATH}")
+pkg_check_modules(LIB_CLRX_AMD_ASM REQUIRED IMPORTED_TARGET clrxamdasm)
+pkg_check_modules(LIB_CLRX_AMD_BIN REQUIRED IMPORTED_TARGET clrxamdbin)
+pkg_check_modules(LIB_CLRX_UTILS REQUIRED IMPORTED_TARGET clrxutils)
+
+
 include_directories(CL)
 include_directories(src)
 
+
 set(OCL_RUNTIME_SOURCES
-        src/runtime/runtime-commons.cpp
         src/runtime/runtime-platform.cpp
-        src/runtime/runtime-device.cpp
         src/runtime/runtime-context.cpp
         src/runtime/runtime-command-queue.cpp
         src/runtime/runtime-memory.cpp
@@ -19,14 +26,30 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/IcdDispatchTable.h
         src/model/GPUModel.cpp
         src/model/GPUModel.h
-        )
+        src/runtime/device/DeviceConfigurationParser.cpp
+        src/runtime/device/DeviceConfigurationParser.h
+        src/runtime/runtime-device.cpp
+        src/runtime/runtime-commons.h
+        src/runtime/runtime-commons.cpp
+        src/common/common.hpp)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 add_library(driver SHARED ${OCL_RUNTIME_SOURCES})
+target_include_directories(driver PUBLIC src/runtime)
 
-target_include_directories(driver PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable(driver-exec ${OCL_RUNTIME_SOURCES} src/main.cpp)
 
 set(OCL_TEST_SOURCES
-        test/driver-call-test.cpp)
+        test/driver-call-test.cpp
+        )
 
 add_executable(driver-test ${OCL_TEST_SOURCES})
-target_link_libraries(driver-test PRIVATE driver)
+target_link_libraries(driver-test driver)
+
+
+add_executable(driver-disasm-test test/disasm-test.cpp)
+target_link_libraries(driver-disasm-test
+        PkgConfig::LIB_CLRX_AMD_ASM
+        PkgConfig::LIB_CLRX_AMD_BIN
+        PkgConfig::LIB_CLRX_UTILS
+        )

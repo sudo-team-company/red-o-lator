@@ -1,15 +1,23 @@
-#ifndef RED_O_LATOR_ICD_H
-#define RED_O_LATOR_ICD_H
+#pragma once
 
-#include "IcdDispatchTable.h"
+/** It is important that rename-api.h is included before <opencl.h> to rename
+ *  OpenCL API entries to avoid clash with icd functions.
+ *
+ *  For that reason, this file should be imported instead of <opencl.h> in
+ *  outer files.
+ */
 #include "rename-api.h"
 
 #include <opencl.h>
+#include <string>
+
+#include "IcdDispatchTable.h"
 
 struct CLPlatformId {
     IcdDispatchTable* dispatchTable;
     const char* profile;
-    const char* version;
+    const char* openClVersion;
+    const char* driverVersion;
     const char* name;
     const char* vendor;
     const char* extensions;
@@ -47,7 +55,3 @@ struct CLEvent {
 struct CLSampler {
     IcdDispatchTable* dispatchTable;
 };
-
-extern IcdDispatchTable* mDispatchTable;
-
-#endif  // RED_O_LATOR_ICD_H
