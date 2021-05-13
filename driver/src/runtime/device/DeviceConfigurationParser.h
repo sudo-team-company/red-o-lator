@@ -8,7 +8,8 @@
 #include <stdexcept>
 #include <variant>
 
-#include "runtime/icd.h"
+#include "icd/icd.h"
+#include "CL/cl_ext.h"
 
 using DeviceConfigurationParameterValueType = std::variant<void*, std::string>;
 

@@ -15,6 +15,7 @@
 #include <CL/opencl.h>
 #include <cstddef>
 #include <optional>
+#include <queue>
 #include <string>
 #include <utility>
 #include <vector>
@@ -42,15 +43,19 @@ struct CLPlatformId {
 
 struct CLDeviceId {
     CLDeviceId(IcdDispatchTable* const dispatchTable,
+               cl_device_type deviceType,
                size_t globalMemorySize,
                size_t constantMemorySize,
                size_t localMemorySize)
         : dispatchTable(dispatchTable),
+          deviceType(deviceType),
           globalMemorySize(globalMemorySize),
           constantMemorySize(constantMemorySize),
           localMemorySize(localMemorySize) {}
 
     IcdDispatchTable* const dispatchTable;
+    cl_device_type deviceType;
+
     size_t globalMemorySize = 0;
     size_t constantMemorySize = 0;
     size_t localMemorySize = 0;
@@ -71,23 +76,14 @@ struct CLContext {
     unsigned int referenceCount = 1;
 };
 
-struct Command {};
-
-struct CLCommandQueue {
-    explicit CLCommandQueue(IcdDispatchTable* dispatchTable)
-        : dispatchTable(dispatchTable) {}
-
-    IcdDispatchTable* const dispatchTable;
-    std::vector<Command> commands = std::vector<Command>();
-    unsigned int referenceCount = 1;
-};
+#include "CLCommandQueue.h"
 
 struct CLMem {
     explicit CLMem(IcdDispatchTable* dispatchTable, CLContext* context)
         : dispatchTable(dispatchTable), context(context) {}
 
     IcdDispatchTable* const dispatchTable;
-    CLContext const * context;
+    CLContext const* context;
 
     std::byte* address = nullptr;
     size_t size = 0;
@@ -102,10 +98,15 @@ struct CLMem {
 };
 
 struct CLProgram {
-    explicit CLProgram(IcdDispatchTable* dispatchTable)
-        : dispatchTable(dispatchTable) {}
+    explicit CLProgram(IcdDispatchTable* dispatchTable, CLContext* context)
+        : dispatchTable(dispatchTable), context(context) {}
 
     IcdDispatchTable* const dispatchTable;
+    CLContext* context;
+
+    size_t binarySize;
+    const unsigned char* binary;
+
     unsigned int referenceCount = 1;
 };
 

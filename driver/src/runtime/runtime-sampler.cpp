@@ -1,5 +1,5 @@
 #include <iostream>
-#include "icd.h"
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainSampler(cl_sampler sampler) {
     std::cerr << "Unimplemented OpenCL API call: clRetainSampler" << std::endl;

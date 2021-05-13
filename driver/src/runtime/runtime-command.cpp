@@ -1,6 +1,5 @@
 #include <iostream>
-#include "icd.h"
-
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueNDRangeKernel(cl_command_queue command_queue,

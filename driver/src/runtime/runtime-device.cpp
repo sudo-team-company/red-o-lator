@@ -23,14 +23,16 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
             "rx-570.ini";
         kDeviceConfigurationParser.load(deviceConfigurationFile);
 
-        kDevice =
-            new CLDeviceId(kDispatchTable,
-                           kDeviceConfigurationParser.requireParameter<size_t>(
-                               CL_DEVICE_GLOBAL_MEM_SIZE),
-                           kDeviceConfigurationParser.requireParameter<size_t>(
-                               CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE),
-                           kDeviceConfigurationParser.requireParameter<size_t>(
-                               CL_DEVICE_LOCAL_MEM_SIZE));
+        kDevice = new CLDeviceId(
+            kDispatchTable,
+            kDeviceConfigurationParser.requireParameter<cl_device_type>(
+                CL_DEVICE_TYPE),
+            kDeviceConfigurationParser.requireParameter<size_t>(
+                CL_DEVICE_GLOBAL_MEM_SIZE),
+            kDeviceConfigurationParser.requireParameter<size_t>(
+                CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE),
+            kDeviceConfigurationParser.requireParameter<size_t>(
+                CL_DEVICE_LOCAL_MEM_SIZE));
     }
 
     // TODO(clGetDeviceIDs, future): handle num_devices
@@ -59,11 +61,6 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
         return CL_SUCCESS;
     }
 
-    if (!param_value) {
-        *param_value_size_ret = 0;
-        return CL_SUCCESS;
-    }
-
     // TODO(clGetDeviceInfo, future): parameters validation according to
     //  OpenCL spec
     const auto maybeResult =
@@ -73,23 +70,12 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
         RETURN_ERROR(CL_INVALID_VALUE, "Unknown parameter.")
     }
 
-    const auto& [result, resultSize] = maybeResult.value();
-
-    if (param_value_size < resultSize) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.");
-    }
-
-    if (std::holds_alternative<void*>(result)) {
-        memcpy(param_value, &std::get<void*>(result), resultSize);
-    } else {
-        memcpy(param_value, std::get<std::string>(result).c_str(), resultSize);
-    }
-
-    if (param_value_size_ret) {
-        *param_value_size_ret = resultSize;
-    }
-
-    return CL_SUCCESS;
+    GET_PARAM_INFO([&]() {
+        const auto& value = maybeResult.value();
+        result = value.value;
+        resultSize = value.size;
+        return 0;
+    })
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
@@ -98,17 +84,18 @@ clCreateSubDevices(cl_device_id in_device,
                    cl_uint num_devices,
                    cl_device_id* out_devices,
                    cl_uint* num_devices_ret) {
+    // TODO(clCreateSubDevices): sub-devices support
     std::cerr << "clCreateSubDevices: sub-devices are not supported!"
               << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainDevice(cl_device_id device) {
-    std::cerr << "clRetainDevice: sub-devices are not supported!" << std::endl;
-    return CL_INVALID_PLATFORM;
+    // TODO(clRetainDevice): sub-devices support
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseDevice(cl_device_id device) {
-    std::cerr << "clReleaseDevice: sub-devices are not supported!" << std::endl;
-    return CL_INVALID_PLATFORM;
+    // TODO(clReleaseDevice): sub-devices support
+    return CL_SUCCESS;
 }

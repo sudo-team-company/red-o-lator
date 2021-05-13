@@ -1,8 +1,8 @@
 #include <CL/opencl.h>
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #define CHECK_ERROR(message)                                               \
     if (errorCode != CL_SUCCESS) {                                         \
@@ -68,7 +68,7 @@ int main() {
 
     const auto binary = readBinaryFile(
         "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/disasm/"
-        "linear_kernels/addition/addition.bin");
+        "addition/addition.bin");
     const size_t binarySize[1] = {binary.size()};
     const unsigned char* binaryData[1] = {binary.data()};
 

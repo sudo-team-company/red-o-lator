@@ -1,32 +1,17 @@
+#include <common/common.hpp>
 #include <cstring>
 #include <iostream>
 #include <unordered_map>
 
-#include "common/common.hpp"
-#include "icd.h"
+#include "icd/icd.h"
 #include "runtime-commons.h"
 
-CL_API_ENTRY cl_context CL_API_CALL
-clCreateContext(const cl_context_properties* properties,
-                cl_uint num_devices,
-                const cl_device_id* devices,
-                CLContextCallback pfn_notify,
-                void* user_data,
-                cl_int* errcode_ret) {
-    if (!num_devices || !devices) {
-        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
-                  "Either num_devices == 0 or devices is null.")
-    }
-
-    if (!pfn_notify && user_data) {
-        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "user_data is set without pfn_notify.")
-    }
-
-    if (devices[0] != kDevice) {
-        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "Invalid device.")
-    }
-
-    auto clContext = new CLContext(kDispatchTable, devices[0]);
+cl_context createContext(const cl_context_properties* properties,
+                         cl_device_id device,
+                         CLContextCallback pfn_notify,
+                         void* user_data,
+                         cl_int* errcode_ret) {
+    auto clContext = new CLContext(kDispatchTable, device);
 
     std::unordered_map<cl_context_properties, cl_context_properties>
         passedProperties;
@@ -48,14 +33,43 @@ clCreateContext(const cl_context_properties* properties,
 }
 
 CL_API_ENTRY cl_context CL_API_CALL
+clCreateContext(const cl_context_properties* properties,
+                cl_uint num_devices,
+                const cl_device_id* devices,
+                CLContextCallback pfn_notify,
+                void* user_data,
+                cl_int* errcode_ret) {
+    if (!num_devices || !devices) {
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
+                             "Either num_devices == 0 or devices is null.")
+    }
+
+    if (!pfn_notify && user_data) {
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
+                             "user_data is set without pfn_notify.")
+    }
+
+    if (devices[0] != kDevice) {
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "Invalid device.")
+    }
+
+    return createContext(properties, devices[0], pfn_notify, user_data,
+                         errcode_ret);
+}
+
+CL_API_ENTRY cl_context CL_API_CALL
 clCreateContextFromType(const cl_context_properties* properties,
                         cl_device_type device_type,
                         CLContextCallback pfn_notify,
                         void* user_data,
                         cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateContextFromType"
-              << std::endl;
-    return nullptr;
+    if ((device_type ^ kDevice->deviceType) != 0) {
+        SET_ERROR_AND_RETURN(CL_DEVICE_NOT_FOUND,
+                             "No devices with all specified flags found.");
+    }
+
+    return createContext(properties, kDevice, pfn_notify, user_data,
+                         errcode_ret);
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainContext(cl_context context) {
@@ -123,7 +137,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
         default: return CL_INVALID_VALUE;
     }
 
-    if (param_value_size < resultSize) {
+    if (param_value_size && param_value_size < resultSize) {
         RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.");
     }
 

@@ -80,6 +80,23 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
         DeviceConfigurationParameterValue(deviceVersion.c_str(),
                                           strlen(deviceVersion.c_str()) + 1));
 
+    utils::insertOrUpdate<cl_bool>(
+        parameters, CL_DEVICE_AVAILABLE,
+        DeviceConfigurationParameterValue((void*) true, sizeof(cl_bool)));
+
+    utils::insertOrUpdate<cl_bool>(
+        parameters, CL_DEVICE_LINKER_AVAILABLE,
+        DeviceConfigurationParameterValue((void*) false, sizeof(cl_bool)));
+
+    utils::insertOrUpdate<cl_bool>(
+        parameters, CL_DEVICE_COMPILER_AVAILABLE,
+        DeviceConfigurationParameterValue((void*) false, sizeof(cl_bool)));
+
+    utils::insertOrUpdate<cl_uint>(
+        parameters, CL_DEVICE_PARTITION_MAX_SUB_DEVICES,
+        DeviceConfigurationParameterValue(reinterpret_cast<void*>(0),
+                                          sizeof(cl_uint)));
+
     mConfigurationPath = configurationFilePath;
     mParameters = parameters;
 }
@@ -143,10 +160,11 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         result = parameterValue == "\"\"" ? "" : parameterValue; \
     }
 
-#define IGNORE_PARAMETER(param)    \
-    if (parameterName == #param) { \
-        clParameter = param;       \
-        result = nullptr;          \
+#define IGNORE_PARAMETER(param)                                   \
+    if (parameterName == #param) {                                \
+        kLogger.log(std::string("Ignoring parameter ") + #param); \
+        clParameter = param;                                      \
+        result = nullptr;                                         \
     }
 
 DeviceConfigurationParser::ParsedParameter
@@ -160,6 +178,10 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     IGNORE_PARAMETER(CL_DEVICE_PARENT_DEVICE)
     IGNORE_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
     IGNORE_PARAMETER(CL_DRIVER_VERSION)
+    IGNORE_PARAMETER(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
+    IGNORE_PARAMETER(CL_DEVICE_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_LINKER_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_COMPILER_AVAILABLE)
 
     PARSE_PARAMETER(CL_DEVICE_TYPE, cl_device_type, parseDeviceType)
     PARSE_STRING_PARAMETER(CL_DEVICE_NAME)
@@ -228,9 +250,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_BOOL_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PROFILING_TIMER_RESOLUTION, size_t)
     PARSE_PARAMETER(CL_DEVICE_ENDIAN_LITTLE, cl_bool, parseClBool)
-    PARSE_BOOL_PARAMETER(CL_DEVICE_AVAILABLE)
-    PARSE_BOOL_PARAMETER(CL_DEVICE_COMPILER_AVAILABLE)
-    PARSE_BOOL_PARAMETER(CL_DEVICE_LINKER_AVAILABLE)
     PARSE_BITFIELD_PARAMETER(CL_DEVICE_EXECUTION_CAPABILITIES,
                              cl_device_exec_capabilities,
                              parseDeviceExecCapabilities)
@@ -242,7 +261,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     })
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PRINTF_BUFFER_SIZE, size_t)
     PARSE_BOOL_PARAMETER(CL_DEVICE_PREFERRED_INTEROP_USER_SYNC)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_PARTITION_MAX_SUB_DEVICES, cl_uint)
     PARSE_PARAMETER(CL_DEVICE_PARTITION_PROPERTIES,
                     cl_device_partition_property, parseDevicePartitionProperty)
     PARSE_BITFIELD_PARAMETER(CL_DEVICE_PARTITION_AFFINITY_DOMAIN,
@@ -250,6 +268,25 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
                              parseDeviceAffinityDomain)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PARTITION_TYPE, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_REFERENCE_COUNT, cl_uint)
+
+    /* * * * *
+     * AMD extensions
+     * https://www.khronos.org/registry/OpenCL/extensions/amd/cl_amd_device_attribute_query.txt
+     * * * * */
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_PROFILING_TIMER_OFFSET_AMD, cl_uint)
+    PARSE_STRING_PARAMETER(CL_DEVICE_TOPOLOGY_AMD)
+    PARSE_STRING_PARAMETER(CL_DEVICE_BOARD_NAME_AMD)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_FREE_MEMORY_AMD, cl_ulong)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_PER_COMPUTE_UNIT_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_WIDTH_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_INSTRUCTION_WIDTH_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_WAVEFRONT_WIDTH_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNELS_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNEL_BANKS_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNEL_BANK_WIDTH_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_SIZE_PER_COMPUTE_UNIT_AMD,
+                           size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, size_t)
 
     if (!clParameter) {
         kLogger.log("Unknown parameter: " + parameterName);

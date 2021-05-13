@@ -1,5 +1,5 @@
 #include <iostream>
-#include "icd.h"
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
                                                   const char* kernel_name,

@@ -26,17 +26,20 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/runtime-commons.h
         src/runtime/runtime-commons.cpp
         src/runtime/runtime-other.cpp
-        src/runtime/icd.h
-        src/runtime/IcdDispatchTable.cpp
-        src/runtime/IcdDispatchTable.h
+        src/runtime/icd/icd.h
+        src/runtime/icd/IcdDispatchTable.cpp
+        src/runtime/icd/IcdDispatchTable.h
         src/runtime/device/DeviceConfigurationParser.h
         src/runtime/device/DeviceConfigurationParser.cpp
         src/runtime/device/DeviceConfigurationParser.tpp
-        src/model/GPUModel.cpp
-        src/model/GPUModel.h
-        ../common/common/common.hpp
-        ../common/common/Logger.cpp
-        ../common/common/Logger.h src/runtime/runtime-memory-buffer.cpp src/runtime/runtime-memory-image.cpp)
+        src/runtime/runtime-memory-buffer.cpp
+        src/runtime/runtime-memory-image.cpp
+        src/runtime/command/Command.h
+        src/runtime/icd/CLCommandQueue.cpp
+        src/runtime/icd/CLCommandQueue.h
+        src/runtime/command/BufferReadCommand.cpp
+        src/runtime/command/BufferWriteCommand.cpp
+        )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
