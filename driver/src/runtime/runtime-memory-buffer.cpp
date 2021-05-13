@@ -2,7 +2,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "icd.h"
+#include "icd/icd.h"
 #include "runtime-commons.h"
 
 CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
@@ -66,7 +66,7 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
             "Cannot allocate " + std::to_string(size) +
                 " bytes of data. Used: " +
                 std::to_string(context->device->usedGlobalMemory) + " / " +
-                std::to_string(context->device->globalMemorySize) + "bytes.")
+                std::to_string(context->device->globalMemorySize) + " bytes.")
     }
 
     auto mem = new CLMem(kDispatchTable, context);
@@ -82,9 +82,23 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
     mem->hostCanWrite = hostRWAccess || (flags & CL_MEM_HOST_WRITE_ONLY);
 
     mem->size = size;
-    auto data = new std::byte[mem->size];
-    memset(data, 0, mem->size);
-    mem->address = data;
+
+    if (flags & CL_MEM_USE_HOST_PTR) {
+        mem->address = static_cast<std::byte*>(host_ptr);
+
+    } else {
+        if (flags & CL_MEM_ALLOC_HOST_PTR) {
+            mem->address = static_cast<std::byte*>(host_ptr);
+        } else {
+            mem->address = new std::byte[mem->size];
+        }
+
+        if (flags & CL_MEM_COPY_HOST_PTR) {
+            memcpy(mem->address, host_ptr, mem->size);
+        } else {
+            memset(mem->address, 0, mem->size);
+        }
+    }
 
     if (!mem->address) {
         delete mem;
@@ -142,7 +156,19 @@ clEnqueueReadBuffer(cl_command_queue command_queue,
                      "clEnqueueReadBuffer on write-only buffer.")
     }
 
-    memcpy(ptr, buffer->address + offset, size);
+    const auto command = std::make_shared<BufferReadCommand>();
+    command->buffer = buffer;
+    command->size = size;
+    command->offset = offset;
+    command->outputPtr = ptr;
+
+    command_queue->enqueue(command);
+
+    clRetainMemObject(buffer);
+
+    if (blocking_read) {
+        clFlush(command_queue);
+    }
 
     return CL_SUCCESS;
 }
@@ -164,7 +190,19 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
                      "clEnqueueWriteBuffer on read-only buffer.")
     }
 
-    memcpy(buffer->address + offset, ptr, size);
+    const auto command = std::make_shared<BufferWriteCommand>();
+    command->buffer = buffer;
+    command->size = size;
+    command->offset = offset;
+    command->dataPtr = ptr;
+
+    command_queue->enqueue(command);
+
+    clRetainMemObject(buffer);
+
+    if (blocking_write) {
+        clFlush(command_queue);
+    }
 
     return CL_SUCCESS;
 }
@@ -184,6 +222,10 @@ clEnqueueReadBufferRect(cl_command_queue command_queue,
                         cl_uint num_events_in_wait_list,
                         const cl_event* event_wait_list,
                         cl_event* event) {
+    if (blocking_read) {
+        clFlush(command_queue);
+    }
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueReadBufferRect"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -204,6 +246,10 @@ clEnqueueWriteBufferRect(cl_command_queue command_queue,
                          cl_uint num_events_in_wait_list,
                          const cl_event* event_wait_list,
                          cl_event* event) {
+    if (blocking_write) {
+        clFlush(command_queue);
+    }
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueWriteBufferRect"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -269,6 +315,10 @@ clEnqueueMapBuffer(cl_command_queue command_queue,
                    const cl_event* event_wait_list,
                    cl_event* event,
                    cl_int* errcode_ret) {
+    if (blocking_map) {
+        clFlush(command_queue);
+    }
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueMapBuffer"
               << std::endl;
     return nullptr;

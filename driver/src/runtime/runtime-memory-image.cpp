@@ -1,5 +1,5 @@
 #include <iostream>
-#include "icd.h"
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_mem CL_API_CALL
 clCreateImage(cl_context context,
@@ -24,6 +24,10 @@ clEnqueueReadImage(cl_command_queue command_queue,
                    cl_uint num_events_in_wait_list,
                    const cl_event* event_wait_list,
                    cl_event* event) {
+    if (blocking_read) {
+        clFlush(command_queue);
+    }
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueReadImage"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -41,6 +45,10 @@ clEnqueueWriteImage(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
+    if (blocking_write) {
+        clFlush(command_queue);
+    }
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueWriteImage"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -118,6 +126,10 @@ clEnqueueMapImage(cl_command_queue command_queue,
                   const cl_event* event_wait_list,
                   cl_event* event,
                   cl_int* errcode_ret) {
+    if (blocking_map) {
+        clFlush(command_queue);
+    }
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueMapImage"
               << std::endl;
     return nullptr;

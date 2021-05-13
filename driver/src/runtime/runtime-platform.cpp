@@ -60,56 +60,45 @@ clGetPlatformInfo(cl_platform_id platform,
                   size_t param_value_size,
                   void* param_value,
                   size_t* param_value_size_ret) {
-    std::string returnString;
-
-    switch (param_name) {
-        case CL_PLATFORM_PROFILE: {
-            returnString = platform->profile;
-            break;
-        }
-
-        case CL_PLATFORM_VERSION: {
-            returnString = platform->openClVersion + " " + platform->name;
-            break;
-        }
-
-        case CL_PLATFORM_NAME: {
-            returnString = platform->name;
-            break;
-        }
-
-        case CL_PLATFORM_VENDOR: {
-            returnString = platform->vendor;
-            break;
-        }
-
-        case CL_PLATFORM_EXTENSIONS: {
-            returnString = platform->extensions;
-            break;
-        }
-
-        case CL_PLATFORM_ICD_SUFFIX_KHR: {
-            returnString = platform->suffix;
-            break;
-        }
-
-        default: return CL_INVALID_VALUE;
+    if (platform != kPlatform) {
+        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.")
     }
 
-    const char* cReturnString = returnString.c_str();
-    const auto returnStringSize = strlen(cReturnString) + 1;
+    GET_PARAM_INFO([&]() {
+        switch (param_name) {
+            case CL_PLATFORM_PROFILE: {
+                result = platform->profile;
+                break;
+            }
 
-    if (param_value_size && param_value_size < returnStringSize) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.")
-    }
+            case CL_PLATFORM_VERSION: {
+                result = platform->openClVersion + " " + platform->name;
+                break;
+            }
 
-    if (param_value) {
-        memcpy(param_value, cReturnString, returnStringSize);
-    }
+            case CL_PLATFORM_NAME: {
+                result = platform->name;
+                break;
+            }
 
-    if (param_value_size_ret) {
-        *param_value_size_ret = returnStringSize;
-    }
+            case CL_PLATFORM_VENDOR: {
+                result = platform->vendor;
+                break;
+            }
 
-    return CL_SUCCESS;
+            case CL_PLATFORM_EXTENSIONS: {
+                result = platform->extensions;
+                break;
+            }
+
+            case CL_PLATFORM_ICD_SUFFIX_KHR: {
+                result = platform->suffix;
+                break;
+            }
+
+            default: return CL_INVALID_VALUE;
+        }
+
+        return 0;
+    })
 }

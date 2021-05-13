@@ -1,7 +1,7 @@
 #include <cassert>
 
 #include "IcdDispatchTable.h"
-#include "icd.h"
+#include "icd/icd.h"
 
 #define ICD_DISPATCH_TABLE_ENTRY(fn)         \
     assert(dispatchTable->entryCount < 256); \

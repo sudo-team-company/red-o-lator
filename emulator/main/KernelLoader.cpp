@@ -20,6 +20,14 @@ std::vector<unsigned char> readBinaryFile(const std::string& path) {
                                       {});
 }
 
+void printArray(cl_uint* begin, cl_uint* end) {
+    std::vector<cl_uint> vec1Out(begin, end);
+    for (auto item : vec1Out) {
+        std::cout << std::to_string(item) << " ";
+    }
+    std::cout << std::endl;
+}
+
 void KernelLoader::executeKernel(const std::string& kernelPath) {
     Logger kLogger = Logger("[red-o-lator emulator] ---");
 
@@ -31,7 +39,9 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
 
     kLogger.log("found " + std::to_string(platformCount) + " platforms");
 
-    cl_platform_id platformList[platformCount];
+    auto* platformList =
+        (cl_platform_id*) malloc(platformCount * sizeof(platformCount));
+
     errorCode = clGetPlatformIDs(platformCount, platformList, nullptr);
     CHECK_ERROR("Failed to load platform list")
 
@@ -43,7 +53,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         errorCode = clGetPlatformInfo(currentPlatform, CL_PLATFORM_NAME, 128,
                                       &platformName, nullptr);
         CHECK_ERROR("Failed to get platform name")
-        kLogger.log("found platform: " + std::string(platformName));
+        kLogger.log("Found platform: " + std::string(platformName));
     }
 
     cl_uint num_devices;
@@ -57,14 +67,21 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, nullptr);
     CHECK_ERROR("Failed to get device name")
 
-    kLogger.log("using device '" + std::string(deviceName) + "'");
+    kLogger.log("Using device '" + std::string(deviceName) + "'");
+
+    char deviceVersion[50];
+    errorCode =
+        clGetDeviceInfo(device, CL_DEVICE_VERSION, 50, deviceVersion, nullptr);
+    CHECK_ERROR("Failed to get device version")
+
+    kLogger.log("Device version: '" + std::string(deviceVersion) + "'");
 
     cl_context context =
         clCreateContext(nullptr, 1, &device, nullptr, nullptr, &errorCode);
     CHECK_ERROR("Failed to create context")
 
-    cl_command_queue commandQueue = clCreateCommandQueue(
-        context, device, CL_QUEUE_PROFILING_ENABLE, &errorCode);
+    cl_command_queue commandQueue =
+        clCreateCommandQueue(context, device, 0, &errorCode);
     CHECK_ERROR("Failed to create command queue")
 
     const size_t n = 1000;
@@ -74,39 +91,13 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
                                  &errorCode);
     CHECK_ERROR("Error creating buffer 1");
 
-    std::vector<cl_uint> vec1{};
-    for (int i = 0; i < n; ++i) {
-        vec1.push_back(i);
-    }
-    cl_uint* in1 = vec1.data();
-    cl_uint out1[20];
-    errorCode = clEnqueueWriteBuffer(commandQueue, mem1, CL_TRUE, 0, arraySize,
-                                     in1, 0, nullptr, nullptr);
-    CHECK_ERROR("Error write for buffer 1")
-
-    errorCode = clEnqueueWriteBuffer(
-        commandQueue, mem1, CL_TRUE, 70 * sizeof(cl_uint), 3 * sizeof(cl_uint),
-        std::vector<cl_uint>({100000, 100001, 100002}).data(), 0, nullptr,
-        nullptr);
-    CHECK_ERROR("Error write 2 for buffer 1")
-
-    errorCode =
-        clEnqueueReadBuffer(commandQueue, mem1, CL_TRUE, 64 * sizeof(cl_uint),
-                            20 * sizeof(cl_uint), out1, 0, nullptr, nullptr);
-    CHECK_ERROR("Error read for buffer 1")
-
-    std::vector<cl_uint> vec1Out(std::begin(out1), std::end(out1));
-    for (auto item : vec1Out) {
-        std::cout << std::to_string(item) << " ";
-    }
-    std::cout << std::endl;
-
     cl_mem mem2 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize, nullptr,
                                  &errorCode);
-    CHECK_ERROR("Error creating buffer 2");
+    CHECK_ERROR("Error creating buffer 2")
+
     cl_mem mem3 = clCreateBuffer(context, CL_MEM_WRITE_ONLY, arraySize, nullptr,
                                  &errorCode);
-    CHECK_ERROR("Error creating buffer 3");
+    CHECK_ERROR("Error creating buffer 3")
 
     const std::string binaryPath =
         "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/disasm/"

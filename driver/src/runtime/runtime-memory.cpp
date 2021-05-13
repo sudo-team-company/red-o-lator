@@ -1,6 +1,6 @@
 #include <iostream>
-#include "icd.h"
 #include "runtime-commons.h"
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
     if (!memobj) {
@@ -21,9 +21,8 @@ CL_API_ENTRY cl_int CL_API_CALL clReleaseMemObject(cl_mem memobj) {
 
     if (memobj->referenceCount == 0) {
         delete[] memobj->address;
+        memobj->context->device->usedGlobalMemory -= memobj->size;
     }
-
-    memobj->context->device->usedGlobalMemory -= memobj->size;
 
     return CL_SUCCESS;
 }
