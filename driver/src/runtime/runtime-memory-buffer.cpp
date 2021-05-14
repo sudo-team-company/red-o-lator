@@ -4,7 +4,9 @@
 #include <iostream>
 #include <memory>
 
-#include "icd/icd.h"
+#include "icd/CLContext.h"
+#include "icd/CLDeviceId.hpp"
+#include "icd/CLCommandQueue.h"
 #include "runtime-commons.h"
 
 CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,

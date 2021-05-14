@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "runtime-commons.h"
-#include "icd/icd.h"
+#include "icd/CLCommandQueue.h"
 
 CL_API_ENTRY cl_command_queue CL_API_CALL
 clCreateCommandQueue(cl_context context,

@@ -29,7 +29,7 @@ void printArray(cl_uint* begin, cl_uint* end) {
 }
 
 void KernelLoader::executeKernel(const std::string& kernelPath) {
-    Logger kLogger = Logger("[red-o-lator emulator] ---");
+    Logger kLogger = Logger("[red-o-lator emulator]");
 
     cl_int errorCode;
 
@@ -37,7 +37,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     errorCode = clGetPlatformIDs(0, nullptr, &platformCount);
     CHECK_ERROR("Failed to load platform count")
 
-    kLogger.log("found " + std::to_string(platformCount) + " platforms");
+    kLogger.debug("found " + std::to_string(platformCount) + " platforms");
 
     auto* platformList =
         (cl_platform_id*) malloc(platformCount * sizeof(platformCount));
@@ -53,7 +53,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         errorCode = clGetPlatformInfo(currentPlatform, CL_PLATFORM_NAME, 128,
                                       &platformName, nullptr);
         CHECK_ERROR("Failed to get platform name")
-        kLogger.log("Found platform: " + std::string(platformName));
+        kLogger.debug("Found platform: " + std::string(platformName));
     }
 
     cl_uint num_devices;
@@ -67,14 +67,14 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, nullptr);
     CHECK_ERROR("Failed to get device name")
 
-    kLogger.log("Using device '" + std::string(deviceName) + "'");
+    kLogger.debug("Using device '" + std::string(deviceName) + "'");
 
     char deviceVersion[50];
     errorCode =
         clGetDeviceInfo(device, CL_DEVICE_VERSION, 50, deviceVersion, nullptr);
     CHECK_ERROR("Failed to get device version")
 
-    kLogger.log("Device version: '" + std::string(deviceVersion) + "'");
+    kLogger.debug("Device version: '" + std::string(deviceVersion) + "'");
 
     cl_context context =
         clCreateContext(nullptr, 1, &device, nullptr, nullptr, &errorCode);

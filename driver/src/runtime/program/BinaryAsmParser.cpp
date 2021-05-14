@@ -1,18 +1,160 @@
+#include <runtime-commons.h>
+#include <cassert>
 #include <common/common.hpp>
+#include <iostream>
 
 #include "BinaryAsmParser.h"
 
-std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm(
-    const std::string& input) {
-    auto lines = utils::split(input, '\n');
+std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm() {
+    if (alreadyParsed) {
+        return std::make_unique<BinaryDisassemblingResult>(parsingResult);
+    }
 
-
-    const auto parsingResult = BinaryDisassemblingResult();
+    auto lines = utils::split(*input, '\n');
+    std::string parameters;
 
     for (auto& line : lines) {
         utils::trimInplace(line);
-        utils::split(line, ' ', 1);
+
+        if (line.empty()) {
+            continue;
+        }
+
+        std::vector<std::string> splitLine;
+        if (parsingState == KernelInstructions &&
+            utils::startsWith(line, "/*")) {
+            splitLine = utils::split(line, ' ', 2);
+
+        } else {
+            splitLine = utils::split(line, ' ', 1);
+        }
+
+        if (splitLine.size() == 1) {
+            parseSingleInstruction(splitLine[0]);
+
+        } else if (splitLine.size() == 2) {
+            parseParameter(line, splitLine[0], splitLine[1]);
+
+        } else {
+            parseKernelInstruction(line, splitLine[0], splitLine[1],
+                                   splitLine[2]);
+        }
     }
 
-    return std::unique_ptr<BinaryDisassemblingResult>();
+    if (currentKernelBuilder) {
+        parsingResult.kernels.push_back(currentKernelBuilder->build());
+    }
+
+    alreadyParsed = true;
+
+    return std::make_unique<BinaryDisassemblingResult>(parsingResult);
+}
+
+void BinaryAsmParser::parseSingleInstruction(const std::string& instruction) {
+    if (instruction == ".config") {
+        parsingState = KernelConfig;
+        return;
+    }
+
+    if (instruction == ".text") {
+        parsingState = KernelInstructions;
+        return;
+    }
+
+    switch (parsingState) {
+        case BinaryParameters: {
+            assert(currentKernelBuilder == nullptr);
+            parsingResult.parameters.push_back(instruction);
+            break;
+        }
+
+        case KernelConfig: {
+            assert(currentKernelBuilder != nullptr);
+            currentKernelBuilder->config.push_back(instruction);
+        }
+
+        case KernelInstructions: {
+            assert(currentKernelBuilder != nullptr);
+            // TODO: this is label
+            currentKernelBuilder->instructions.push_back(instruction);
+            break;
+        }
+    }
+}
+
+void BinaryAsmParser::parseParameter(const std::string& line,
+                                     const std::string& parameterName,
+                                     const std::string& parameterValue) {
+    if (utils::startsWith(parameterName, ".kernel")) {
+        if (currentKernelBuilder) {
+            parsingResult.kernels.push_back(currentKernelBuilder->build());
+        }
+
+        currentKernelBuilder = std::make_shared<CLKernelBuilder>();
+        currentKernelBuilder->name = parameterValue;
+        return;
+    }
+
+    switch (parsingState) {
+        case BinaryParameters: {
+            assert(currentKernelBuilder == nullptr);
+            parseBinaryParameter(line, parameterName, parameterValue);
+            break;
+        }
+
+        case KernelConfig: {
+            assert(currentKernelBuilder != nullptr);
+            parseKernelConfigParameter(line, parameterName, parameterValue);
+            break;
+        }
+
+        case KernelInstructions: {
+            assert(currentKernelBuilder != nullptr);
+            if (utils::startsWith(line, "/*")) {
+                parseKernelInstruction(line, parameterName, parameterValue, "");
+            } else {
+                kLogger.warn(
+                    "Got instruction without address while parsing kernel "
+                    "instructions: " +
+                    line);
+                parseKernelInstruction(line, "/*unknown*/", parameterName,
+                                       parameterValue);
+            }
+        }
+    }
+}
+
+void BinaryAsmParser::parseKernelInstruction(const std::string& line,
+                                             const std::string& address,
+                                             const std::string& instruction,
+                                             const std::string& values) {
+    assert(utils::startsWith(address, "/*"));
+    assert(utils::endsWith(address, "*/"));
+    const auto addressValue = address.substr(2, address.size() - 4);
+    currentKernelBuilder->instructions.push_back(line);
+}
+
+void BinaryAsmParser::parseBinaryParameter(const std::string& line,
+                                           const std::string& parameterName,
+                                           const std::string& parameterValue) {
+    if (parameterName == ".gpu") {
+        parsingResult.gpuName = parameterValue;
+
+    } else if (parameterName == ".compile_options") {
+        parsingResult.compileOptions = parameterValue;
+
+    } else {
+        parsingResult.parameters.push_back(line);
+    }
+}
+
+void BinaryAsmParser::parseKernelConfigParameter(
+    const std::string& line,
+    const std::string& parameterName,
+    const std::string& parameterValue) {
+    if (parameterName == ".arg" && !utils::startsWith(parameterValue, "_")) {
+        currentKernelBuilder->argumentCount++;
+    }
+
+    currentKernelBuilder->config.push_back(line);
 }

@@ -1,8 +1,9 @@
-#include "CLKernel.h"
-
 #include <common/common.hpp>
 #include <string>
 #include <utility>
+
+#include "CLKernel.h"
+#include "runtime-commons.h"
 
 KernelArgument KernelArgument::UNSET =  // NOLINT(cert-err58-cpp)
     KernelArgument(0, 0, nullptr);
@@ -42,4 +43,9 @@ std::optional<KernelArgument> CLKernel::getArgument(cl_uint index) {
     }
 
     return utils::optionalOf(arguments[index]);
+}
+
+CLKernel* CLKernelBuilder::build() {
+    return new CLKernel(kDispatchTable, name, argumentCount, config,
+                        instructions);
 }
