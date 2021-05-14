@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <CLRX/amdasm/Disassembler.h>
+#include <common/common.hpp>
 #include <sstream>
 
 #include "icd/icd.h"
@@ -144,64 +145,70 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
     }
 
-    GET_PARAM_INFO([&]() {
-        switch (param_name) {
-            case CL_PROGRAM_REFERENCE_COUNT: {
-                resultSize = sizeof(cl_uint);
-                result = reinterpret_cast<void*>(program->referenceCount);
-                break;
+    getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
+
+            switch (param_name) {
+                case CL_PROGRAM_REFERENCE_COUNT: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(program->referenceCount);
+                    break;
+                }
+
+                case CL_PROGRAM_CONTEXT: {
+                    resultSize = sizeof(cl_context);
+                    result = reinterpret_cast<void*>(program->context);
+                    break;
+                }
+
+                case CL_PROGRAM_NUM_DEVICES: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(1);
+                    break;
+                }
+
+                case CL_PROGRAM_DEVICES: {
+                    resultSize = sizeof(cl_device_id);
+                    result = kDevice;
+                    break;
+                }
+
+                case CL_PROGRAM_SOURCE: {
+                    result = "";
+                    break;
+                }
+
+                case CL_PROGRAM_BINARY_SIZES: {
+                    resultSize = sizeof(size_t);
+                    result = reinterpret_cast<void*>(program->binarySize);
+                    break;
+                }
+
+                case CL_PROGRAM_BINARIES: {
+                    resultSize = program->binarySize;
+                    result = const_cast<unsigned char*>(program->binary);
+                    break;
+                }
+
+                case CL_PROGRAM_NUM_KERNELS: {
+                    resultSize = sizeof(size_t);
+                    result = reinterpret_cast<void*>(0);
+                    break;
+                }
+
+                case CL_PROGRAM_KERNEL_NAMES: {
+                    result = "";
+                    break;
+                }
+
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
             }
 
-            case CL_PROGRAM_CONTEXT: {
-                resultSize = sizeof(cl_context);
-                result = reinterpret_cast<void*>(program->context);
-                break;
-            }
-
-            case CL_PROGRAM_NUM_DEVICES: {
-                resultSize = sizeof(cl_uint);
-                result = reinterpret_cast<void*>(1);
-                break;
-            }
-
-            case CL_PROGRAM_DEVICES: {
-                resultSize = sizeof(cl_device_id);
-                result = kDevice;
-                break;
-            }
-
-            case CL_PROGRAM_SOURCE: {
-                result = "";
-                break;
-            }
-
-            case CL_PROGRAM_BINARY_SIZES: {
-                resultSize = sizeof(size_t);
-                result = reinterpret_cast<void*>(program->binarySize);
-                break;
-            }
-
-            case CL_PROGRAM_BINARIES: {
-                resultSize = program->binarySize;
-                result = const_cast<unsigned char*>(program->binary);
-                break;
-            }
-
-            case CL_PROGRAM_NUM_KERNELS: {
-                resultSize = sizeof(size_t);
-                result = reinterpret_cast<void*>(0);
-                break;
-            }
-
-            case CL_PROGRAM_KERNEL_NAMES: {
-                result = "";
-                break;
-            }
-
-            default: return CL_INVALID_VALUE;
-        }
-        return 0;
-    })
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize));
+        });
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
@@ -215,34 +222,40 @@ clGetProgramBuildInfo(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
     }
 
-    GET_PARAM_INFO([&]() {
-        switch (param_name) {
-            case CL_PROGRAM_BUILD_STATUS: {
-                resultSize = sizeof(cl_build_status);
-                result = reinterpret_cast<void*>(CL_BUILD_SUCCESS);
-                break;
+    getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
+
+            switch (param_name) {
+                case CL_PROGRAM_BUILD_STATUS: {
+                    resultSize = sizeof(cl_build_status);
+                    result = reinterpret_cast<void*>(CL_BUILD_SUCCESS);
+                    break;
+                }
+
+                case CL_PROGRAM_BUILD_OPTIONS: {
+                    result = "";
+                    break;
+                }
+
+                case CL_PROGRAM_BUILD_LOG: {
+                    result =
+                        "Binary build is not supported, assuming binary was "
+                        "already built for AMD platform.";
+                    break;
+                }
+
+                case CL_PROGRAM_BINARY_TYPE: {
+                    resultSize = sizeof(cl_program_binary_type);
+                    result = reinterpret_cast<void*>(
+                        CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT);
+                    break;
+                }
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
             }
 
-            case CL_PROGRAM_BUILD_OPTIONS: {
-                result = "";
-                break;
-            }
-
-            case CL_PROGRAM_BUILD_LOG: {
-                result =
-                    "Binary build is not supported, assuming binary was "
-                    "already built for AMD platform.";
-                break;
-            }
-
-            case CL_PROGRAM_BINARY_TYPE: {
-                resultSize = sizeof(cl_program_binary_type);
-                result = reinterpret_cast<void*>(
-                    CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT);
-                break;
-            }
-            default: return CL_INVALID_VALUE;
-        }
-        return 0;
-    })
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize));
+        });
 }

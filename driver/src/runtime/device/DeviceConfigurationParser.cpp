@@ -39,7 +39,7 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
                                                 configurationFilePath);
     }
 
-    std::unordered_map<cl_device_info, DeviceConfigurationParameterValue>
+    std::unordered_map<cl_device_info, CLObjectInfoParameterValue>
         parameters;
     std::string line;
 
@@ -57,51 +57,51 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
 
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_PLATFORM,
-        DeviceConfigurationParameterValue(kPlatform, sizeof(cl_platform_id)));
+        CLObjectInfoParameterValue(kPlatform, sizeof(cl_platform_id)));
 
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_PARENT_DEVICE,
-        DeviceConfigurationParameterValue(nullptr, sizeof(cl_device_id)));
+        CLObjectInfoParameterValue(nullptr, sizeof(cl_device_id)));
 
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_OPENCL_C_VERSION,
-        DeviceConfigurationParameterValue(kPlatform->openClVersion,
+        CLObjectInfoParameterValue(kPlatform->openClVersion,
                                           kPlatform->openClVersion.size() + 1));
 
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DRIVER_VERSION,
-        DeviceConfigurationParameterValue(kPlatform->driverVersion,
+        CLObjectInfoParameterValue(kPlatform->driverVersion,
                                           kPlatform->driverVersion.size() + 1));
 
     const auto deviceVersion = std::string(kPlatform->openClVersion) +
                                " AMD (" + kPlatform->driverVersion + ")";
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_VERSION,
-        DeviceConfigurationParameterValue(deviceVersion.c_str(),
+        CLObjectInfoParameterValue(deviceVersion.c_str(),
                                           strlen(deviceVersion.c_str()) + 1));
 
     utils::insertOrUpdate<cl_bool>(
         parameters, CL_DEVICE_AVAILABLE,
-        DeviceConfigurationParameterValue((void*) true, sizeof(cl_bool)));
+        CLObjectInfoParameterValue((void*) true, sizeof(cl_bool)));
 
     utils::insertOrUpdate<cl_bool>(
         parameters, CL_DEVICE_LINKER_AVAILABLE,
-        DeviceConfigurationParameterValue((void*) false, sizeof(cl_bool)));
+        CLObjectInfoParameterValue((void*) false, sizeof(cl_bool)));
 
     utils::insertOrUpdate<cl_bool>(
         parameters, CL_DEVICE_COMPILER_AVAILABLE,
-        DeviceConfigurationParameterValue((void*) false, sizeof(cl_bool)));
+        CLObjectInfoParameterValue((void*) false, sizeof(cl_bool)));
 
     utils::insertOrUpdate<cl_uint>(
         parameters, CL_DEVICE_PARTITION_MAX_SUB_DEVICES,
-        DeviceConfigurationParameterValue(reinterpret_cast<void*>(0),
+        CLObjectInfoParameterValue(reinterpret_cast<void*>(0),
                                           sizeof(cl_uint)));
 
     mConfigurationPath = configurationFilePath;
     mParameters = parameters;
 }
 
-std::optional<DeviceConfigurationParameterValue>
+std::optional<CLObjectInfoParameterValue>
 DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
     if (mParameters.find(parameter) != mParameters.end()) {
         return mParameters.at(parameter);
@@ -113,7 +113,7 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
     if (isValidOpenCLParameter) {
         std::cout << "Parameter " << parameter << " was not found in config"
                   << std::endl;
-        return DeviceConfigurationParameterValue(nullptr, 0);
+        return CLObjectInfoParameterValue(nullptr, 0);
     }
 
     return std::nullopt;
@@ -171,7 +171,7 @@ DeviceConfigurationParser::ParsedParameter
 DeviceConfigurationParser::parseParameter(const std::string& parameterName,
                                           const std::string& parameterValue) {
     size_t resultSize = 0;
-    DeviceConfigurationParameterValueType result;
+    CLObjectInfoParameterValueType result;
     cl_device_info clParameter = 0;
 
     IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
@@ -297,7 +297,8 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     }
 
     return ParsedParameter(
-        clParameter, DeviceConfigurationParameterValue(result, resultSize));
+        clParameter,
+                           CLObjectInfoParameterValue(result, resultSize));
 }
 
 template <typename T>

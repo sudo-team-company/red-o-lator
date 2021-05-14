@@ -39,7 +39,7 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/icd/CLCommandQueue.h
         src/runtime/command/BufferReadCommand.cpp
         src/runtime/command/BufferWriteCommand.cpp
-        )
+        src/runtime/CLObjectInfoParameterValue.hpp)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 

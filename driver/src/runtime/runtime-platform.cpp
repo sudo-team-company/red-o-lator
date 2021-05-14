@@ -1,5 +1,6 @@
+#include <common/common.hpp>
 #include <cstring>
-#include <iostream>
+#include <optional>
 
 #include "runtime-commons.h"
 
@@ -64,41 +65,43 @@ clGetPlatformInfo(cl_platform_id platform,
         RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.")
     }
 
-    GET_PARAM_INFO([&]() {
-        switch (param_name) {
-            case CL_PLATFORM_PROFILE: {
-                result = platform->profile;
-                break;
+    return getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            switch (param_name) {
+                case CL_PLATFORM_PROFILE: {
+                    result = platform->profile;
+                    break;
+                }
+
+                case CL_PLATFORM_VERSION: {
+                    result = platform->openClVersion + " " + platform->name;
+                    break;
+                }
+
+                case CL_PLATFORM_NAME: {
+                    result = platform->name;
+                    break;
+                }
+
+                case CL_PLATFORM_VENDOR: {
+                    result = platform->vendor;
+                    break;
+                }
+
+                case CL_PLATFORM_EXTENSIONS: {
+                    result = platform->extensions;
+                    break;
+                }
+
+                case CL_PLATFORM_ICD_SUFFIX_KHR: {
+                    result = platform->suffix;
+                    break;
+                }
+
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
             }
 
-            case CL_PLATFORM_VERSION: {
-                result = platform->openClVersion + " " + platform->name;
-                break;
-            }
-
-            case CL_PLATFORM_NAME: {
-                result = platform->name;
-                break;
-            }
-
-            case CL_PLATFORM_VENDOR: {
-                result = platform->vendor;
-                break;
-            }
-
-            case CL_PLATFORM_EXTENSIONS: {
-                result = platform->extensions;
-                break;
-            }
-
-            case CL_PLATFORM_ICD_SUFFIX_KHR: {
-                result = platform->suffix;
-                break;
-            }
-
-            default: return CL_INVALID_VALUE;
-        }
-
-        return 0;
-    })
+            return utils::optionalOf(CLObjectInfoParameterValue(result, 0));
+        });
 }
