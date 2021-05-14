@@ -9,5 +9,5 @@ BufferWriteCommand::~BufferWriteCommand() {
 
 void BufferWriteCommand::execute() const {
     memcpy(buffer->address + offset, dataPtr, size);
-    kLogger.log(std::to_string(offset));
+    kLogger.debug(std::to_string(offset));
 }

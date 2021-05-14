@@ -112,7 +112,8 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         parameter >= CL_DEVICE_TYPE &&
         parameter <= CL_DEVICE_PRINTF_BUFFER_SIZE;
     if (isValidOpenCLParameter) {
-        kLogger.log("Parameter " + std::to_string(parameter) + " was not found in config");
+        kLogger.debug("Parameter " + std::to_string(parameter) +
+                      " was not found in config");
         return CLObjectInfoParameterValue(nullptr, 0);
     }
 
@@ -162,7 +163,7 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
 
 #define IGNORE_PARAMETER(param)                                   \
     if (parameterName == #param) {                                \
-        kLogger.log(std::string("Ignoring parameter ") + #param); \
+        kLogger.warn(std::string("Ignoring parameter ") + #param); \
         clParameter = param;                                      \
         result = nullptr;                                         \
     }
@@ -289,7 +290,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, size_t)
 
     if (!clParameter) {
-        kLogger.log("Unknown parameter: " + parameterName);
+        kLogger.debug("Unknown parameter: " + parameterName);
     }
 
     if (std::holds_alternative<std::string>(result)) {

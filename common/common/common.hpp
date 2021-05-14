@@ -1,11 +1,12 @@
 #pragma once
 
-#include <unordered_map>
 #include <algorithm>
 #include <cctype>
 #include <locale>
 #include <optional>
+#include <unordered_map>
 #include <vector>
+#include <string_view>
 
 namespace utils {
 static std::vector<std::string> split(const std::string& line,
@@ -82,6 +83,15 @@ static inline std::string trim(std::string s) {
     return s;
 }
 
+static inline bool startsWith(const std::string& s, const std::string& prefix) {
+    return s.rfind(prefix, 0) == 0;
+}
+
+static inline bool endsWith(const std::string& s, const std::string& suffix) {
+    return s.size() >= suffix.size() &&
+           0 == s.compare(s.size() - suffix.size(), suffix.size(), suffix);
+}
+
 template <typename K, typename V>
 static inline void insertOrUpdate(std::unordered_map<K, V>& map,
                                   const K& key,
@@ -95,17 +105,17 @@ static inline void insertOrUpdate(std::unordered_map<K, V>& map,
 }
 
 template <typename T>
-static std::optional<T*> optionalOf(T* value) {
+static inline std::optional<T*> optionalOf(T* value) {
     return value ? std::make_optional(value) : std::nullopt;
 }
 
 template <typename T>
-static std::optional<T> optionalOf(T value) {
+static inline std::optional<T> optionalOf(T value) {
     return std::make_optional(value);
 }
 
 template <typename T>
-static std::optional<T> optionalOf() {
+static inline std::optional<T> optionalOf() {
     return std::nullopt;
 }
 }  // namespace utils

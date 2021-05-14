@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "runtime/runtime-commons.h"
-#include "icd/icd.h"
+#include "icd/CLDeviceId.hpp"
 
 CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                                                cl_device_type device_type,

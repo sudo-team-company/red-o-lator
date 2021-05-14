@@ -1,6 +1,6 @@
 #include "runtime-commons.h"
 
-Logger kLogger = Logger("[red-o-lator driver] ---");  // NOLINT(cert-err58-cpp)
+Logger kLogger = Logger("[red-o-lator driver]");  // NOLINT(cert-err58-cpp)
 
 IcdDispatchTable* kDispatchTable =  // NOLINT(cert-err58-cpp)
     IcdDispatchTableProvider().get();

@@ -1,6 +1,8 @@
 #include <iostream>
 #include "runtime-commons.h"
-#include "icd/icd.h"
+#include "icd/CLMem.hpp"
+#include "icd/CLDeviceId.hpp"
+#include "icd/CLContext.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
     if (!memobj) {

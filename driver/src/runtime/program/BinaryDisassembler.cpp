@@ -18,10 +18,11 @@ std::unique_ptr<BinaryDisassemblingResult> BinaryDisassembler::disassemble(
     CLRX::Disassembler disasm(amdInput, disasmOss, disasmFlags);
     disasm.disassemble();
 
-    std::unique_ptr<BinaryDisassemblingResult> parsingResult =
-        BinaryAsmParser::parseAsm(disasmOss.str());
+    const std::string input = disasmOss.str();
+    auto parser = BinaryAsmParser(std::make_shared<std::string>(input));
 
-    std::cout << disasmOss.str() << std::endl;
+    std::unique_ptr<BinaryDisassemblingResult> parsingResult =
+        parser.parseAsm();
 
     return parsingResult;
 }
