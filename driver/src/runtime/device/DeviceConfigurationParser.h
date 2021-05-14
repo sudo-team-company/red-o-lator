@@ -1,32 +1,21 @@
 #pragma once
 
 #include <map>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
-#include <optional>
-#include <stdexcept>
 #include <variant>
 
 #include "icd/icd.h"
-#include "CL/cl_ext.h"
-
-using DeviceConfigurationParameterValueType = std::variant<void*, std::string>;
-
-struct DeviceConfigurationParameterValue {
-    DeviceConfigurationParameterValue(
-        DeviceConfigurationParameterValueType value, size_t size)
-        : value(std::move(value)), size(size) {}
-
-    DeviceConfigurationParameterValueType value;
-    size_t size;
-};
+#include "CLObjectInfoParameterValue.hpp"
 
 class DeviceConfigurationParser {
    public:
     void load(const std::string& configurationFilePath);
 
-    std::optional<DeviceConfigurationParameterValue> getParameter(
+    std::optional<CLObjectInfoParameterValue> getParameter(
         cl_device_info parameter) const;
 
     template <class T>
@@ -34,16 +23,15 @@ class DeviceConfigurationParser {
 
    private:
     struct ParsedParameter {
-        ParsedParameter(cl_device_info name,
-                        DeviceConfigurationParameterValue value)
+        ParsedParameter(cl_device_info name, CLObjectInfoParameterValue value)
             : name(name), value(std::move(value)) {}
 
         cl_device_info name;
-        DeviceConfigurationParameterValue value;
+        CLObjectInfoParameterValue value;
     };
 
     std::string mConfigurationPath;
-    std::unordered_map<cl_device_info, DeviceConfigurationParameterValue>
+    std::unordered_map<cl_device_info, CLObjectInfoParameterValue>
         mParameters;
 
     static ParsedParameter parseParameter(const std::string& parameterName,

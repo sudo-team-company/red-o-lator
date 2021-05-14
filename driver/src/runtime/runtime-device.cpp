@@ -63,19 +63,11 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
 
     // TODO(clGetDeviceInfo, future): parameters validation according to
     //  OpenCL spec
-    const auto maybeResult =
-        kDeviceConfigurationParser.getParameter(param_name);
 
-    if (!maybeResult) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Unknown parameter.")
-    }
-
-    GET_PARAM_INFO([&]() {
-        const auto& value = maybeResult.value();
-        result = value.value;
-        resultSize = value.size;
-        return 0;
-    })
+    getParamInfo(param_name, param_value_size, param_value,
+                 param_value_size_ret, [&]() {
+                     return kDeviceConfigurationParser.getParameter(param_name);
+                 });
 }
 
 CL_API_ENTRY cl_int CL_API_CALL

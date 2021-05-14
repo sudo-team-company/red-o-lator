@@ -1,7 +1,13 @@
 #pragma once
 
 #include <common/Logger.h>
-#include "runtime/device/DeviceConfigurationParser.h"
+#include <cstring>
+#include <functional>
+#include <optional>
+#include <variant>
+
+#include "CLObjectInfoParameterValue.hpp"
+#include "device/DeviceConfigurationParser.h"
 
 extern Logger kLogger;
 extern IcdDispatchTable* kDispatchTable;
@@ -29,43 +35,13 @@ extern CLDeviceId* kDevice;
         *errcode_ret = CL_SUCCESS; \
     }
 
-#define GET_PARAM_INFO(fn)                                                    \
-    if (!param_value && !param_value_size_ret) {                              \
-        return CL_SUCCESS;                                                    \
-    }                                                                         \
-                                                                              \
-    std::variant<void*, std::string> result;                                  \
-    size_t resultSize;                                                        \
-                                                                              \
-    const auto error = fn();                                                  \
-                                                                              \
-    if (error) {                                                              \
-        return error;                                                         \
-    }                                                                         \
-                                                                              \
-    if (std::holds_alternative<std::string>(result)) {                        \
-        resultSize = std::get<std::string>(result).size() + 1;                \
-    }                                                                         \
-                                                                              \
-    if (param_value_size && param_value_size < resultSize) {                  \
-        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter: " + \
-                                           std::to_string(param_name))        \
-    }                                                                         \
-                                                                              \
-    if (param_value) {                                                        \
-        if (std::holds_alternative<void*>(result)) {                          \
-            memcpy(param_value, &std::get<void*>(result), resultSize);        \
-        } else {                                                              \
-            memcpy(param_value, std::get<std::string>(result).c_str(),        \
-                   resultSize);                                               \
-        }                                                                     \
-    }                                                                         \
-                                                                              \
-    if (param_value_size_ret) {                                               \
-        *param_value_size_ret = resultSize;                                   \
-    }                                                                         \
-                                                                              \
-    return CL_SUCCESS;
+extern cl_int getParamInfo(
+    cl_uint param_name,
+    size_t param_value_size,
+    void* param_value,
+    size_t* param_value_size_ret,
+    const std::function<std::optional<CLObjectInfoParameterValue>()>&
+        parameterValueGetter);
 
 namespace utils {
 extern bool isMutuallyExclusive(cl_bitfield flags,
