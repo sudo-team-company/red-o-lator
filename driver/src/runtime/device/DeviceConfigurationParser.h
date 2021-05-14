@@ -1,5 +1,6 @@
 #pragma once
 
+#include <CL/opencl.h>
 #include <map>
 #include <optional>
 #include <stdexcept>
@@ -8,7 +9,6 @@
 #include <utility>
 #include <variant>
 
-#include "icd/icd.h"
 #include "CLObjectInfoParameterValue.hpp"
 
 class DeviceConfigurationParser {
@@ -31,8 +31,7 @@ class DeviceConfigurationParser {
     };
 
     std::string mConfigurationPath;
-    std::unordered_map<cl_device_info, CLObjectInfoParameterValue>
-        mParameters;
+    std::unordered_map<cl_device_info, CLObjectInfoParameterValue> mParameters;
 
     static ParsedParameter parseParameter(const std::string& parameterName,
                                           const std::string& value);

@@ -1,4 +1,3 @@
-#include <runtime-commons.h>
 #include <cstring>
 
 #include "Command.h"

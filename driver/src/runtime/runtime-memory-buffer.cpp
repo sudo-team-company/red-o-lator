@@ -1,6 +1,8 @@
+#include <command/Command.h>
 #include <cstddef>
 #include <cstring>
 #include <iostream>
+#include <memory>
 
 #include "icd/icd.h"
 #include "runtime-commons.h"
