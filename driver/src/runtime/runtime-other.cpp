@@ -1,5 +1,5 @@
-#include <cstring>
 #include <iostream>
+
 #include "icd/icd.h"
 
 CL_API_ENTRY void* CL_API_CALL clGetExtensionFunctionAddressForPlatform(

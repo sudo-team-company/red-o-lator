@@ -13,6 +13,14 @@ include_directories(src)
 
 
 set(OCL_RUNTIME_SOURCES
+        src/runtime/icd/CLPlatformId.hpp
+        src/runtime/icd/CLDeviceId.hpp
+        src/runtime/icd/CLContext.h
+        src/runtime/icd/CLMem.hpp
+        src/runtime/icd/CLProgram.hpp
+        src/runtime/icd/CLEvent.hpp
+        src/runtime/icd/CLSampler.hpp
+        src/runtime/icd/icd.h
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-context.cpp
         src/runtime/runtime-command-queue.cpp
@@ -26,7 +34,6 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/runtime-commons.h
         src/runtime/runtime-commons.cpp
         src/runtime/runtime-other.cpp
-        src/runtime/icd/icd.h
         src/runtime/icd/IcdDispatchTable.cpp
         src/runtime/icd/IcdDispatchTable.h
         src/runtime/device/DeviceConfigurationParser.h
@@ -39,7 +46,12 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/icd/CLCommandQueue.h
         src/runtime/command/BufferReadCommand.cpp
         src/runtime/command/BufferWriteCommand.cpp
-        src/runtime/CLObjectInfoParameterValue.hpp)
+        src/runtime/CLObjectInfoParameterValue.hpp src/runtime/icd/CLKernel.cpp
+        src/runtime/icd/CLKernel.h
+        src/runtime/program/BinaryAsmParser.cpp
+        src/runtime/program/BinaryAsmParser.h
+        src/runtime/program/BinaryDisassembler.cpp
+        src/runtime/program/BinaryDisassembler.h)
 
 add_library(red-o-lator-icd SHARED ${OCL_RUNTIME_SOURCES})
 target_link_libraries(red-o-lator-icd INTERFACE

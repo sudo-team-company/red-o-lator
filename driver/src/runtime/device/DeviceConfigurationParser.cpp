@@ -1,12 +1,13 @@
 #include <cstring>
 #include <fstream>
-#include <iostream>
+#include <string>
 #include <numeric>
 #include <unordered_set>
 
 #include "DeviceConfigurationParser.h"
 #include "common/common.hpp"
 #include "runtime/runtime-commons.h"
+#include "runtime/icd/CLPlatformId.hpp"
 
 template <typename T>
 T parseNumber(const std::string& value);
@@ -111,8 +112,7 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         parameter >= CL_DEVICE_TYPE &&
         parameter <= CL_DEVICE_PRINTF_BUFFER_SIZE;
     if (isValidOpenCLParameter) {
-        std::cout << "Parameter " << parameter << " was not found in config"
-                  << std::endl;
+        kLogger.log("Parameter " + std::to_string(parameter) + " was not found in config");
         return CLObjectInfoParameterValue(nullptr, 0);
     }
 

@@ -101,7 +101,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
 
     const std::string binaryPath =
         "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/disasm/"
-        "linear_kernels/addition/addition.bin";
+        "weighted_sum_kernel/weighted_sum_kernel.bin";
     const auto binary = readBinaryFile(binaryPath);
 
     if (binary.empty()) {

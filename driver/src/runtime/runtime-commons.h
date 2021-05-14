@@ -3,11 +3,13 @@
 #include <common/Logger.h>
 #include <cstring>
 #include <functional>
+#include <icd/CLPlatformId.hpp>
 #include <optional>
 #include <variant>
 
 #include "CLObjectInfoParameterValue.hpp"
 #include "device/DeviceConfigurationParser.h"
+#include "icd/IcdDispatchTable.h"
 
 extern Logger kLogger;
 extern IcdDispatchTable* kDispatchTable;

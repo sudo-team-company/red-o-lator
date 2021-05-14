@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "runtime/icd/icd.h"
+#include "runtime/icd/CLMem.hpp"
 
 class Command {
    public:

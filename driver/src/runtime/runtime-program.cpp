@@ -1,8 +1,6 @@
 #include <iostream>
 
-#include <CLRX/amdasm/Disassembler.h>
 #include <common/common.hpp>
-#include <sstream>
 
 #include "icd/icd.h"
 #include "runtime-commons.h"
@@ -39,18 +37,6 @@ clCreateProgramWithBinary(cl_context context,
 
     program->binarySize = lengths[0];
     program->binary = binaries[0];
-
-    const auto amdInput = CLRX::AmdCL2MainGPUBinary64(
-        program->binarySize, const_cast<unsigned char*>(program->binary));
-    std::ostringstream disasmOss;
-    std::string resultStr;
-    CLRX::Flags disasmFlags =
-        CLRX::DISASM_ALL & ~(CLRX::DISASM_CODEPOS | CLRX::DISASM_HEXCODE);
-
-    CLRX::Disassembler disasm(amdInput, disasmOss, disasmFlags);
-    disasm.disassemble();
-    resultStr = disasmOss.str();
-    //    std::cout << resultStr << std::endl;
 
     SET_SUCCESS()
 
@@ -95,8 +81,9 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
-    // assuming we already have compiled binary here so doing nothing as
-    // compiler nor linker are not available
+    const auto disassembler = BinaryDisassembler();
+    program->disassembledBinary =
+        disassembler.disassemble(program->binarySize, program->binary);
 
     return CL_SUCCESS;
 }

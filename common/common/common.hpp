@@ -9,7 +9,8 @@
 
 namespace utils {
 static std::vector<std::string> split(const std::string& line,
-                                      const char separator) {
+                                      const char separator,
+                                      int maxSplitCount = -1) {
     if (line.empty()) {
         return {""};
     }
@@ -20,9 +21,11 @@ static std::vector<std::string> split(const std::string& line,
     for (char ch : line) {
         if (ch != separator) {
             buffer += ch;
-        } else {
+        } else if (maxSplitCount < 0 || result.size() < maxSplitCount) {
             result.push_back(buffer);
             buffer = "";
+        } else {
+            buffer += ch;
         }
     }
 

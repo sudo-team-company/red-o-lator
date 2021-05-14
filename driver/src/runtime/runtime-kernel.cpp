@@ -1,10 +1,16 @@
 #include <iostream>
 #include "icd/icd.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
                                                   const char* kernel_name,
                                                   cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateKernel" << std::endl;
+    if (!program) {
+        SET_ERROR_AND_RETURN(CL_INVALID_PROGRAM, "Program is null.");
+    }
+
+
+
     return nullptr;
 }
 
