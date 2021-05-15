@@ -16,6 +16,7 @@ enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST };
 struct Operand {
     OperandType type;
     std::variant<int16_t, uint32_t, double, RegisterType> value;
+    int waitcnt;
     size_t reg_amount = 0;
 
     explicit Operand(int16_t i) : type(INT_CONST), value(i) {}

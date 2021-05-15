@@ -13,6 +13,11 @@ add_executable(emulator
         cu/scalar_unit.cpp
         cu/compute_unit.cpp
         cu/simd_unit.cpp
+        cu/scheduler.cpp
+        cu/wf_buffer.cpp
+        gpu/cluster.cpp
+        gpu/gpu.cpp
+        gpu/command_queue.h
         main.cpp
         )
 

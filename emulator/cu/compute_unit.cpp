@@ -1,5 +1,11 @@
 //
-// Created by Diana Kudaiberdieva on 12.05.2021.
+// Created by Diana Kudaiberdieva
 //
 
 #include "compute_unit.h"
+
+ComputeUnit ComputeUnit::build() {
+
+
+    return ComputeUnit();
+}

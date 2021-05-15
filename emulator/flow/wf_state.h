@@ -31,35 +31,35 @@ struct WfStateSOP2 {
     bool SCC;
 
     WfStateSOP2(uint64_t SDST, uint64_t SSRC0, uint64_t SSRC1, bool SCC)
-        : SDST(SDST), SSRC0(SSRC0), SCC(SCC) {}
+        : SDST(SDST), SSRC0(SSRC0), SSRC1(SSRC1), SCC(SCC) {}
 };
 
 struct WfStateSOPP {
     uint64_t RELADDR;
     uint64_t PC;
     uint64_t EXEC;
-    ModeReg MODE;
-    StatusReg STATUS;
+    uint64_t VCC;
     uint32_t M0;
     uint32_t SIMM16;
-    uint64_t VCC;
+    StatusReg STATUS;
+    ModeReg MODE;
     bool SCC;
 };
 
 struct WfStateSOPC {
     uint64_t SSRC0;
     uint64_t SSRC1;
-    ModeReg MODE;
     uint32_t M0;
     uint32_t IMM8;
+    ModeReg MODE;
     bool SCC;
 };
 
 struct WfStateSOPK {
     uint64_t SDST;
-    uint32_t IMM16;
     uint64_t RELADDR;
     uint64_t PC;
+    uint32_t IMM16;
     bool SCC;
 };
 

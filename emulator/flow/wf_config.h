@@ -1,7 +1,3 @@
-//
-// Created by Diana Kudaiberdieva.
-//
-
 #ifndef RED_O_LATOR_WF_CONFIG_H
 #define RED_O_LATOR_WF_CONFIG_H
 
@@ -13,7 +9,6 @@ struct WfConfig {
     int vgprsnum;
     bool dx10clamp;
     bool ieeemode;
-
 
     WfConfig(int sgprsnum = SGPRS_NUM_DEFAULT,
              int vgprsnum,

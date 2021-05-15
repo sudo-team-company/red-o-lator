@@ -1,0 +1,5 @@
+1. Function get_instr_key(char const* ) is useful.
+2. SGPRs ("Vega" 7nm Instruction Set Architecture, page 16)
+   ◦ Source or destination out-of-range = (sgpr < 0 || (sgpr >= sgpr_size)).
+   ◦ Source out-of-range: returns the value of SGPR0 (not the value 0).
+   ◦ Destination out-of-range: instruction writes no SGPR result.
