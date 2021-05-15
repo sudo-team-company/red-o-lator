@@ -10,7 +10,7 @@ class Logger {
     explicit Logger(std::string mPrefix) : mPrefix(std::move(mPrefix)) {}
 
     void debug(const std::string& message);
-    void log(const char* message);
+    void debug(const char* message);
 
     void warn(const std::string& message);
     void warn(const char* message);

@@ -1,5 +1,4 @@
 #include <CLRX/amdasm/Disassembler.h>
-#include <common/common.hpp>
 #include <iostream>
 #include <sstream>
 

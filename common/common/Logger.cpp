@@ -3,7 +3,7 @@
 
 #include "Logger.h"
 
-void Logger::log(const char* message) {
+void Logger::debug(const char* message) {
     std::cout << appendPrefix(message, "DEBUG") << std::endl;
 }
 
@@ -17,7 +17,7 @@ void Logger::warn(const char* message) {
 
 
 void Logger::debug(const std::string& message) {
-    log(message.c_str());
+    debug(message.c_str());
 }
 
 void Logger::warn(const std::string& message) {

@@ -118,18 +118,16 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     errorCode = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);
     CHECK_ERROR("Failed to build program")
 
-    //    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
-    //    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
-    //
-    //        clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
-    //    clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
-    //    clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
-
-    const std::string kernelName = "kernelName";
+    const std::string kernelName = "weighted_sum_kernel";
     cl_kernel kernel = clCreateKernel(program, kernelName.c_str(), &errorCode);
     CHECK_ERROR("Failed to create kernel with name " + kernelName)
 
-    // TODO(executeKernel): create buffers and memory, set kernel args
+//    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
+//    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
+
+    clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
+    clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
 
     //    size_t globalWorkOffset = 0;
     //    size_t globalWorkSize = 0;

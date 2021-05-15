@@ -37,11 +37,11 @@ class DeviceConfigurationParser {
                                           const std::string& value);
 };
 
-struct DeviceConfigurationParseException : public std::runtime_error {
-    explicit DeviceConfigurationParseException(const char* message)
+struct DeviceConfigurationParseError : public std::runtime_error {
+    explicit DeviceConfigurationParseError(const char* message)
         : std::runtime_error(message){};
 
-    explicit DeviceConfigurationParseException(const std::string& message)
+    explicit DeviceConfigurationParseError(const std::string& message)
         : std::runtime_error(message){};
 };
 
