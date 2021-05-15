@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <program/KernelArgumentInfoParser.h>
 #include <common/common.hpp>
 
 #include "icd/CLProgram.hpp"
@@ -82,8 +83,13 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
     }
 
     const auto disassembler = BinaryDisassembler();
-    program->disassembledBinary =
-        disassembler.disassemble(program->binarySize, program->binary);
+    try {
+        program->disassembledBinary =
+            disassembler.disassemble(program->binarySize, program->binary);
+    } catch (const KernelArgumentInfoParseError& e) {
+        kLogger.error(e.what());
+        return CL_INVALID_BINARY;
+    }
 
     return CL_SUCCESS;
 }

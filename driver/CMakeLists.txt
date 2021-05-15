@@ -46,12 +46,18 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/icd/CLCommandQueue.h
         src/runtime/command/BufferReadCommand.cpp
         src/runtime/command/BufferWriteCommand.cpp
-        src/runtime/CLObjectInfoParameterValue.hpp src/runtime/icd/CLKernel.cpp
-        src/runtime/icd/CLKernel.h
+        src/runtime/CLObjectInfoParameterValue.hpp
+        src/runtime/icd/kernel/CLKernel.cpp
+        src/runtime/icd/kernel/CLKernel.h
+        src/runtime/icd/kernel/KernelArgument.hpp
+        src/runtime/icd/kernel/KernelArgumentInfo.h
+        src/runtime/icd/kernel/KernelArgumentValue.hpp
         src/runtime/program/BinaryAsmParser.cpp
         src/runtime/program/BinaryAsmParser.h
         src/runtime/program/BinaryDisassembler.cpp
-        src/runtime/program/BinaryDisassembler.h)
+        src/runtime/program/BinaryDisassembler.h
+        src/runtime/program/KernelArgumentInfoParser.cpp
+        src/runtime/program/KernelArgumentInfoParser.h src/runtime/icd/kernel/KernelArgumentInfo.cpp)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 

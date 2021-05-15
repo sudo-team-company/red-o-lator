@@ -1,12 +1,15 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cctype>
+#include <functional>
 #include <locale>
 #include <optional>
+#include <set>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
-#include <string_view>
 
 namespace utils {
 static std::vector<std::string> split(const std::string& line,
@@ -34,6 +37,20 @@ static std::vector<std::string> split(const std::string& line,
         result.push_back(buffer);
     }
 
+    return result;
+}
+
+template <typename R>
+static std::vector<R> splitMap(
+    const std::string& line,
+    const char separator,
+    int maxSplitCount = -1,
+    std::function<R(std::string&)> transform = nullptr) {
+    assert(transform);
+    auto splitResult = split(line, separator, maxSplitCount);
+    std::vector<std::string> result;
+    std::transform(splitResult.begin(), splitResult.end(),
+                   std::back_inserter(result), transform);
     return result;
 }
 
@@ -117,5 +134,15 @@ static inline std::optional<T> optionalOf(T value) {
 template <typename T>
 static inline std::optional<T> optionalOf() {
     return std::nullopt;
+}
+
+template <typename T>
+static inline bool contains(std::vector<T> vector, T value) {
+    return vector.find(value) != vector.end();
+}
+
+template <typename T>
+static inline bool contains(std::set<T> set, T value) {
+    return set.find(value) != set.end();
 }
 }  // namespace utils

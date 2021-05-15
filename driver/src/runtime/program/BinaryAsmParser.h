@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 
-#include "runtime/icd/CLKernel.h"
+#include "runtime/icd/kernel/CLKernel.h"
 
 struct BinaryDisassemblingResult {
     std::string gpuName;
@@ -37,6 +37,9 @@ class BinaryAsmParser {
                                     const std::string& parameterName,
                                     const std::string& parameterValue);
 
+    void parseKernelArgument(const std::string& argumentConfigLine);
+
+
     void parseKernelInstruction(const std::string& line,
                                 const std::string& address,
                                 const std::string& instruction,
@@ -49,5 +52,5 @@ class BinaryAsmParser {
     BinaryDisassemblingResult parsingResult{};
     ParsingState parsingState = BinaryParameters;
 
-    std::shared_ptr<CLKernelBuilder> currentKernelBuilder = nullptr;
+    std::unique_ptr<CLKernelBuilder> currentKernelBuilder = nullptr;
 };

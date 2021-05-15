@@ -1,8 +1,8 @@
 #include <cstring>
 #include <iostream>
 
-#include "runtime/runtime-commons.h"
 #include "icd/CLDeviceId.hpp"
+#include "runtime/runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                                                cl_device_type device_type,
@@ -21,7 +21,14 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
         const auto deviceConfigurationFile =
             "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/resources/"
             "rx-570.ini";
-        kDeviceConfigurationParser.load(deviceConfigurationFile);
+        try {
+            kDeviceConfigurationParser.load(deviceConfigurationFile);
+
+        } catch (const DeviceConfigurationParseError& e) {
+            kLogger.error(e.what());
+
+            return CL_INVALID_DEVICE;
+        }
 
         kDevice = new CLDeviceId(
             kDispatchTable,

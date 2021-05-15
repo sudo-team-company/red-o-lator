@@ -2,20 +2,24 @@
 #include <cassert>
 #include <common/common.hpp>
 #include <iostream>
+#include <string>
 
 #include "BinaryAsmParser.h"
+#include "KernelArgumentInfoParser.h"
 
 std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm() {
     if (alreadyParsed) {
         return std::make_unique<BinaryDisassemblingResult>(parsingResult);
     }
 
-    auto lines = utils::split(*input, '\n');
+    auto lines = utils::splitMap<std::string>(*input, '\n', -1, [](auto line) {
+        utils::trimInplace(line);
+        return line;
+    });
+
     std::string parameters;
 
-    for (auto& line : lines) {
-        utils::trimInplace(line);
-
+    for (const auto& line : lines) {
         if (line.empty()) {
             continue;
         }
@@ -90,7 +94,7 @@ void BinaryAsmParser::parseParameter(const std::string& line,
             parsingResult.kernels.push_back(currentKernelBuilder->build());
         }
 
-        currentKernelBuilder = std::make_shared<CLKernelBuilder>();
+        currentKernelBuilder = std::make_unique<CLKernelBuilder>();
         currentKernelBuilder->name = parameterValue;
         return;
     }
@@ -153,8 +157,15 @@ void BinaryAsmParser::parseKernelConfigParameter(
     const std::string& parameterName,
     const std::string& parameterValue) {
     if (parameterName == ".arg" && !utils::startsWith(parameterValue, "_")) {
-        currentKernelBuilder->argumentCount++;
+        parseKernelArgument(parameterValue);
     }
 
     currentKernelBuilder->config.push_back(line);
+}
+
+void BinaryAsmParser::parseKernelArgument(
+    const std::string& argumentConfigLine) {
+    auto parser = KernelArgumentInfoParser(
+        currentKernelBuilder->argumentInfo.size(), argumentConfigLine);
+    currentKernelBuilder->argumentInfo.push_back(parser.parse());
 }

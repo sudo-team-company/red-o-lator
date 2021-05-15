@@ -1,20 +1,22 @@
 #include <cstring>
 #include <fstream>
-#include <string>
+#include <functional>
 #include <numeric>
+#include <string>
 #include <unordered_set>
 
 #include "DeviceConfigurationParser.h"
 #include "common/common.hpp"
-#include "runtime/runtime-commons.h"
 #include "runtime/icd/CLPlatformId.hpp"
+#include "runtime/runtime-commons.h"
 
 template <typename T>
 T parseNumber(const std::string& value);
 
 cl_bool parseClBool(const std::string& value);
-cl_bitfield parseBitfield(const std::string& value,
-                          cl_bitfield parseFunction(const std::string& value));
+cl_bitfield parseBitfield(
+    const std::string& value,
+    std::function<cl_bitfield(const std::string& value)> parseFunction);
 
 template <typename T>
 std::vector<T> parseArray(const std::string& value,
@@ -36,12 +38,11 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     std::ifstream configurationFile(configurationFilePath);
 
     if (!configurationFile.is_open()) {
-        throw DeviceConfigurationParseException("Failed to open " +
+        throw DeviceConfigurationParseError("Failed to open " +
                                                 configurationFilePath);
     }
 
-    std::unordered_map<cl_device_info, CLObjectInfoParameterValue>
-        parameters;
+    std::unordered_map<cl_device_info, CLObjectInfoParameterValue> parameters;
     std::string line;
 
     while (getline(configurationFile, line)) {
@@ -67,19 +68,19 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_OPENCL_C_VERSION,
         CLObjectInfoParameterValue(kPlatform->openClVersion,
-                                          kPlatform->openClVersion.size() + 1));
+                                   kPlatform->openClVersion.size() + 1));
 
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DRIVER_VERSION,
         CLObjectInfoParameterValue(kPlatform->driverVersion,
-                                          kPlatform->driverVersion.size() + 1));
+                                   kPlatform->driverVersion.size() + 1));
 
     const auto deviceVersion = std::string(kPlatform->openClVersion) +
                                " AMD (" + kPlatform->driverVersion + ")";
     utils::insertOrUpdate<cl_device_info>(
         parameters, CL_DEVICE_VERSION,
         CLObjectInfoParameterValue(deviceVersion.c_str(),
-                                          strlen(deviceVersion.c_str()) + 1));
+                                   strlen(deviceVersion.c_str()) + 1));
 
     utils::insertOrUpdate<cl_bool>(
         parameters, CL_DEVICE_AVAILABLE,
@@ -96,7 +97,7 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     utils::insertOrUpdate<cl_uint>(
         parameters, CL_DEVICE_PARTITION_MAX_SUB_DEVICES,
         CLObjectInfoParameterValue(reinterpret_cast<void*>(0),
-                                          sizeof(cl_uint)));
+                                   sizeof(cl_uint)));
 
     mConfigurationPath = configurationFilePath;
     mParameters = parameters;
@@ -161,11 +162,11 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         result = parameterValue == "\"\"" ? "" : parameterValue; \
     }
 
-#define IGNORE_PARAMETER(param)                                   \
-    if (parameterName == #param) {                                \
+#define IGNORE_PARAMETER(param)                                    \
+    if (parameterName == #param) {                                 \
         kLogger.warn(std::string("Ignoring parameter ") + #param); \
-        clParameter = param;                                      \
-        result = nullptr;                                         \
+        clParameter = param;                                       \
+        result = nullptr;                                          \
     }
 
 DeviceConfigurationParser::ParsedParameter
@@ -297,8 +298,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
         resultSize = strlen(std::get<std::string>(result).c_str()) + 1;
     }
 
-    return ParsedParameter(
-        clParameter,
+    return ParsedParameter(clParameter,
                            CLObjectInfoParameterValue(result, resultSize));
 }
 
@@ -307,13 +307,14 @@ T parseNumber(const std::string& value) {
     try {
         return static_cast<T>(std::stoul(value));
     } catch (std::invalid_argument& e) {
-        throw DeviceConfigurationParseException("Failed to parse number: " +
+        throw DeviceConfigurationParseError("Failed to parse number: " +
                                                 value);
     }
 }
 
-cl_bitfield parseBitfield(const std::string& value,
-                          cl_bitfield parseFunction(const std::string& value)) {
+cl_bitfield parseBitfield(
+    const std::string& value,
+    std::function<cl_bitfield(const std::string& value)> parseFunction) {
     // TODO(parseBitfield): parse 0xNN?
     const auto splitBitfield = utils::split(value, '|');
 
@@ -346,7 +347,7 @@ cl_bool parseClBool(const std::string& value) {
         return CL_FALSE;
     }
 
-    throw DeviceConfigurationParseException("Failed to parse cl_bool: " +
+    throw DeviceConfigurationParseError("Failed to parse cl_bool: " +
                                             value);
 }
 
@@ -367,7 +368,7 @@ cl_device_type parseDeviceType(const std::string& value) {
         return CL_DEVICE_TYPE_CUSTOM;
     }
 
-    throw DeviceConfigurationParseException("Unknown cl_device_type value: " +
+    throw DeviceConfigurationParseError("Unknown cl_device_type value: " +
                                             value);
 }
 
@@ -382,7 +383,7 @@ cl_device_local_mem_type parseDeviceLocalMemType(const std::string& value) {
         return CL_NONE;
     }
 
-    throw DeviceConfigurationParseException(
+    throw DeviceConfigurationParseError(
         "Unknown cl_device_local_mem_type value: " + value);
 }
 
@@ -395,7 +396,7 @@ cl_device_exec_capabilities parseDeviceExecCapabilities(
         return CL_EXEC_NATIVE_KERNEL;
     }
 
-    throw DeviceConfigurationParseException(
+    throw DeviceConfigurationParseError(
         "Unknown cl_device_exec_capabilities value: " + value);
 }
 
@@ -408,7 +409,7 @@ cl_command_queue_properties parseCommandQueueProperties(
         return CL_QUEUE_PROFILING_ENABLE;
     }
 
-    throw DeviceConfigurationParseException(
+    throw DeviceConfigurationParseError(
         "Unknown cl_command_queue_properties value: " + value);
 }
 
@@ -423,7 +424,7 @@ cl_device_mem_cache_type parseDeviceMemCacheType(const std::string& value) {
         return CL_NONE;
     }
 
-    throw DeviceConfigurationParseException(
+    throw DeviceConfigurationParseError(
         "Unknown cl_device_mem_cache_type value: " + value);
 }
 
@@ -447,7 +448,7 @@ cl_device_partition_property parseDevicePartitionProperty(
         return 0;
     }
 
-    throw DeviceConfigurationParseException(
+    throw DeviceConfigurationParseError(
         "Unknown cl_device_partition_property value: " + value);
 }
 
@@ -474,7 +475,7 @@ cl_device_affinity_domain parseDeviceAffinityDomain(const std::string& value) {
         return 0;
     }
 
-    throw DeviceConfigurationParseException(
+    throw DeviceConfigurationParseError(
         "Unknown cl_device_affinity_domain value: " + value);
 }
 
@@ -507,6 +508,6 @@ cl_device_fp_config parseDeviceFpConfig(const std::string& value) {
         return 0;
     }
 
-    throw DeviceConfigurationParseException(
+    throw DeviceConfigurationParseError(
         "Unknown cl_device_fp_config value: " + value);
 }
