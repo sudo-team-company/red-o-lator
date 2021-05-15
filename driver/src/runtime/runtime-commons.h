@@ -30,10 +30,12 @@ extern CLDeviceId* kDevice;
         return nullptr;                                               \
     } while (0);
 
-#define SET_SUCCESS()              \
-    if (errcode_ret) {             \
-        *errcode_ret = CL_SUCCESS; \
-    }
+#define SET_SUCCESS()                  \
+    do {                               \
+        if (errcode_ret) {             \
+            *errcode_ret = CL_SUCCESS; \
+        }                              \
+    } while (0);
 
 extern cl_int getParamInfo(
     cl_uint param_name,
