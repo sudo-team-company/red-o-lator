@@ -100,8 +100,8 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     CHECK_ERROR("Error creating buffer 3")
 
     const std::string binaryPath =
-        "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/disasm/"
-        "weighted_sum_kernel/weighted_sum_kernel.bin";
+        "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/"
+        "resources/kernels/weighted_sum_kernel/weighted_sum_kernel.bin";
     const auto binary = readBinaryFile(binaryPath);
 
     if (binary.empty()) {
@@ -122,8 +122,8 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     cl_kernel kernel = clCreateKernel(program, kernelName.c_str(), &errorCode);
     CHECK_ERROR("Failed to create kernel with name " + kernelName)
 
-//    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
-//    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
+    //    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
+    //    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
 
     clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
     clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);

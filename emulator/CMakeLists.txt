@@ -20,10 +20,15 @@ add_executable(emulator
         main/main.cpp
         )
 
+target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
+
+
 add_executable(util_test
         test/util/util_test.cpp
         util/util.cpp
         )
+target_link_libraries(util_test PRIVATE red-o-lator-common)
+
 
 add_executable(alu_test
         alu/alu_sop1.cpp
@@ -31,5 +36,4 @@ add_executable(alu_test
         util/util.cpp
         test/alu/alu_test.cpp
         )
-
-target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
+target_link_libraries(alu_test PRIVATE red-o-lator-common)

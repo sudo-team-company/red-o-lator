@@ -2,9 +2,9 @@
 #include <cstring>
 #include <unordered_map>
 
-#include "runtime-commons.h"
-#include "icd/CLDeviceId.hpp"
 #include "icd/CLContext.h"
+#include "icd/CLDeviceId.hpp"
+#include "runtime-commons.h"
 
 cl_context createContext(const cl_context_properties* properties,
                          cl_device_id device,
@@ -64,8 +64,10 @@ clCreateContextFromType(const cl_context_properties* properties,
                         void* user_data,
                         cl_int* errcode_ret) {
     if ((device_type ^ kDevice->deviceType) != 0) {
-        SET_ERROR_AND_RETURN(CL_DEVICE_NOT_FOUND,
-                             "No devices with all specified flags found.");
+        if (errcode_ret) {
+            *errcode_ret = CL_DEVICE_NOT_FOUND;
+            return nullptr;
+        }
     }
 
     return createContext(properties, kDevice, pfn_notify, user_data,
@@ -122,7 +124,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
         }
 
         case CL_CONTEXT_DEVICES: {
-            resultSize = sizeof(cl_device_info);
+            resultSize = sizeof(cl_device_id);
             result = kDevice;
             break;
         }
