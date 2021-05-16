@@ -11,8 +11,7 @@ find_package(OpenCL REQUIRED)
 
 include_directories(src)
 
-
-set(OCL_RUNTIME_SOURCES
+set(SOURCES
         src/runtime/icd/CLPlatformId.hpp
         src/runtime/icd/CLDeviceId.hpp
         src/runtime/icd/CLContext.h
@@ -57,9 +56,12 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/program/BinaryDisassembler.cpp
         src/runtime/program/BinaryDisassembler.h
         src/runtime/program/KernelArgumentInfoParser.cpp
-        src/runtime/program/KernelArgumentInfoParser.h src/runtime/icd/kernel/KernelArgumentInfo.cpp)
+        src/runtime/program/KernelArgumentInfoParser.h
+        src/runtime/icd/kernel/KernelArgumentInfo.cpp)
 
-add_library(red-o-lator-icd SHARED ${OCL_RUNTIME_SOURCES})
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
+
+add_library(red-o-lator-icd SHARED ${SOURCES})
 target_link_libraries(red-o-lator-icd INTERFACE
         OpenCL::OpenCL
         )
@@ -71,16 +73,22 @@ target_include_directories(red-o-lator-icd PRIVATE src/runtime)
 
 install(TARGETS red-o-lator-icd DESTINATION lib)
 
-
-set(OCL_TEST_SOURCES
-        test/driver-call-test.cpp
-        )
-
-add_executable(driver-test ${OCL_TEST_SOURCES})
-target_link_libraries(driver-test PRIVATE red-o-lator-icd red-o-lator-common)
-
 add_executable(driver-disasm-test test/disasm/disasm-test.cpp)
 target_link_libraries(driver-disasm-test
         red-o-lator-icd
         PkgConfig::LIB_CLRX_AMD_BIN
         )
+
+
+set(E2E_TEST_SOURCES
+        test/e2e/runner.cpp
+        test/e2e/runtime/runtime-platform-test.cpp
+        test/e2e/runtime/test-commons.hpp)
+
+set(TEST_RESOURCES
+        test/resources)
+
+add_executable(red-o-lator-icd-test-e2e ${E2E_TEST_SOURCES})
+target_link_libraries(red-o-lator-icd-test-e2e PRIVATE OpenCL::OpenCL red-o-lator-common)
+target_compile_definitions(red-o-lator-icd-test-e2e PRIVATE __CL_ENABLE_EXCEPTIONS)
+

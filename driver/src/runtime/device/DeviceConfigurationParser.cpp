@@ -39,7 +39,7 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
 
     if (!configurationFile.is_open()) {
         throw DeviceConfigurationParseError("Failed to open " +
-                                                configurationFilePath);
+                                            configurationFilePath);
     }
 
     std::unordered_map<cl_device_info, CLObjectInfoParameterValue> parameters;
@@ -307,8 +307,7 @@ T parseNumber(const std::string& value) {
     try {
         return static_cast<T>(std::stoul(value));
     } catch (std::invalid_argument& e) {
-        throw DeviceConfigurationParseError("Failed to parse number: " +
-                                                value);
+        throw DeviceConfigurationParseError("Failed to parse number: " + value);
     }
 }
 
@@ -347,8 +346,7 @@ cl_bool parseClBool(const std::string& value) {
         return CL_FALSE;
     }
 
-    throw DeviceConfigurationParseError("Failed to parse cl_bool: " +
-                                            value);
+    throw DeviceConfigurationParseError("Failed to parse cl_bool: " + value);
 }
 
 cl_device_type parseDeviceType(const std::string& value) {
@@ -369,7 +367,7 @@ cl_device_type parseDeviceType(const std::string& value) {
     }
 
     throw DeviceConfigurationParseError("Unknown cl_device_type value: " +
-                                            value);
+                                        value);
 }
 
 cl_device_local_mem_type parseDeviceLocalMemType(const std::string& value) {
@@ -508,6 +506,6 @@ cl_device_fp_config parseDeviceFpConfig(const std::string& value) {
         return 0;
     }
 
-    throw DeviceConfigurationParseError(
-        "Unknown cl_device_fp_config value: " + value);
+    throw DeviceConfigurationParseError("Unknown cl_device_fp_config value: " +
+                                        value);
 }
