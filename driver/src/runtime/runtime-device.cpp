@@ -42,7 +42,9 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                 CL_DEVICE_LOCAL_MEM_SIZE));
     }
 
-    // TODO(clGetDeviceIDs, future): handle num_devices
+    if (!kDevice->matchesType(device_type)) {
+        return CL_DEVICE_NOT_FOUND;
+    }
 
     if (devices) {
         devices[0] = kDevice;
@@ -64,14 +66,10 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
         RETURN_ERROR(CL_INVALID_DEVICE, "Device is null or not valid.")
     }
 
-    if (!param_value && !param_value_size_ret) {
-        return CL_SUCCESS;
-    }
-
     // TODO(clGetDeviceInfo, future): parameters validation according to
     //  OpenCL spec
 
-    getParamInfo(param_name, param_value_size, param_value,
+    return getParamInfo(param_name, param_value_size, param_value,
                  param_value_size_ret, [&]() {
                      return kDeviceConfigurationParser.getParameter(param_name);
                  });
@@ -83,18 +81,34 @@ clCreateSubDevices(cl_device_id in_device,
                    cl_uint num_devices,
                    cl_device_id* out_devices,
                    cl_uint* num_devices_ret) {
-    // TODO(clCreateSubDevices): sub-devices support
-    std::cerr << "clCreateSubDevices: sub-devices are not supported!"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    // TODO(clCreateSubDevices, future): sub-devices support
+    kLogger.warn("clCreateSubDevices is not supported!");
+
+    if (num_devices > 0) {
+        return CL_INVALID_DEVICE_PARTITION_COUNT;
+    }
+
+    if (num_devices_ret) {
+        *num_devices_ret = 0;
+    }
+
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainDevice(cl_device_id device) {
-    // TODO(clRetainDevice): sub-devices support
-    return CL_SUCCESS;
+    // TODO(clRetainDevice, future): sub-devices support
+    if (device == kDevice) {
+        return CL_SUCCESS;
+    }
+
+    return CL_INVALID_DEVICE;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseDevice(cl_device_id device) {
-    // TODO(clReleaseDevice): sub-devices support
-    return CL_SUCCESS;
+    // TODO(clReleaseDevice, future): sub-devices support
+    if (device == kDevice) {
+        return CL_SUCCESS;
+    }
+
+    return CL_INVALID_DEVICE;
 }

@@ -10,7 +10,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
                                                  cl_uint* num_platforms) {
     if (!platforms && !num_platforms) {
         RETURN_ERROR(CL_INVALID_VALUE,
-                     "platforms is null and num_platforms == 0.")
+                     "platforms is null and num_platforms is null.")
     }
 
     if (platforms && num_entries == 0) {

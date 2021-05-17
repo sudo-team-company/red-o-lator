@@ -40,7 +40,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     kLogger.debug("found " + std::to_string(platformCount) + " platforms");
 
     auto* platformList =
-        (cl_platform_id*) malloc(platformCount * sizeof(platformCount));
+        (cl_platform_id*) malloc(platformCount * sizeof(cl_platform_id));
 
     errorCode = clGetPlatformIDs(platformCount, platformList, nullptr);
     CHECK_ERROR("Failed to load platform list")

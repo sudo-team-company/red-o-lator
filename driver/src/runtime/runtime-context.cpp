@@ -63,7 +63,7 @@ clCreateContextFromType(const cl_context_properties* properties,
                         CLContextCallback pfn_notify,
                         void* user_data,
                         cl_int* errcode_ret) {
-    if ((device_type ^ kDevice->deviceType) != 0) {
+    if (!kDevice->matchesType(device_type)) {
         if (errcode_ret) {
             *errcode_ret = CL_DEVICE_NOT_FOUND;
             return nullptr;

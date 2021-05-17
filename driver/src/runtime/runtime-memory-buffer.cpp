@@ -30,7 +30,7 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
             "CL_MEM_USE_HOST_PTR is specified.")
     }
 
-    if (!utils::isMutuallyExclusive(
+    if (utils::hasMutuallyExclusiveFlags(
             flags, {CL_MEM_READ_WRITE, CL_MEM_READ_ONLY, CL_MEM_WRITE_ONLY})) {
         SET_ERROR_AND_RETURN(
             CL_INVALID_VALUE,
@@ -38,7 +38,7 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
             "mutually exclusive.")
     }
 
-    if (!utils::isMutuallyExclusive(
+    if (utils::hasMutuallyExclusiveFlags(
             flags, {CL_MEM_HOST_WRITE_ONLY, CL_MEM_HOST_READ_ONLY,
                     CL_MEM_HOST_NO_ACCESS})) {
         SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
@@ -46,7 +46,7 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
                              "CL_MEM_HOST_NO_ACCESS are mutually exclusive.")
     }
 
-    if (!utils::isMutuallyExclusive(
+    if (utils::hasMutuallyExclusiveFlags(
             flags, {CL_MEM_USE_HOST_PTR, CL_MEM_ALLOC_HOST_PTR})) {
         SET_ERROR_AND_RETURN(
             CL_INVALID_VALUE,
@@ -54,7 +54,7 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
             "exclusive.")
     }
 
-    if (!utils::isMutuallyExclusive(
+    if (utils::hasMutuallyExclusiveFlags(
             flags, {CL_MEM_USE_HOST_PTR, CL_MEM_COPY_HOST_PTR})) {
         SET_ERROR_AND_RETURN(
             CL_INVALID_VALUE,
