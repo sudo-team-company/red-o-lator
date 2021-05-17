@@ -22,4 +22,15 @@ cl_device_id getDevice() {
 
     return deviceList[0];
 }
+
+cl_context getContext() {
+    cl_int error;
+    const std::vector<cl_device_id> devices = {test::getDevice()};
+    cl_context context = clCreateContext(nullptr, 1, devices.data(), nullptr,
+                                         nullptr, &error);
+    REQUIRE(error == CL_SUCCESS);
+    REQUIRE(context != nullptr);
+
+    return context;
+}
 }  // namespace test

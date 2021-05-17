@@ -109,7 +109,7 @@ set(UNIT_TEST_SOURCES
         test/unit/runner.cpp
         test/unit/runtime/runtime-platform-test.cpp
         test/unit/unit-test-common/test-commons.h
-        test/unit/runtime/runtime-commons-test.cpp test/unit/runtime/runtime-device-test.cpp test/unit/unit-test-common/test-commons.cpp)
+        test/unit/runtime/runtime-commons-test.cpp test/unit/runtime/runtime-device-test.cpp test/unit/unit-test-common/test-commons.cpp test/unit/runtime/runtime-context-test.cpp)
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)
