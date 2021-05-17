@@ -39,12 +39,13 @@ std::shared_ptr<KernelArgumentInfo> KernelArgumentInfoParser::parse() {
     if (utils::endsWith(argType, "*")) {
         PARSE_ARGUMENT(PointerKernelArgumentInfo)
 
-    } else if (std::any_of(ScalarKernelArgumentInfo::typeNameVariants.begin(),
-                           ScalarKernelArgumentInfo::typeNameVariants.end(),
-                           [&](auto value) {
-                               return utils::startsWith(argType, value);
-                           })) {
+    } else if (utils::contains(ScalarKernelArgumentInfo::typeNameVariants,
+                               argType)) {
         PARSE_ARGUMENT(ScalarKernelArgumentInfo)
+
+    } else if (utils::contains(VectorKernelArgumentInfo::typeNameVariants,
+                               argType)) {
+        PARSE_ARGUMENT(VectorKernelArgumentInfo)
 
     } else if (utils::contains(StructureKernelArgumentInfo::typeNameVariants,
                                argType)) {
@@ -83,7 +84,24 @@ void KernelArgumentInfoParser::parse(
             continue;
         }
 
+        // line with params should not consist of any params other than name and
+        // type, so we just throw error here
         throwParseError("scalar", param);
+    }
+}
+
+void KernelArgumentInfoParser::parse(
+    const std::shared_ptr<VectorKernelArgumentInfo>& outInfo) {
+    for (auto it = restParametersBeginIter; it < restParametersEndIter; ++it) {
+        const auto param = *it;
+
+        if (param.empty()) {
+            continue;
+        }
+
+        // line with params should not consist of any params other than name and
+        // type, so we just throw error here
+        throwParseError("vector", param);
     }
 }
 

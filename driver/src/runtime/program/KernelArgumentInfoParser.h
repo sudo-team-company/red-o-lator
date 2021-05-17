@@ -16,6 +16,7 @@ class KernelArgumentInfoParser {
 
    private:
     void parse(const std::shared_ptr<ScalarKernelArgumentInfo>& outInfo);
+    void parse(const std::shared_ptr<VectorKernelArgumentInfo>& outInfo);
     void parse(const std::shared_ptr<StructureKernelArgumentInfo>& outInfo);
     void parse(const std::shared_ptr<ImageKernelArgumentInfo>& outInfo);
     void parse(const std::shared_ptr<SamplerKernelArgumentInfo>& outInfo);
