@@ -1,8 +1,9 @@
 #include <iostream>
-#include "icd.h"
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clWaitForEvents(cl_uint num_events,
                                                 const cl_event* event_list) {
+    // TODO(clWaitForEvents): flush queue
     std::cerr << "Unimplemented OpenCL API call: clWaitForEvents" << std::endl;
     return CL_INVALID_PLATFORM;
 }

@@ -1,46 +1,37 @@
-#ifndef RED_O_LATOR_DEVICECONFIGURATIONPARSER_H
-#define RED_O_LATOR_DEVICECONFIGURATIONPARSER_H
+#pragma once
 
 #include <map>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
-#include <optional>
-#include <stdexcept>
 #include <variant>
 
-#include "runtime/icd.h"
-
-using DeviceConfigurationParameterValueType = std::variant<void*, std::string>;
-
-struct DeviceConfigurationParameterValue {
-    DeviceConfigurationParameterValue(
-        DeviceConfigurationParameterValueType value, size_t size)
-        : value(std::move(value)), size(size) {}
-
-    DeviceConfigurationParameterValueType value;
-    size_t size;
-};
+#include "icd/icd.h"
+#include "CLObjectInfoParameterValue.hpp"
 
 class DeviceConfigurationParser {
    public:
     void load(const std::string& configurationFilePath);
 
-    std::optional<DeviceConfigurationParameterValue> getParameter(
+    std::optional<CLObjectInfoParameterValue> getParameter(
         cl_device_info parameter) const;
+
+    template <class T>
+    T requireParameter(cl_device_info parameter) const;
 
    private:
     struct ParsedParameter {
-        ParsedParameter(cl_device_info name,
-                        DeviceConfigurationParameterValue value)
+        ParsedParameter(cl_device_info name, CLObjectInfoParameterValue value)
             : name(name), value(std::move(value)) {}
 
         cl_device_info name;
-        DeviceConfigurationParameterValue value;
+        CLObjectInfoParameterValue value;
     };
 
     std::string mConfigurationPath;
-    std::unordered_map<cl_device_info, DeviceConfigurationParameterValue>
+    std::unordered_map<cl_device_info, CLObjectInfoParameterValue>
         mParameters;
 
     static ParsedParameter parseParameter(const std::string& parameterName,
@@ -55,4 +46,4 @@ struct DeviceConfigurationParseException : public std::runtime_error {
         : std::runtime_error(message){};
 };
 
-#endif  // RED_O_LATOR_DEVICECONFIGURATIONPARSER_H
+#include "DeviceConfigurationParser.tpp"

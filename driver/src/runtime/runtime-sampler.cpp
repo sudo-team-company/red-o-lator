@@ -1,5 +1,5 @@
 #include <iostream>
-#include "icd.h"
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainSampler(cl_sampler sampler) {
     std::cerr << "Unimplemented OpenCL API call: clRetainSampler" << std::endl;
@@ -20,7 +20,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetSamplerInfo(cl_sampler sampler,
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY CL_API_PREFIX__VERSION_1_2_DEPRECATED cl_sampler CL_API_CALL
+CL_API_ENTRY cl_sampler CL_API_CALL
 clCreateSampler(cl_context context,
                 cl_bool normalized_coords,
                 cl_addressing_mode addressing_mode,

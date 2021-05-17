@@ -5,38 +5,60 @@ on:
   pull_request:
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   PKG_CONFIG_PATH: ${{github.workspace}}/CLRX/lib/pkgconfig
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     steps:
       - uses: actions/checkout@v2
 
+      - name: Clone OpenCL-Headers
+        run: git clone https://github.com/KhronosGroup/OpenCL-Headers
+
+      - name: Clone ICD loader
+        run: git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader
+
+      - name: Configure ICD Loader
+        run: cp -r ${{github.workspace}}/OpenCL-Headers/CL ${{github.workspace}}/OpenCL-ICD-Loader/inc &&
+          cmake -H${{github.workspace}}/OpenCL-ICD-Loader -B ${{github.workspace}}/OpenCL-ICD-Loader/build
+
+      - name: Build ICD Loader
+        run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build --config Debug -j 16
+
+      - name: Install ICD Loader
+        run: cmake --install ${{github.workspace}}/OpenCL-ICD-Loader/build
+             --prefix ${{github.workspace}}/OpenCL-ICD-Loader
+             --config Debug
+
       - name: Git clone CLRX
         run: git clone https://github.com/CLRX/CLRX-mirror
 
       - name: Configure CLRX
-        run: cmake -H${{github.workspace}}/CLRX-mirror -B ${{github.workspace}}/CLRX-mirror/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=CLRX -DLIB_INSTALL_DIR=lib
+        run: cmake -H${{github.workspace}}/CLRX-mirror -B ${{github.workspace}}/CLRX-mirror/build
+             -DCMAKE_BUILD_TYPE=Debug
+             -DCMAKE_INSTALL_PREFIX=CLRX
+             -DLIB_INSTALL_DIR=lib
+             -DNO_CLWRAPPER=ON
+             -DBUILD_STATIC_EXE=OFF
 
       - name: Build CLRX
-        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Release
+        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Debug -j 16
 
       - name: Install CLRX
-        run: cmake --install ${{github.workspace}}/CLRX-mirror/build/ --config Release --prefix ${{github.workspace}}/CLRX
+        run: cmake --install ${{github.workspace}}/CLRX-mirror/build/ --config Debug --prefix ${{github.workspace}}/CLRX
 
-      - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Configure red-o-lator
+        run: cmake -H${{github.workspace}} -B ${{github.workspace}}/build
+              -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+              -DCMAKE_LIBRARY_PATH=${{github.workspace}}/OpenCL-ICD-Loader/lib
+              -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
 
-      - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Build red-o-lator
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j 16

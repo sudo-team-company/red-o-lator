@@ -3,3 +3,4 @@ set(DEBUGGER_SOURCES
 )
 
 add_executable(debugger ${DEBUGGER_SOURCES})
+target_link_libraries(debugger red-o-lator-common)

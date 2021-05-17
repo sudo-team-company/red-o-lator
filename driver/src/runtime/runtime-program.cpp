@@ -1,5 +1,11 @@
 #include <iostream>
-#include "icd.h"
+
+#include <CLRX/amdasm/Disassembler.h>
+#include <common/common.hpp>
+#include <sstream>
+
+#include "icd/icd.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_program CL_API_CALL
 clCreateProgramWithSource(cl_context context,
@@ -7,9 +13,8 @@ clCreateProgramWithSource(cl_context context,
                           const char** strings,
                           const size_t* lengths,
                           cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateProgramWithSource"
-              << std::endl;
-    return nullptr;
+    SET_ERROR_AND_RETURN(CL_INVALID_OPERATION,
+                         "Only creating programs from binary is supported");
 }
 
 CL_API_ENTRY cl_program CL_API_CALL
@@ -20,9 +25,36 @@ clCreateProgramWithBinary(cl_context context,
                           const unsigned char** binaries,
                           cl_int* binary_status,
                           cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clCreateProgramWithBinary"
-              << std::endl;
-    return nullptr;
+    if (!device_list || !num_devices) {
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
+                             "device_list is null or num_devices == 0.")
+    }
+
+    if (!lengths || !binaries) {
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
+                             "Source lengths or binaries is null.")
+    }
+
+    const auto program = new CLProgram(kDispatchTable, context);
+
+    program->binarySize = lengths[0];
+    program->binary = binaries[0];
+
+    const auto amdInput = CLRX::AmdCL2MainGPUBinary64(
+        program->binarySize, const_cast<unsigned char*>(program->binary));
+    std::ostringstream disasmOss;
+    std::string resultStr;
+    CLRX::Flags disasmFlags =
+        CLRX::DISASM_ALL & ~(CLRX::DISASM_CODEPOS | CLRX::DISASM_HEXCODE);
+
+    CLRX::Disassembler disasm(amdInput, disasmOss, disasmFlags);
+    disasm.disassemble();
+    resultStr = disasmOss.str();
+    //    std::cout << resultStr << std::endl;
+
+    SET_SUCCESS()
+
+    return program;
 }
 
 CL_API_ENTRY cl_program CL_API_CALL
@@ -38,13 +70,18 @@ clCreateProgramWithBuiltInKernels(cl_context context,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainProgram(cl_program program) {
-    std::cerr << "Unimplemented OpenCL API call: clRetainProgram" << std::endl;
-    return CL_INVALID_PLATFORM;
+    program->referenceCount++;
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseProgram(cl_program program) {
-    std::cerr << "Unimplemented OpenCL API call: clReleaseProgram" << std::endl;
-    return CL_INVALID_PLATFORM;
+    program->referenceCount--;
+
+    if (program->referenceCount == 0) {
+        delete program;
+    }
+
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
@@ -54,8 +91,14 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
                                                void (*pfn_notify)(cl_program,
                                                                   void*),
                                                void* user_data) {
-    std::cerr << "Unimplemented OpenCL API call: clBuildProgram" << std::endl;
-    return CL_INVALID_PLATFORM;
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
+    }
+
+    // assuming we already have compiled binary here so doing nothing as
+    // compiler nor linker are not available
+
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
@@ -68,7 +111,7 @@ clCompileProgram(cl_program program,
                  const char** header_include_names,
                  void (*pfn_notify)(cl_program, void*),
                  void* user_data) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clCompileProgram" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
@@ -82,7 +125,7 @@ clLinkProgram(cl_context context,
               void (*pfn_notify)(cl_program, void*),
               void* user_data,
               cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
+    std::cerr << "Unimplemented OpenCL API call: clLinkProgram" << std::endl;
     return nullptr;
 }
 
@@ -98,8 +141,74 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
                                                  size_t param_value_size,
                                                  void* param_value,
                                                  size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clGetProgramInfo" << std::endl;
-    return CL_INVALID_PLATFORM;
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+    }
+
+    getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
+
+            switch (param_name) {
+                case CL_PROGRAM_REFERENCE_COUNT: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(program->referenceCount);
+                    break;
+                }
+
+                case CL_PROGRAM_CONTEXT: {
+                    resultSize = sizeof(cl_context);
+                    result = reinterpret_cast<void*>(program->context);
+                    break;
+                }
+
+                case CL_PROGRAM_NUM_DEVICES: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(1);
+                    break;
+                }
+
+                case CL_PROGRAM_DEVICES: {
+                    resultSize = sizeof(cl_device_id);
+                    result = kDevice;
+                    break;
+                }
+
+                case CL_PROGRAM_SOURCE: {
+                    result = "";
+                    break;
+                }
+
+                case CL_PROGRAM_BINARY_SIZES: {
+                    resultSize = sizeof(size_t);
+                    result = reinterpret_cast<void*>(program->binarySize);
+                    break;
+                }
+
+                case CL_PROGRAM_BINARIES: {
+                    resultSize = program->binarySize;
+                    result = const_cast<unsigned char*>(program->binary);
+                    break;
+                }
+
+                case CL_PROGRAM_NUM_KERNELS: {
+                    resultSize = sizeof(size_t);
+                    result = reinterpret_cast<void*>(0);
+                    break;
+                }
+
+                case CL_PROGRAM_KERNEL_NAMES: {
+                    result = "";
+                    break;
+                }
+
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
+            }
+
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize));
+        });
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
@@ -109,6 +218,44 @@ clGetProgramBuildInfo(cl_program program,
                       size_t param_value_size,
                       void* param_value,
                       size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call." << std::endl;
-    return CL_INVALID_PLATFORM;
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+    }
+
+    getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
+
+            switch (param_name) {
+                case CL_PROGRAM_BUILD_STATUS: {
+                    resultSize = sizeof(cl_build_status);
+                    result = reinterpret_cast<void*>(CL_BUILD_SUCCESS);
+                    break;
+                }
+
+                case CL_PROGRAM_BUILD_OPTIONS: {
+                    result = "";
+                    break;
+                }
+
+                case CL_PROGRAM_BUILD_LOG: {
+                    result =
+                        "Binary build is not supported, assuming binary was "
+                        "already built for AMD platform.";
+                    break;
+                }
+
+                case CL_PROGRAM_BINARY_TYPE: {
+                    resultSize = sizeof(cl_program_binary_type);
+                    result = reinterpret_cast<void*>(
+                        CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT);
+                    break;
+                }
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
+            }
+
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize));
+        });
 }
