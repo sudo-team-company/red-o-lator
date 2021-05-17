@@ -6,7 +6,7 @@
 
 #include <common/test/doctest.h>
 
-#include "../../alu/alu.h"
+#include "alu/alu.h"
 
 struct WfStateSOP1Test : WfStateSOP1 {
     WfStateSOP1Test() : WfStateSOP1(0, 0, 0, 0, 0, false) {}
