@@ -20,6 +20,15 @@ struct ScalarKernelArgumentInfo : public KernelArgumentInfo {
     static const std::set<std::string> typeNameVariants;
 };
 
+struct VectorKernelArgumentInfo : public KernelArgumentInfo {
+   public:
+    static const std::set<std::string> typeNameVariants;
+
+   private:
+    static const std::set<std::string> typeNamePrefixVariants;
+    static const std::set<std::string> typeNameSuffixVariants;
+};
+
 struct StructureKernelArgumentInfo : public KernelArgumentInfo {
     size_t structSize = 0;
 
