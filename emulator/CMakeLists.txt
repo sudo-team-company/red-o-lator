@@ -24,6 +24,8 @@ add_executable(emulator
         main/KernelLoader.h
         main.cpp
         )
+target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(util_test
         test/util/util_test.cpp
@@ -66,4 +68,3 @@ add_executable(wf_exec_test
         ../common/common/common.hpp
         )
 
-target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
