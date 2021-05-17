@@ -1,6 +1,4 @@
 #include <common/test/doctest.h>
-#include <iostream>
-#include <memory>
 #include <vector>
 
 #include "runtime/icd/icd.h"

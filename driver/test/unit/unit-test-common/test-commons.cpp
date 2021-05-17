@@ -33,4 +33,16 @@ cl_context getContext() {
 
     return context;
 }
+
+cl_command_queue getCommandQueue() {
+    const auto context = test::getContext();
+    cl_int error;
+    const auto queue =
+        clCreateCommandQueue(context, context->device, 0, &error);
+
+    CHECK(error == CL_SUCCESS);
+    CHECK(queue != nullptr);
+
+    return queue;
+}
 }  // namespace test
