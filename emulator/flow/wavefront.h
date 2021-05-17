@@ -10,8 +10,8 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include "../instr/instruction.h"
-#include "../reg/register.h"
+#include "instr/instruction.h"
+#include "reg/register.h"
 
 struct WorkGroup {};
 

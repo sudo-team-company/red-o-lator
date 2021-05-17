@@ -3,8 +3,8 @@
 //
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "../../alu/alu.h"
-#include "../../doctest.h"
+#include "alu/alu.h"
+#include "doctest.h"
 
 struct WfStateSOP1Test : WfStateSOP1 {
     WfStateSOP1Test() : WfStateSOP1(0, 0, 0, 0, 0, false) {}

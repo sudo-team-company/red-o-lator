@@ -5,7 +5,7 @@
 #ifndef RED_O_LATOR_WF_STATE_H
 #define RED_O_LATOR_WF_STATE_H
 
-#include "../reg/register.h"
+#include "reg/register.h"
 
 struct WfStateSOP1 {
     uint64_t SDST;

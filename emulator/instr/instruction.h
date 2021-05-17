@@ -6,7 +6,7 @@
 #include <string>
 #include <variant>
 #include <vector>
-#include "../reg/reg_info.h"
+#include "reg/reg_info.h"
 #include "instr_info.h"
 
 using namespace reg;
