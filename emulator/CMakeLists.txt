@@ -25,13 +25,7 @@ add_library(red-o-lator-emulator
         main.cpp
         )
 target_link_libraries(red-o-lator-emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
-target_include_directories(red-o-lator-emulator PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/alu
-        ${CMAKE_CURRENT_SOURCE_DIR}/cu
-        ${CMAKE_CURRENT_SOURCE_DIR}/flow
-        ${CMAKE_CURRENT_SOURCE_DIR}/instr
-        ${CMAKE_CURRENT_SOURCE_DIR}/reg
-        ${CMAKE_CURRENT_SOURCE_DIR}/util)
+target_include_directories(red-o-lator-emulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(util_test
         test/util/util_test.cpp
