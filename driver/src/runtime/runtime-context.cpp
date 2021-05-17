@@ -107,49 +107,41 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
         RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.")
     }
 
-    void* result;
-    size_t resultSize;
+    return getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
 
-    switch (param_name) {
-        case CL_CONTEXT_REFERENCE_COUNT: {
-            resultSize = sizeof(cl_uint);
-            result = reinterpret_cast<void*>(context->referenceCount);
-            break;
-        }
+            switch (param_name) {
+                case CL_CONTEXT_REFERENCE_COUNT: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(context->referenceCount);
+                    break;
+                }
 
-        case CL_CONTEXT_NUM_DEVICES: {
-            resultSize = sizeof(cl_uint);
-            result = reinterpret_cast<void*>(1);
-            break;
-        }
+                case CL_CONTEXT_NUM_DEVICES: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(1);
+                    break;
+                }
 
-        case CL_CONTEXT_DEVICES: {
-            resultSize = sizeof(cl_device_id);
-            result = kDevice;
-            break;
-        }
+                case CL_CONTEXT_DEVICES: {
+                    resultSize = sizeof(cl_device_id);
+                    result = kDevice;
+                    break;
+                }
 
-        case CL_CONTEXT_PROPERTIES: {
-            // TODO(clGetContextInfo): parse props
-            resultSize = sizeof(cl_context_properties);
-            result = nullptr;
-            break;
-        }
+                case CL_CONTEXT_PROPERTIES: {
+                    // TODO(clGetContextInfo): parse props
+                    resultSize = sizeof(cl_context_properties);
+                    result = nullptr;
+                    break;
+                }
 
-        default: return CL_INVALID_VALUE;
-    }
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
+            }
 
-    if (param_value_size && param_value_size < resultSize) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.");
-    }
-
-    if (param_value) {
-        memcpy(param_value, &result, resultSize);
-    }
-
-    if (param_value_size_ret) {
-        *param_value_size_ret = resultSize;
-    }
-
-    return CL_SUCCESS;
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize));
+        });
 }

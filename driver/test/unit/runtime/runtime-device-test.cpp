@@ -76,6 +76,19 @@ TEST_SUITE("Device API") {
             REQUIRE(errorCode == CL_SUCCESS);
             REQUIRE(devices[0] == kDevice);
         }
+
+        SUBCASE(
+            "should return device if combination of flags is passed") {
+            auto devices = std::vector<cl_device_id>(1);
+            const auto errorCode =
+                clGetDeviceIDs(test::getPlatform(),
+                               CL_DEVICE_TYPE_CPU | CL_DEVICE_TYPE_GPU |
+                                   CL_DEVICE_TYPE_ACCELERATOR,
+                               1, devices.data(), nullptr);
+
+            REQUIRE(errorCode == CL_SUCCESS);
+            REQUIRE(devices[0] == kDevice);
+        }
     }
 
     TEST_CASE("clGetDeviceInfo") {

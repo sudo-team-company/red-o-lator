@@ -58,7 +58,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
 
     cl_uint num_devices;
     cl_device_id device;
-    errorCode = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device,
+    errorCode = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device,
                                &num_devices);
     CHECK_ERROR("Failed to load device")
 

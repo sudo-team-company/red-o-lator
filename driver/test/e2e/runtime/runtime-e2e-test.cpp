@@ -17,11 +17,15 @@ TEST_CASE("a_plus_b") {
 
     std::vector<cl::Platform> platforms;
     REQUIRE_NOTHROW(cl::Platform::get(&platforms));
+    REQUIRE_FALSE(platforms.empty());
+
     const auto platform = platforms[0];
     INFO(platform.getInfo<CL_PLATFORM_VENDOR>());
 
     std::vector<cl::Device> devices;
     REQUIRE_NOTHROW(platform.getDevices(CL_DEVICE_TYPE_GPU, &devices));
+    REQUIRE_FALSE(devices.empty());
+
     const auto device = devices[0];
     INFO(device.getInfo<CL_DEVICE_NAME>());
 
