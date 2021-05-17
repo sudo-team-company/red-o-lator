@@ -1,6 +1,6 @@
 find_package(OpenCL REQUIRED)
 
-add_executable(emulator
+add_library(red-o-lator-emulator
         util/util.cpp
         flow/wavefront.cpp
         gpu/dispatcher.cpp
@@ -24,13 +24,20 @@ add_executable(emulator
         main/KernelLoader.h
         main.cpp
         )
-target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(red-o-lator-emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
+target_include_directories(red-o-lator-emulator PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/alu
+        ${CMAKE_CURRENT_SOURCE_DIR}/cu
+        ${CMAKE_CURRENT_SOURCE_DIR}/flow
+        ${CMAKE_CURRENT_SOURCE_DIR}/instr
+        ${CMAKE_CURRENT_SOURCE_DIR}/reg
+        ${CMAKE_CURRENT_SOURCE_DIR}/util)
 
 add_executable(util_test
         test/util/util_test.cpp
         util/util.cpp
         )
+target_link_libraries(util_test PRIVATE red-o-lator-emulator)
 
 add_executable(alu_test
         alu/alu_sop1.cpp
@@ -67,4 +74,4 @@ add_executable(wf_exec_test
         gpu/dispatcher.cpp
         ../common/common/common.hpp
         )
-
+target_link_libraries(alu_test PRIVATE red-o-lator-emulator)
