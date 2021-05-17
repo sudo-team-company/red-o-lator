@@ -27,15 +27,11 @@ add_library(red-o-lator-emulator
 target_link_libraries(red-o-lator-emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
 target_include_directories(red-o-lator-emulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
-
-
 add_executable(util_test
         test/util/util_test.cpp
         util/util.cpp
         )
-target_link_libraries(util_test PRIVATE red-o-lator-common)
-
+target_link_libraries(util_test PRIVATE red-o-lator-emulator red-o-lator-common)
 
 add_executable(alu_test
         alu/alu_sop1.cpp
@@ -48,6 +44,7 @@ add_executable(alu_test
         instr/instruction.cpp
         instr/instr_info.cpp
         )
+target_link_libraries(alu_test PRIVATE red-o-lator-emulator red-o-lator-common)
 
 add_executable(wf_exec_test
         test/wavefront_exec/wf_exec_test.cpp
@@ -72,4 +69,3 @@ add_executable(wf_exec_test
         gpu/dispatcher.cpp
         ../common/common/common.hpp
         )
-target_link_libraries(alu_test PRIVATE red-o-lator-emulator)

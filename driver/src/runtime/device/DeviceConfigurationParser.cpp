@@ -109,9 +109,17 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         return mParameters.at(parameter);
     }
 
-    const auto isValidOpenCLParameter =
+    const auto isBasicOpenCLParameter =
         parameter >= CL_DEVICE_TYPE &&
         parameter <= CL_DEVICE_PRINTF_BUFFER_SIZE;
+
+    const auto isAmdParameter =
+        parameter >= CL_DEVICE_PROFILING_TIMER_OFFSET_AMD &&
+        parameter <= CL_DEVICE_LOCAL_MEM_BANKS_AMD;
+
+    const auto isValidOpenCLParameter =
+        isBasicOpenCLParameter || isAmdParameter;
+
     if (isValidOpenCLParameter) {
         kLogger.debug("Parameter " + std::to_string(parameter) +
                       " was not found in config");
@@ -162,11 +170,11 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         result = parameterValue == "\"\"" ? "" : parameterValue; \
     }
 
-#define IGNORE_PARAMETER(param)                                    \
-    if (parameterName == #param) {                                 \
-        kLogger.warn(std::string("Ignoring parameter ") + #param); \
-        clParameter = param;                                       \
-        result = nullptr;                                          \
+#define IGNORE_PARAMETER(param)                                           \
+    if (parameterName == #param) {                                        \
+        kLogger.warn(std::string("Ignoring config parameter ") + #param); \
+        clParameter = param;                                              \
+        result = nullptr;                                                 \
     }
 
 DeviceConfigurationParser::ParsedParameter
@@ -291,7 +299,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, size_t)
 
     if (!clParameter) {
-        kLogger.debug("Unknown parameter: " + parameterName);
+        kLogger.warn("Unknown config parameter: " + parameterName);
     }
 
     if (std::holds_alternative<std::string>(result)) {

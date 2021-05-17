@@ -48,6 +48,6 @@ extern cl_int getParamInfo(
         parameterValueGetter);
 
 namespace utils {
-extern bool isMutuallyExclusive(cl_bitfield flags,
+extern bool hasMutuallyExclusiveFlags(cl_bitfield flags,
                                 std::initializer_list<cl_int> checkFlags);
 }  // namespace utils

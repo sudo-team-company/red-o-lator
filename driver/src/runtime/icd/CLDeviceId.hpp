@@ -23,4 +23,8 @@ struct CLDeviceId {
 
     size_t usedGlobalMemory = 0;
     size_t usedLocalMemory = 0;
+
+    [[nodiscard]] bool matchesType(cl_device_type type) const {
+        return type == CL_DEVICE_TYPE_ALL || (type ^ deviceType) == 0;
+    }
 };

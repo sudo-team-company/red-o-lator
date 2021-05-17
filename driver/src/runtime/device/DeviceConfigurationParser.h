@@ -9,7 +9,7 @@
 #include <utility>
 #include <variant>
 
-#include "CLObjectInfoParameterValue.hpp"
+#include "runtime/CLObjectInfoParameterValue.hpp"
 
 class DeviceConfigurationParser {
    public:

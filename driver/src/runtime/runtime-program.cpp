@@ -57,11 +57,19 @@ clCreateProgramWithBuiltInKernels(cl_context context,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainProgram(cl_program program) {
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+    }
+
     program->referenceCount++;
     return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseProgram(cl_program program) {
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+    }
+
     program->referenceCount--;
 
     if (program->referenceCount == 0) {
@@ -103,7 +111,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
     }
 
-    getParamInfo(
+    return getParamInfo(
         param_name, param_value_size, param_value, param_value_size_ret, [&]() {
             CLObjectInfoParameterValueType result;
             size_t resultSize;
@@ -180,7 +188,7 @@ clGetProgramBuildInfo(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
     }
 
-    getParamInfo(
+    return getParamInfo(
         param_name, param_value_size, param_value, param_value_size_ret, [&]() {
             CLObjectInfoParameterValueType result;
             size_t resultSize;
