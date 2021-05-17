@@ -2,6 +2,7 @@
 // Created by Diana Kudaiberdieva
 //
 
+#include <stdexcept>
 #include "alu.h"
 
 void run_s_barrier(WfStateSOPP& state) {
