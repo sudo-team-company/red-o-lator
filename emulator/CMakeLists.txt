@@ -1,6 +1,6 @@
 find_package(OpenCL REQUIRED)
 
-add_executable(emulator
+add_library(red-o-lator-emulator
         util/util.cpp
         flow/wavefront.cpp
         alu/alu_sop1.cpp
@@ -15,15 +15,15 @@ add_executable(emulator
         cu/scalar_unit.cpp
         cu/compute_unit.cpp
         cu/simd_unit.cpp
-        main/KernelLoader.cpp
-        main/KernelLoader.h
-        main/main.cpp
         )
+target_link_libraries(red-o-lator-emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
+target_include_directories(red-o-lator-emulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(util_test
         test/util/util_test.cpp
         util/util.cpp
         )
+target_link_libraries(util_test PRIVATE red-o-lator-emulator)
 
 add_executable(alu_test
         alu/alu_sop1.cpp
@@ -31,5 +31,4 @@ add_executable(alu_test
         util/util.cpp
         test/alu/alu_test.cpp
         )
-
-target_link_libraries(emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
+target_link_libraries(alu_test PRIVATE red-o-lator-emulator)

@@ -2,6 +2,7 @@
 // Created by Diana Kudaiberdieva
 //
 
+#include <stdexcept>
 #include "instruction.h"
 
 
@@ -63,6 +64,7 @@ namespace SOPK {
 
 Operand get_dst(const Instruction& instr) {
     UNEXPECTED_FORMAT_ASSERT(get_instr_format(instr.get_instr_key()));
+    throw std::runtime_error("Not implemented");
 }
 
 //Operand get_src0(const Instruction& instr) {

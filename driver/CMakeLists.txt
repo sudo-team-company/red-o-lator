@@ -59,8 +59,6 @@ set(OCL_RUNTIME_SOURCES
         src/runtime/program/KernelArgumentInfoParser.cpp
         src/runtime/program/KernelArgumentInfoParser.h src/runtime/icd/kernel/KernelArgumentInfo.cpp)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
-
 add_library(red-o-lator-icd SHARED ${OCL_RUNTIME_SOURCES})
 target_link_libraries(red-o-lator-icd INTERFACE
         OpenCL::OpenCL
