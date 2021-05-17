@@ -2,6 +2,7 @@
 // Created by Diana Kudaiberdieva
 //
 
+#include <stdexcept>
 #include "alu.h"
 
 void set_reladdr_and_run(const Instruction& instruction,

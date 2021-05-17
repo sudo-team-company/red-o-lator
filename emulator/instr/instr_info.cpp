@@ -2,6 +2,8 @@
 // Created by Diana Kudaiberdieva
 //
 
+#include <stdexcept>
+
 #include "instr_info.h"
 
 InstrKey get_instr_key(std::string_view instruction) {

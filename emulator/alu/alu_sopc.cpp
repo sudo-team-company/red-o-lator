@@ -2,6 +2,7 @@
 // Created by Diana Kudaiberdieva
 //
 
+#include <stdexcept>
 #include "alu.h"
 
 static inline void run_s_bitcmp0_b32(WfStateSOPC& state) {
