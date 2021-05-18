@@ -48,6 +48,10 @@ struct SamplerKernelArgumentInfo : public KernelArgumentInfo {
     static const std::set<std::string> typeNameVariants;
 };
 
+struct EventKernelArgumentInfo : public KernelArgumentInfo {
+    static const std::set<std::string> typeNameVariants;
+};
+
 struct PointerKernelArgumentInfo : public KernelArgumentInfo {
     cl_kernel_arg_address_qualifier addressQualifier =
         CL_KERNEL_ARG_ADDRESS_PRIVATE;

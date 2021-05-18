@@ -20,6 +20,7 @@ class KernelArgumentInfoParser {
     void parse(const std::shared_ptr<StructureKernelArgumentInfo>& outInfo);
     void parse(const std::shared_ptr<ImageKernelArgumentInfo>& outInfo);
     void parse(const std::shared_ptr<SamplerKernelArgumentInfo>& outInfo);
+    void parse(const std::shared_ptr<EventKernelArgumentInfo>& outInfo);
     void parse(const std::shared_ptr<PointerKernelArgumentInfo>& outInfo);
 
     int argIndex;
