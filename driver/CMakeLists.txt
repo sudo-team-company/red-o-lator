@@ -76,9 +76,7 @@ set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
 add_library(red-o-lator-icd SHARED ${SOURCES})
-target_link_libraries(red-o-lator-icd INTERFACE
-        OpenCL::OpenCL
-        )
+target_link_libraries(red-o-lator-icd INTERFACE OpenCL::OpenCL)
 target_link_libraries(red-o-lator-icd PRIVATE
         red-o-lator-common
         PkgConfig::LIB_CLRX_AMD_ASM
@@ -117,7 +115,7 @@ set(UNIT_TEST_SOURCES
         )
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
-target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)
+target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common OpenCL::OpenCL)
 target_include_directories(red-o-lator-icd-test-unit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/)
 add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
