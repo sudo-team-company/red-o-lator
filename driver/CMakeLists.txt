@@ -35,7 +35,7 @@ set(SOURCES
         src/runtime/icd/CLContext.h
         src/runtime/icd/CLDeviceId.hpp
         src/runtime/icd/CLEvent.hpp
-        src/runtime/icd/CLMem.hpp
+        src/runtime/icd/CLMem.h
         src/runtime/icd/CLPlatformId.hpp
         src/runtime/icd/CLProgram.hpp
         src/runtime/icd/CLSampler.hpp
@@ -69,14 +69,14 @@ set(SOURCES
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        )
+        src/runtime/icd/CLMem.cpp)
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
-
 add_library(red-o-lator-icd SHARED ${SOURCES})
-target_link_libraries(red-o-lator-icd INTERFACE OpenCL::OpenCL)
+target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
+        OpenCL::OpenCL
+        )
 target_link_libraries(red-o-lator-icd PRIVATE
         red-o-lator-common
         PkgConfig::LIB_CLRX_AMD_ASM
@@ -112,7 +112,7 @@ set(UNIT_TEST_SOURCES
         test/unit/unit-test-common/test-commons.cpp
         test/unit/runtime/runtime-context-test.cpp
         test/unit/runtime/runtime-command-queue-test.cpp
-        )
+        test/unit/runtime/runtime-memory-test.cpp test/unit/runtime/runtime-memory-buffer-test.cpp)
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)
@@ -122,9 +122,6 @@ add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-unit>/test/resources
         )
-add_test(NAME red-o-lator-icd-test-unit COMMAND red-o-lator-icd-test-unit
-        --config $<CONFIG>
-        --exe $<TARGET_FILE:red-o-lator-icd-test-unit>)
 
 #############
 # E2E tests #
@@ -141,7 +138,5 @@ add_custom_command(TARGET red-o-lator-icd-test-e2e POST_BUILD
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-e2e>/test/resources
         )
-add_test(NAME red-o-lator-icd-test-e2e COMMAND red-o-lator-icd-test-e2e
-        --config $<CONFIG>
-        --exe $<TARGET_FILE:red-o-lator-icd-test-e2e>
-        WORKING_DIRECTORY $<TARGET_FILE_DIR:red-o-lator-icd-test-e2e>)
+target_compile_definitions(red-o-lator-icd-test-e2e PRIVATE __CL_ENABLE_EXCEPTIONS)
+

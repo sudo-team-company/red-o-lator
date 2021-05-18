@@ -10,7 +10,7 @@
 
 class Command;
 
-class CLCommandQueue {
+struct CLCommandQueue {
    public:
     explicit CLCommandQueue(IcdDispatchTable* dispatchTable,
                             CLContext* context,
