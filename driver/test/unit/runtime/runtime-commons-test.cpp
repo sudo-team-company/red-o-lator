@@ -62,7 +62,7 @@ TEST_SUITE("Runtime commons test") {
             auto resultParamSize = strlen(resultParam.c_str()) + 1;
 
             auto paramSize = resultParamSize - 1;
-            char paramValue[paramSize];
+            auto paramValue = new char[paramSize];
             auto errorCode = getParamInfo(
                 CL_PLATFORM_NAME, paramSize, paramValue, nullptr, [&]() {
                     return utils::optionalOf(CLObjectInfoParameterValue(
