@@ -113,6 +113,9 @@ TEST_SUITE("Command queue API") {
     TEST_CASE("clReleaseCommandQueue") {
         SUBCASE("should decrement ref count") {
             auto queue = test::getCommandQueue();
+
+            clRetainCommandQueue(queue);
+
             const auto initialRefCount = queue->referenceCount;
             const auto error = clReleaseCommandQueue(queue);
 

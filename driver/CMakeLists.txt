@@ -122,7 +122,8 @@ add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-unit>/test/resources
         )
-add_test(NAME red-o-lator-icd-test-unit COMMAND red-o-lator-icd-test-unit --config $<CONFIG>
+add_test(NAME red-o-lator-icd-test-unit COMMAND red-o-lator-icd-test-unit
+        --config $<CONFIG>
         --exe $<TARGET_FILE:red-o-lator-icd-test-unit>)
 
 #############
@@ -140,5 +141,7 @@ add_custom_command(TARGET red-o-lator-icd-test-e2e POST_BUILD
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-e2e>/test/resources
         )
-add_test(NAME red-o-lator-icd-test-e2e COMMAND red-o-lator-icd-test-e2e --config $<CONFIG>
-        --exe $<TARGET_FILE:red-o-lator-icd-test-e2e>)
+add_test(NAME red-o-lator-icd-test-e2e COMMAND red-o-lator-icd-test-e2e
+        --config $<CONFIG>
+        --exe $<TARGET_FILE:red-o-lator-icd-test-e2e>
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:red-o-lator-icd-test-e2e>)

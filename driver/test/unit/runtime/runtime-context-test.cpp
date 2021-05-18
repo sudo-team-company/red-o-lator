@@ -26,7 +26,7 @@ TEST_SUITE("Context API") {
             CHECK(context->device == test::getDevice());
         }
 
-        SUBCASE("context reference count should be 1 after created") {
+        SUBCASE("context reference count should be 1 after creation") {
             const auto context = test::getContext();
             CHECK(context->referenceCount == 1);
         }
@@ -84,6 +84,9 @@ TEST_SUITE("Context API") {
     TEST_CASE("clReleaseContext") {
         SUBCASE("should decrement context reference count") {
             auto context = test::getContext();
+
+            clRetainContext(context);
+
             const auto refCount = context->referenceCount;
 
             const auto error = clReleaseContext(context);
