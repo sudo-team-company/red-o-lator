@@ -80,4 +80,4 @@ jobs:
         run: ctest --test-dir ${{github.workspace}}/build
               -C ${{env.BUILD_TYPE}}
               -VV --output-on-failure
-              -j ${{env.THREAD_COUNT}}
+              --debug
