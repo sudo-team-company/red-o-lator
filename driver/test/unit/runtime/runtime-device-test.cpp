@@ -5,19 +5,27 @@
 
 #include "runtime/icd/icd.h"
 
-#include <CL/cl.hpp>
+template <typename T>
+void checkDeviceParameter(cl_device_info paramName, T expected) {
+    cl_int error;
+    T result;
+    error = clGetDeviceInfo(test::getDevice(), paramName, sizeof(T), &result,
+                            nullptr);
 
-#define CHECK_DEVICE_PARAMETER(deviceParameter, expected) \
-    CHECK(cl::Device(test::getDevice()).getInfo<deviceParameter>() == expected)
+    CHECK(error == CL_SUCCESS);
+    CHECK(result == expected);
+}
 
-#define CHECK_DEVICE_STRING_PARAMETER(deviceParameter, expected)       \
-    do {                                                               \
-        char result[128];                                              \
-        const auto errorCode = clGetDeviceInfo(                        \
-            test::getDevice(), deviceParameter, 128, result, nullptr); \
-        CHECK(errorCode == CL_SUCCESS);                                \
-        CHECK(std::string(result) == expected);                        \
-    } while (0)
+void checkDeviceStringParameter(cl_device_info paramName,
+                                std::string expected) {
+    cl_int error;
+    char result[128];
+    error =
+        clGetDeviceInfo(test::getDevice(), paramName, 128, &result, nullptr);
+
+    CHECK(error == CL_SUCCESS);
+    CHECK(result == expected);
+}
 
 TEST_SUITE("Device API") {
     TEST_CASE("clGetDeviceIDs") {
@@ -77,8 +85,7 @@ TEST_SUITE("Device API") {
             REQUIRE(devices[0] == kDevice);
         }
 
-        SUBCASE(
-            "should return device if combination of flags is passed") {
+        SUBCASE("should return device if combination of flags is passed") {
             auto devices = std::vector<cl_device_id>(1);
             const auto errorCode =
                 clGetDeviceIDs(test::getPlatform(),
@@ -94,62 +101,46 @@ TEST_SUITE("Device API") {
     TEST_CASE("clGetDeviceInfo") {
         SUBCASE("Hardcoded parameters") {
             SUBCASE("platform") {
-                CHECK_DEVICE_PARAMETER(CL_DEVICE_PLATFORM, kPlatform);
+                checkDeviceParameter(CL_DEVICE_PLATFORM, kPlatform);
             }
 
             SUBCASE("parent device") {
-                CHECK_DEVICE_PARAMETER(CL_DEVICE_PARENT_DEVICE, nullptr);
+                checkDeviceParameter<cl_device_id>(CL_DEVICE_PARENT_DEVICE,
+                                                   nullptr);
             }
 
             SUBCASE("OpenCL version") {
-                CHECK_DEVICE_STRING_PARAMETER(CL_DEVICE_OPENCL_C_VERSION,
-                                              kPlatform->openClVersion);
+                checkDeviceStringParameter(CL_DEVICE_OPENCL_C_VERSION,
+                                           kPlatform->openClVersion);
             }
 
             SUBCASE("driver version") {
-                CHECK_DEVICE_STRING_PARAMETER(CL_DRIVER_VERSION,
-                                              kPlatform->driverVersion);
+                checkDeviceStringParameter(CL_DRIVER_VERSION,
+                                           kPlatform->driverVersion);
             }
 
             SUBCASE("device version") {
                 const auto deviceVersion =
                     std::string(kPlatform->openClVersion) + " AMD (" +
                     kPlatform->driverVersion + ")";
-                CHECK_DEVICE_STRING_PARAMETER(CL_DEVICE_VERSION, deviceVersion);
+                checkDeviceStringParameter(CL_DEVICE_VERSION, deviceVersion);
             }
 
             SUBCASE("device should be available") {
-                CHECK_DEVICE_PARAMETER(CL_DEVICE_AVAILABLE, true);
+                checkDeviceParameter(CL_DEVICE_AVAILABLE, CL_TRUE);
             }
 
             SUBCASE("linker should not be available") {
-                cl_bool result;
-                const auto error = clGetDeviceInfo(
-                    test::getDevice(), CL_DEVICE_LINKER_AVAILABLE,
-                    sizeof(cl_bool), &result, nullptr);
-
-                CHECK(error == CL_SUCCESS);
-                CHECK_FALSE(result);
+                checkDeviceParameter(CL_DEVICE_LINKER_AVAILABLE, CL_FALSE);
             }
 
             SUBCASE("compiler should not be available") {
-                cl_bool result;
-                const auto error = clGetDeviceInfo(
-                    test::getDevice(), CL_DEVICE_COMPILER_AVAILABLE,
-                    sizeof(cl_bool), &result, nullptr);
-
-                CHECK(error == CL_SUCCESS);
-                CHECK_FALSE(result);
+                checkDeviceParameter(CL_DEVICE_COMPILER_AVAILABLE, CL_FALSE);
             }
 
             SUBCASE("sub-devices are not supported") {
-                cl_uint result;
-                const auto error = clGetDeviceInfo(
-                    test::getDevice(), CL_DEVICE_PARTITION_MAX_SUB_DEVICES,
-                    sizeof(cl_uint), &result, nullptr);
-
-                CHECK(error == CL_SUCCESS);
-                CHECK(result == 0);
+                checkDeviceParameter<cl_uint>(
+                    CL_DEVICE_PARTITION_MAX_SUB_DEVICES, 0);
             }
         }
 
@@ -162,7 +153,7 @@ TEST_SUITE("Device API") {
         }
 
         SUBCASE("should not fail with AMD ext") {
-            CHECK_DEVICE_STRING_PARAMETER(CL_DEVICE_BOARD_NAME_AMD,
+            checkDeviceStringParameter(CL_DEVICE_BOARD_NAME_AMD,
                                           "Radeon RX 570 Series");
         }
 

@@ -23,7 +23,7 @@ jobs:
         run: git clone https://github.com/KhronosGroup/OpenCL-Headers
 
       - name: Clone ICD loader
-        run: git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader
+        run: git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader --depth 1
 
       - name: Configure ICD Loader
         run: cp -r ${{github.workspace}}/OpenCL-Headers/CL ${{github.workspace}}/OpenCL-ICD-Loader/inc &&
@@ -38,7 +38,7 @@ jobs:
              --config Debug
 
       - name: Git clone CLRX
-        run: git clone https://github.com/CLRX/CLRX-mirror
+        run: git clone https://github.com/CLRX/CLRX-mirror --depth 1
 
       - name: Configure CLRX
         run: cmake -H${{github.workspace}}/CLRX-mirror -B ${{github.workspace}}/CLRX-mirror/build

@@ -115,7 +115,7 @@ set(UNIT_TEST_SOURCES
         )
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
-target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common OpenCL::OpenCL)
+target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)
 target_include_directories(red-o-lator-icd-test-unit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/)
 add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -138,5 +138,4 @@ add_custom_command(TARGET red-o-lator-icd-test-e2e POST_BUILD
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-e2e>/test/resources
         )
-target_compile_definitions(red-o-lator-icd-test-e2e PRIVATE __CL_ENABLE_EXCEPTIONS)
 

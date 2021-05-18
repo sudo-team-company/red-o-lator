@@ -17,8 +17,14 @@ CLKernel::CLKernel(IcdDispatchTable* const dispatchTable,
       instructions(std::move(instructions)),
       arguments(std::move(arguments)) {}
 
+CLKernel::~CLKernel() {
+    if (program) {
+        clReleaseProgram(program);
+    }
+}
+
 void CLKernel::setArgument(cl_uint index, size_t size, const void* value) {
-    if (index > arguments.size()) {
+    if (index >= arguments.size()) {
         throw KernelArgumentOutOfBoundsError(
             "Attempt to set argument at index " + std::to_string(index) +
             " of kernel with " + std::to_string(arguments.size()) +
@@ -32,7 +38,7 @@ void CLKernel::setArgument(cl_uint index, size_t size, const void* value) {
 }
 
 KernelArgument CLKernel::getArgument(cl_uint index) {
-    if (index > arguments.size()) {
+    if (index >= arguments.size()) {
         throw KernelArgumentOutOfBoundsError(
             "Attempt to get argument at index " + std::to_string(index) +
             " of kernel with " + std::to_string(arguments.size()) +
