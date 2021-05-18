@@ -1,8 +1,8 @@
 #include <iostream>
-#include "runtime-commons.h"
-#include "icd/CLMem.hpp"
-#include "icd/CLDeviceId.hpp"
 #include "icd/CLContext.h"
+#include "icd/CLDeviceId.hpp"
+#include "icd/CLMem.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
     if (!memobj) {
@@ -24,6 +24,7 @@ CL_API_ENTRY cl_int CL_API_CALL clReleaseMemObject(cl_mem memobj) {
     if (memobj->referenceCount == 0) {
         delete[] memobj->address;
         memobj->context->device->usedGlobalMemory -= memobj->size;
+        delete memobj;
     }
 
     return CL_SUCCESS;
@@ -65,10 +66,19 @@ clEnqueueMigrateMemObjects(cl_command_queue command_queue,
     return CL_INVALID_PLATFORM;
 }
 
-CL_API_ENTRY cl_int CL_API_CALL clSetMemObjectDestructorCallback(
-    cl_mem memobj, void (*pfn_notify)(cl_mem, void*), void* user_data) {
-    std::cerr
-        << "Unimplemented OpenCL API call: clSetMemObjectDestructorCallback"
-        << std::endl;
-    return CL_INVALID_PLATFORM;
+CL_API_ENTRY cl_int CL_API_CALL
+clSetMemObjectDestructorCallback(cl_mem memobj,
+                                 CLMemDestructorCallbackFunction pfn_notify,
+                                 void* user_data) {
+    if (!memobj) {
+        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.")
+    }
+
+    if (!pfn_notify) {
+        RETURN_ERROR(CL_INVALID_VALUE, "Callback is null.")
+    }
+
+    memobj->registerCallback(CLMemDestructorCallback(pfn_notify, user_data));
+
+    return CL_SUCCESS;
 }

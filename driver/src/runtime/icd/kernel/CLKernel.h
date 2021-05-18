@@ -10,7 +10,7 @@
 #include "KernelArgument.hpp"
 #include "runtime/icd/icd.h"
 
-class CLKernel {
+struct CLKernel {
    public:
     CLKernel(IcdDispatchTable* dispatchTable,
              std::string name,

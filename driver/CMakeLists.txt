@@ -35,7 +35,7 @@ set(SOURCES
         src/runtime/icd/CLContext.h
         src/runtime/icd/CLDeviceId.hpp
         src/runtime/icd/CLEvent.hpp
-        src/runtime/icd/CLMem.hpp
+        src/runtime/icd/CLMem.h
         src/runtime/icd/CLPlatformId.hpp
         src/runtime/icd/CLProgram.hpp
         src/runtime/icd/CLSampler.hpp
@@ -69,12 +69,12 @@ set(SOURCES
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        )
+        src/runtime/icd/CLMem.cpp)
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
 add_library(red-o-lator-icd SHARED ${SOURCES})
-target_link_libraries(red-o-lator-icd INTERFACE
+target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
         OpenCL::OpenCL
         )
 target_link_libraries(red-o-lator-icd PRIVATE
@@ -112,7 +112,7 @@ set(UNIT_TEST_SOURCES
         test/unit/unit-test-common/test-commons.cpp
         test/unit/runtime/runtime-context-test.cpp
         test/unit/runtime/runtime-command-queue-test.cpp
-        )
+        test/unit/runtime/runtime-memory-test.cpp test/unit/runtime/runtime-memory-buffer-test.cpp)
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)

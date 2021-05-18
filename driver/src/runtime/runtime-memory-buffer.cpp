@@ -4,9 +4,9 @@
 #include <iostream>
 #include <memory>
 
+#include "icd/CLCommandQueue.h"
 #include "icd/CLContext.h"
 #include "icd/CLDeviceId.hpp"
-#include "icd/CLCommandQueue.h"
 #include "runtime-commons.h"
 
 CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
@@ -26,8 +26,16 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
         ((flags & CL_MEM_COPY_HOST_PTR) || (flags & CL_MEM_USE_HOST_PTR))) {
         SET_ERROR_AND_RETURN(
             CL_INVALID_HOST_PTR,
-            "Host ptr is null but either CL_MEM_COPY_HOST_PTR or "
+            "host_ptr is null but either CL_MEM_COPY_HOST_PTR or "
             "CL_MEM_USE_HOST_PTR is specified.")
+    }
+
+    if (host_ptr &&
+        !((flags & CL_MEM_COPY_HOST_PTR) || (flags & CL_MEM_USE_HOST_PTR))) {
+        SET_ERROR_AND_RETURN(
+            CL_INVALID_HOST_PTR,
+            "host_ptr is not null but neither CL_MEM_COPY_HOST_PTR nor "
+            "CL_MEM_USE_HOST_PTR are present.")
     }
 
     if (utils::hasMutuallyExclusiveFlags(
@@ -66,7 +74,7 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
         context->device->globalMemorySize) {
         // TODO: lookup error code
         SET_ERROR_AND_RETURN(
-            CL_OUT_OF_RESOURCES,
+            CL_MEM_OBJECT_ALLOCATION_FAILURE,
             "Cannot allocate " + std::to_string(size) +
                 " bytes of data. Used: " +
                 std::to_string(context->device->usedGlobalMemory) + " / " +
@@ -92,7 +100,9 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
 
     } else {
         if (flags & CL_MEM_ALLOC_HOST_PTR) {
-            mem->address = static_cast<std::byte*>(host_ptr);
+            // TODO: handle this properly, looks like memory is always allocated
+            //  at host accessible memory
+            mem->address = new std::byte[mem->size];
         } else {
             mem->address = new std::byte[mem->size];
         }
@@ -107,8 +117,10 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
     if (!mem->address) {
         delete mem;
         SET_ERROR_AND_RETURN(CL_MEM_OBJECT_ALLOCATION_FAILURE,
-                             "Failed to allocate buffer memory.");
+                             "Failed to allocate buffer memory.")
     }
+
+    context->device->usedGlobalMemory += mem->size;
 
     SET_SUCCESS()
 
@@ -141,7 +153,7 @@ clCreateSubBuffer(cl_mem buffer,
                              " bytes) is more than buffer size of " +    \
                              std::to_string(buffer->size) + " bytes.")   \
         }                                                                \
-    } while (0);
+    } while (0)
 
 CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueReadBuffer(cl_command_queue command_queue,
@@ -153,7 +165,7 @@ clEnqueueReadBuffer(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
-    CHECK_BUFFER_PARAMETERS()
+    CHECK_BUFFER_PARAMETERS();
 
     if (!buffer->hostCanRead) {
         RETURN_ERROR(CL_INVALID_OPERATION,
@@ -187,7 +199,7 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
                      cl_uint num_events_in_wait_list,
                      const cl_event* event_wait_list,
                      cl_event* event) {
-    CHECK_BUFFER_PARAMETERS()
+    CHECK_BUFFER_PARAMETERS();
 
     if (!buffer->hostCanWrite) {
         RETURN_ERROR(CL_INVALID_OPERATION,
