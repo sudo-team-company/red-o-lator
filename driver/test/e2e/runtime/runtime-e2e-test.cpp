@@ -1,10 +1,10 @@
-#include <CL/cl.hpp>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
 #include <common/test/doctest.h>
+#include <CL/opencl.h>
 
 std::vector<unsigned char> readBinaryFile(const std::string& path) {
     std::ifstream input(path, std::ios::binary);
@@ -13,63 +13,103 @@ std::vector<unsigned char> readBinaryFile(const std::string& path) {
 }
 
 TEST_CASE("a_plus_b") {
-    cl_uint errorCode;
+    cl_int error;
 
-    std::vector<cl::Platform> platforms;
-    REQUIRE_NOTHROW(cl::Platform::get(&platforms));
-    REQUIRE_FALSE(platforms.empty());
+    cl_uint platformCount;
+    error = clGetPlatformIDs(0, nullptr, &platformCount);
+    CHECK(error == CL_SUCCESS);
 
-    const auto platform = platforms[0];
-    INFO(platform.getInfo<CL_PLATFORM_VENDOR>());
+    auto* platformList =
+        (cl_platform_id*) malloc(platformCount * sizeof(cl_platform_id));
 
-    std::vector<cl::Device> devices;
-    REQUIRE_NOTHROW(platform.getDevices(CL_DEVICE_TYPE_GPU, &devices));
-    REQUIRE_FALSE(devices.empty());
+    error = clGetPlatformIDs(platformCount, platformList, nullptr);
+    CHECK(error == CL_SUCCESS);
 
-    const auto device = devices[0];
-    INFO(device.getInfo<CL_DEVICE_NAME>());
+    const auto platform = platformList[0];
 
-    cl::Context context;
-    REQUIRE_NOTHROW(context = cl::Context(device));
+    for (int i = 0; i < platformCount; i++) {
+        const auto currentPlatform = platformList[i];
+        char platformName[128];
+        error = clGetPlatformInfo(currentPlatform, CL_PLATFORM_NAME, 128,
+                                      &platformName, nullptr);
+        CHECK(error == CL_SUCCESS);
+    }
 
-    cl::CommandQueue queue;
-    REQUIRE_NOTHROW(queue = cl::CommandQueue(context));
+    cl_uint num_devices;
+    cl_device_id device;
+    error = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device,
+                               &num_devices);
+    CHECK(error == CL_SUCCESS);
 
-    const auto binary = readBinaryFile("../resources/kernels/a_plus_b.bin");
-    REQUIRE_FALSE(binary.empty());
-    cl::Program::Binaries binaryObj = {{binary.data(), binary.size()}};
+    char deviceName[128];
+    error =
+        clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, nullptr);
+    CHECK(error == CL_SUCCESS);
 
-    cl::Program program;
-    REQUIRE_NOTHROW(program = cl::Program(context, devices, binaryObj));
-    REQUIRE_NOTHROW(program.build());
+    char deviceVersion[50];
+    error =
+        clGetDeviceInfo(device, CL_DEVICE_VERSION, 50, deviceVersion, nullptr);
+    CHECK(error == CL_SUCCESS);
 
-    const size_t arraySize = 100000;
-    const size_t arraySizeMem = arraySize * sizeof(cl_uint);
+    cl_context context =
+        clCreateContext(nullptr, 1, &device, nullptr, nullptr, &error);
+    CHECK(error == CL_SUCCESS);
 
-    std::vector<cl_uint> inputA;
-    inputA.assign(arraySize, 100);
-    cl_mem inputABuffer;
-    REQUIRE_NOTHROW(inputABuffer = clCreateBuffer(
-                        context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                        arraySizeMem, inputA.data(), nullptr));
+    cl_command_queue commandQueue =
+        clCreateCommandQueue(context, device, 0, &error);
+    CHECK(error == CL_SUCCESS);
 
-    std::vector<cl_uint> inputB;
-    inputB.assign(arraySize, 200);
-    cl_mem inputBBuffer;
-    REQUIRE_NOTHROW(inputBBuffer = clCreateBuffer(
-                        context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                        arraySizeMem, inputB.data(), nullptr));
+    const size_t n = 1000;
+    const size_t arraySize = n * sizeof(cl_uint);
 
-    std::vector<cl_uint> output;
-    output.assign(arraySize, 0);
-    cl_mem outputBuffer;
-    REQUIRE_NOTHROW(outputBuffer = clCreateBuffer(context(), CL_MEM_WRITE_ONLY,
-                                         arraySizeMem, nullptr, nullptr));
+    cl_mem mem1 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize, nullptr,
+                                 &error);
+    CHECK(error == CL_SUCCESS);
 
-    cl::Kernel kernel;
-    REQUIRE_NOTHROW(kernel = cl::Kernel(program, "a_plus_b"));
-    REQUIRE_NOTHROW(kernel.setArg(0, inputABuffer));
-    REQUIRE_NOTHROW(kernel.setArg(1, inputBBuffer));
-    REQUIRE_NOTHROW(kernel.setArg(2, outputBuffer));
-//    REQUIRE_NOTHROW(queue.enqueueNDRangeKernel(kernel, 0, 0));
+    cl_mem mem2 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize, nullptr,
+                                 &error);
+    CHECK(error == CL_SUCCESS);
+
+    cl_mem mem3 = clCreateBuffer(context, CL_MEM_WRITE_ONLY, arraySize, nullptr,
+                                 &error);
+    CHECK(error == CL_SUCCESS);
+
+    const std::string binaryPath =
+        "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/"
+        "resources/kernels/weighted_sum_kernel/weighted_sum_kernel.bin";
+    const auto binary = readBinaryFile(binaryPath);
+
+    CHECK_FALSE(binary.empty());
+
+    const size_t binarySize[1] = {binary.size()};
+    const unsigned char* binaryData[1] = {binary.data()};
+
+    cl_program program = clCreateProgramWithBinary(
+        context, 1, &device, binarySize, binaryData, nullptr, &error);
+    CHECK(error == CL_SUCCESS);
+
+    error = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);
+    CHECK(error == CL_SUCCESS);
+
+    const std::string kernelName = "weighted_sum_kernel";
+    cl_kernel kernel = clCreateKernel(program, kernelName.c_str(), &error);
+    CHECK(error == CL_SUCCESS);
+
+    //    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
+    //    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
+
+    clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
+    clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
+
+    //    size_t globalWorkOffset = 0;
+    //    size_t globalWorkSize = 0;
+    //    size_t localWorkSize = 0;
+    //    error = clEnqueueNDRangeKernel(commandQueue, kernel, 1,
+    //                                       &globalWorkOffset, &globalWorkSize,
+    //                                       &localWorkSize, 0, nullptr,
+    //                                       nullptr);
+
+    // TODO(executeKernel): memory release stuff
+
 }
