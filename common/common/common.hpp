@@ -1,15 +1,20 @@
 #pragma once
 
-#include <unordered_map>
 #include <algorithm>
+#include <cassert>
 #include <cctype>
+#include <functional>
 #include <locale>
 #include <optional>
+#include <set>
+#include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace utils {
 static std::vector<std::string> split(const std::string& line,
-                                      const char separator) {
+                                      const char separator,
+                                      int maxSplitCount = -1) {
     if (line.empty()) {
         return {""};
     }
@@ -20,9 +25,11 @@ static std::vector<std::string> split(const std::string& line,
     for (char ch : line) {
         if (ch != separator) {
             buffer += ch;
-        } else {
+        } else if (maxSplitCount < 0 || result.size() < maxSplitCount) {
             result.push_back(buffer);
             buffer = "";
+        } else {
+            buffer += ch;
         }
     }
 
@@ -30,6 +37,20 @@ static std::vector<std::string> split(const std::string& line,
         result.push_back(buffer);
     }
 
+    return result;
+}
+
+template <typename R>
+static std::vector<R> splitMap(
+    const std::string& line,
+    const char separator,
+    int maxSplitCount = -1,
+    std::function<R(std::string&)> transform = nullptr) {
+    assert(transform);
+    auto splitResult = split(line, separator, maxSplitCount);
+    std::vector<std::string> result;
+    std::transform(splitResult.begin(), splitResult.end(),
+                   std::back_inserter(result), transform);
     return result;
 }
 
@@ -79,6 +100,15 @@ static inline std::string trim(std::string s) {
     return s;
 }
 
+static inline bool startsWith(const std::string& s, const std::string& prefix) {
+    return s.rfind(prefix, 0) == 0;
+}
+
+static inline bool endsWith(const std::string& s, const std::string& suffix) {
+    return s.size() >= suffix.size() &&
+           0 == s.compare(s.size() - suffix.size(), suffix.size(), suffix);
+}
+
 template <typename K, typename V>
 static inline void insertOrUpdate(std::unordered_map<K, V>& map,
                                   const K& key,
@@ -92,17 +122,27 @@ static inline void insertOrUpdate(std::unordered_map<K, V>& map,
 }
 
 template <typename T>
-static std::optional<T*> optionalOf(T* value) {
+static inline std::optional<T*> optionalOf(T* value) {
     return value ? std::make_optional(value) : std::nullopt;
 }
 
 template <typename T>
-static std::optional<T> optionalOf(T value) {
+static inline std::optional<T> optionalOf(T value) {
     return std::make_optional(value);
 }
 
 template <typename T>
-static std::optional<T> optionalOf() {
+static inline std::optional<T> optionalOf() {
     return std::nullopt;
+}
+
+template <typename T>
+static inline bool contains(std::vector<T> vector, T value) {
+    return vector.find(value) != vector.end();
+}
+
+template <typename T>
+static inline bool contains(std::set<T> set, T value) {
+    return set.find(value) != set.end();
 }
 }  // namespace utils

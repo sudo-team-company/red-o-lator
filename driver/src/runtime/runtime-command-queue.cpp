@@ -1,6 +1,7 @@
 #include <iostream>
+
 #include "runtime-commons.h"
-#include "icd/icd.h"
+#include "icd/CLCommandQueue.h"
 
 CL_API_ENTRY cl_command_queue CL_API_CALL
 clCreateCommandQueue(cl_context context,
@@ -35,10 +36,6 @@ clCreateCommandQueue(cl_context context,
     return commandQueue;
 }
 
-CL_API_ENTRY cl_int CL_API_CALL clFlush(cl_command_queue command_queue) {
-    return clFinish(command_queue);
-}
-
 CL_API_ENTRY cl_int CL_API_CALL clFinish(cl_command_queue command_queue) {
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
@@ -47,6 +44,10 @@ CL_API_ENTRY cl_int CL_API_CALL clFinish(cl_command_queue command_queue) {
     command_queue->flush();
 
     return CL_SUCCESS;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL clFlush(cl_command_queue command_queue) {
+    return clFinish(command_queue);
 }
 
 CL_API_ENTRY cl_int CL_API_CALL

@@ -29,7 +29,7 @@ void printArray(cl_uint* begin, cl_uint* end) {
 }
 
 void KernelLoader::executeKernel(const std::string& kernelPath) {
-    Logger kLogger = Logger("[red-o-lator emulator] ---");
+    Logger kLogger = Logger("[red-o-lator emulator]");
 
     cl_int errorCode;
 
@@ -37,7 +37,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     errorCode = clGetPlatformIDs(0, nullptr, &platformCount);
     CHECK_ERROR("Failed to load platform count")
 
-    kLogger.log("found " + std::to_string(platformCount) + " platforms");
+    kLogger.debug("found " + std::to_string(platformCount) + " platforms");
 
     auto* platformList =
         (cl_platform_id*) malloc(platformCount * sizeof(platformCount));
@@ -53,7 +53,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         errorCode = clGetPlatformInfo(currentPlatform, CL_PLATFORM_NAME, 128,
                                       &platformName, nullptr);
         CHECK_ERROR("Failed to get platform name")
-        kLogger.log("Found platform: " + std::string(platformName));
+        kLogger.debug("Found platform: " + std::string(platformName));
     }
 
     cl_uint num_devices;
@@ -67,14 +67,14 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, nullptr);
     CHECK_ERROR("Failed to get device name")
 
-    kLogger.log("Using device '" + std::string(deviceName) + "'");
+    kLogger.debug("Using device '" + std::string(deviceName) + "'");
 
     char deviceVersion[50];
     errorCode =
         clGetDeviceInfo(device, CL_DEVICE_VERSION, 50, deviceVersion, nullptr);
     CHECK_ERROR("Failed to get device version")
 
-    kLogger.log("Device version: '" + std::string(deviceVersion) + "'");
+    kLogger.debug("Device version: '" + std::string(deviceVersion) + "'");
 
     cl_context context =
         clCreateContext(nullptr, 1, &device, nullptr, nullptr, &errorCode);
@@ -101,7 +101,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
 
     const std::string binaryPath =
         "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/disasm/"
-        "linear_kernels/addition/addition.bin";
+        "weighted_sum_kernel/weighted_sum_kernel.bin";
     const auto binary = readBinaryFile(binaryPath);
 
     if (binary.empty()) {
@@ -118,18 +118,16 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     errorCode = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);
     CHECK_ERROR("Failed to build program")
 
-    //    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
-    //    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
-    //
-    //        clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
-    //    clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
-    //    clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
-
-    const std::string kernelName = "kernelName";
+    const std::string kernelName = "weighted_sum_kernel";
     cl_kernel kernel = clCreateKernel(program, kernelName.c_str(), &errorCode);
     CHECK_ERROR("Failed to create kernel with name " + kernelName)
 
-    // TODO(executeKernel): create buffers and memory, set kernel args
+//    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
+//    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
+
+    clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
+    clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
 
     //    size_t globalWorkOffset = 0;
     //    size_t globalWorkSize = 0;

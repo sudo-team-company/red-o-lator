@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "icd/icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL

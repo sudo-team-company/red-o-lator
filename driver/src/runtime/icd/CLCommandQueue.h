@@ -1,8 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <queue>
 
-#include "icd.h"
+#include "IcdDispatchTable.h"
 #include "runtime/command/Command.h"
 
 class Command;

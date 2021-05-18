@@ -1,10 +1,10 @@
 #include <common/common.hpp>
 #include <cstring>
-#include <iostream>
 #include <unordered_map>
 
-#include "icd/icd.h"
 #include "runtime-commons.h"
+#include "icd/CLDeviceId.hpp"
+#include "icd/CLContext.h"
 
 cl_context createContext(const cl_context_properties* properties,
                          cl_device_id device,

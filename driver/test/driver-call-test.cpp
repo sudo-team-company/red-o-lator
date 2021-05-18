@@ -1,5 +1,5 @@
 #include <iostream>
-#include "runtime/icd/icd.h"
+#include "runtime/icd/CLPlatformId.hpp"
 
 int main() {
     cl_uint num_platforms;

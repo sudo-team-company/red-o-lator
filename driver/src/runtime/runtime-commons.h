@@ -6,8 +6,10 @@
 #include <optional>
 #include <variant>
 
+#include "icd/CLPlatformId.hpp"
 #include "CLObjectInfoParameterValue.hpp"
 #include "device/DeviceConfigurationParser.h"
+#include "icd/IcdDispatchTable.h"
 
 extern Logger kLogger;
 extern IcdDispatchTable* kDispatchTable;

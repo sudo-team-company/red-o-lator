@@ -3,22 +3,7 @@
 #include <optional>
 
 #include "runtime-commons.h"
-
-CL_API_ENTRY void* CL_API_CALL
-clGetExtensionFunctionAddress(const char* func_name) {
-    if (strcmp(func_name, "clIcdGetPlatformIDsKHR") == 0) {
-        return (void*) clIcdGetPlatformIDsKHR;
-    } else if (strcmp(func_name, "clGetPlatformInfo") == 0) {
-        return (void*) clGetPlatformInfo;
-    } else {
-        return nullptr;
-    }
-}
-
-CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
-    cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms) {
-    return clGetPlatformIDs(num_entries, platforms, num_platforms);
-}
+#include "icd/icd.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
                                                  cl_platform_id* platforms,
@@ -104,4 +89,20 @@ clGetPlatformInfo(cl_platform_id platform,
 
             return utils::optionalOf(CLObjectInfoParameterValue(result, 0));
         });
+}
+
+CL_API_ENTRY void* CL_API_CALL
+clGetExtensionFunctionAddress(const char* func_name) {
+    if (strcmp(func_name, "clIcdGetPlatformIDsKHR") == 0) {
+        return (void*) clIcdGetPlatformIDsKHR;
+    } else if (strcmp(func_name, "clGetPlatformInfo") == 0) {
+        return (void*) clGetPlatformInfo;
+    } else {
+        return nullptr;
+    }
+}
+
+CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
+    cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms) {
+    return clGetPlatformIDs(num_entries, platforms, num_platforms);
 }

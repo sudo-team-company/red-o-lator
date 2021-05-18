@@ -1,10 +1,9 @@
 #include <iostream>
 
-#include <CLRX/amdasm/Disassembler.h>
+#include <program/KernelArgumentInfoParser.h>
 #include <common/common.hpp>
-#include <sstream>
 
-#include "icd/icd.h"
+#include "icd/CLProgram.hpp"
 #include "runtime-commons.h"
 
 CL_API_ENTRY cl_program CL_API_CALL
@@ -39,18 +38,6 @@ clCreateProgramWithBinary(cl_context context,
 
     program->binarySize = lengths[0];
     program->binary = binaries[0];
-
-    const auto amdInput = CLRX::AmdCL2MainGPUBinary64(
-        program->binarySize, const_cast<unsigned char*>(program->binary));
-    std::ostringstream disasmOss;
-    std::string resultStr;
-    CLRX::Flags disasmFlags =
-        CLRX::DISASM_ALL & ~(CLRX::DISASM_CODEPOS | CLRX::DISASM_HEXCODE);
-
-    CLRX::Disassembler disasm(amdInput, disasmOss, disasmFlags);
-    disasm.disassemble();
-    resultStr = disasmOss.str();
-    //    std::cout << resultStr << std::endl;
 
     SET_SUCCESS()
 
@@ -95,45 +82,16 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
-    // assuming we already have compiled binary here so doing nothing as
-    // compiler nor linker are not available
+    const auto disassembler = BinaryDisassembler();
+    try {
+        program->disassembledBinary =
+            disassembler.disassemble(program->binarySize, program->binary);
+    } catch (const KernelArgumentInfoParseError& e) {
+        kLogger.error(e.what());
+        return CL_INVALID_BINARY;
+    }
 
     return CL_SUCCESS;
-}
-
-CL_API_ENTRY cl_int CL_API_CALL
-clCompileProgram(cl_program program,
-                 cl_uint num_devices,
-                 const cl_device_id* device_list,
-                 const char* options,
-                 cl_uint num_input_headers,
-                 const cl_program* input_headers,
-                 const char** header_include_names,
-                 void (*pfn_notify)(cl_program, void*),
-                 void* user_data) {
-    std::cerr << "Unimplemented OpenCL API call: clCompileProgram" << std::endl;
-    return CL_INVALID_PLATFORM;
-}
-
-CL_API_ENTRY cl_program CL_API_CALL
-clLinkProgram(cl_context context,
-              cl_uint num_devices,
-              const cl_device_id* device_list,
-              const char* options,
-              cl_uint num_input_programs,
-              const cl_program* input_programs,
-              void (*pfn_notify)(cl_program, void*),
-              void* user_data,
-              cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clLinkProgram" << std::endl;
-    return nullptr;
-}
-
-CL_API_ENTRY cl_int CL_API_CALL
-clUnloadPlatformCompiler(cl_platform_id platform) {
-    std::cerr << "Unimplemented OpenCL API call: clUnloadPlatformCompiler"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
@@ -258,4 +216,39 @@ clGetProgramBuildInfo(cl_program program,
             return utils::optionalOf(
                 CLObjectInfoParameterValue(result, resultSize));
         });
+}
+
+CL_API_ENTRY cl_int CL_API_CALL
+clCompileProgram(cl_program program,
+                 cl_uint num_devices,
+                 const cl_device_id* device_list,
+                 const char* options,
+                 cl_uint num_input_headers,
+                 const cl_program* input_headers,
+                 const char** header_include_names,
+                 void (*pfn_notify)(cl_program, void*),
+                 void* user_data) {
+    std::cerr << "Unimplemented OpenCL API call: clCompileProgram" << std::endl;
+    return CL_INVALID_PLATFORM;
+}
+
+CL_API_ENTRY cl_program CL_API_CALL
+clLinkProgram(cl_context context,
+              cl_uint num_devices,
+              const cl_device_id* device_list,
+              const char* options,
+              cl_uint num_input_programs,
+              const cl_program* input_programs,
+              void (*pfn_notify)(cl_program, void*),
+              void* user_data,
+              cl_int* errcode_ret) {
+    std::cerr << "Unimplemented OpenCL API call: clLinkProgram" << std::endl;
+    return nullptr;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL
+clUnloadPlatformCompiler(cl_platform_id platform) {
+    std::cerr << "Unimplemented OpenCL API call: clUnloadPlatformCompiler"
+              << std::endl;
+    return CL_INVALID_PLATFORM;
 }
