@@ -4,13 +4,11 @@
 #include "runtime/icd/icd.h"
 #include "unit-test-common/test-commons.h"
 
-#include <CL/cl.hpp>
-
-template <cl_context_info Param, typename T>
-void checkParameter(cl_context clContext, T expected) {
-    cl_int error;
-    const auto context = cl::Context(clContext);
-    T result = context.getInfo<Param>(&error);
+template <typename T>
+void checkParameter(cl_context context, cl_context_info paramName, T expected) {
+    T result;
+    cl_int error =
+        clGetContextInfo(context, paramName, sizeof(T), &result, nullptr);
 
     CHECK(error == CL_SUCCESS);
     CHECK(result == expected);
@@ -35,8 +33,7 @@ TEST_SUITE("Context API") {
 
         SUBCASE("should fail with null devices") {
             cl_int error;
-            cl_context context =
-                clCreateContext(nullptr, 1, nullptr, nullptr, nullptr, &error);
+            clCreateContext(nullptr, 1, nullptr, nullptr, nullptr, &error);
             CHECK(error == CL_INVALID_VALUE);
         }
 
@@ -44,7 +41,7 @@ TEST_SUITE("Context API") {
             cl_int error;
 
             const std::vector<cl_device_id> devices = {test::getDevice()};
-            cl_context context = clCreateContext(nullptr, 0, devices.data(),
+            clCreateContext(nullptr, 0, devices.data(),
                                                  nullptr, nullptr, &error);
             CHECK(error == CL_INVALID_VALUE);
         }
@@ -52,7 +49,7 @@ TEST_SUITE("Context API") {
         SUBCASE("should fail with invalid callback parameters") {
             cl_int error;
             const std::vector<cl_device_id> devices = {test::getDevice()};
-            cl_context context = clCreateContext(nullptr, 1, devices.data(),
+            clCreateContext(nullptr, 1, devices.data(),
                                                  nullptr, nullptr, &error);
             CHECK(error == CL_SUCCESS);
         }
@@ -111,24 +108,18 @@ TEST_SUITE("Context API") {
 
         SUBCASE("should return reference count") {
             const auto context = test::getContext();
-            checkParameter<CL_CONTEXT_REFERENCE_COUNT>(context, 1);
+            checkParameter(context, CL_CONTEXT_REFERENCE_COUNT, 1);
         }
 
         SUBCASE("num_devices should always be 1") {
             const auto context = test::getContext();
-            checkParameter<CL_CONTEXT_NUM_DEVICES>(context, 1);
+            checkParameter(context, CL_CONTEXT_NUM_DEVICES, 1);
         }
 
         SUBCASE("should return correct device") {
             const auto context = test::getContext();
-            std::vector<cl_device_id> expected = {context->device};
-            cl_device_id actual[1];
-            cl_int error =
-                clGetContextInfo(context, CL_CONTEXT_DEVICES,
-                                 sizeof(cl_device_id), actual, nullptr);
-
-            CHECK(error == CL_SUCCESS);
-            CHECK(actual[0] == expected[0]);
+            cl_device_id expected = context->device;
+            checkParameter<cl_device_id>(context, CL_CONTEXT_DEVICES, expected);
         }
 
         SUBCASE("properties are not supported yet") {

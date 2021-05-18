@@ -63,7 +63,6 @@ CL_API_ENTRY cl_int CL_API_CALL clReleaseKernel(cl_kernel kernel) {
     kernel->referenceCount--;
 
     if (kernel->referenceCount == 0) {
-        clReleaseProgram(kernel->program);
         delete kernel;
     }
 

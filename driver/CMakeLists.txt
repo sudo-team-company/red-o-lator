@@ -122,6 +122,8 @@ add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-unit>/test/resources
         )
+add_test(NAME red-o-lator-icd-test-unit COMMAND red-o-lator-icd-test-unit --config $<CONFIG>
+        --exe $<TARGET_FILE:red-o-lator-icd-test-unit>)
 
 #############
 # E2E tests #
@@ -138,5 +140,5 @@ add_custom_command(TARGET red-o-lator-icd-test-e2e POST_BUILD
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-e2e>/test/resources
         )
-target_compile_definitions(red-o-lator-icd-test-e2e PRIVATE __CL_ENABLE_EXCEPTIONS)
-
+add_test(NAME red-o-lator-icd-test-e2e COMMAND red-o-lator-icd-test-e2e --config $<CONFIG>
+        --exe $<TARGET_FILE:red-o-lator-icd-test-e2e>)

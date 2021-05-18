@@ -23,7 +23,7 @@ TEST_SUITE("Platform API") {
                 clGetPlatformIDs(1, platformList.data(), nullptr);
 
             CHECK(errorCode == CL_SUCCESS);
-            CHECK(platformList[0] == kPlatform);
+            CHECK(platformList[0] != nullptr);
         }
 
         SUBCASE("platform should have correct vendor") {
@@ -53,13 +53,12 @@ TEST_SUITE("Platform API") {
     TEST_CASE("clGetPlatformInfo") {
         SUBCASE("should correctly return platform param") {
             const std::string expected = "sudo-team-company";
-            const size_t expectedSize = strlen(expected.c_str()) + 1;
 
             auto platform = test::getPlatform();
 
-            char actual[expectedSize];
+            char actual[128];
             const auto errorCode = clGetPlatformInfo(
-                platform, CL_PLATFORM_VENDOR, expectedSize, actual, nullptr);
+                platform, CL_PLATFORM_VENDOR, 128, actual, nullptr);
 
             CHECK(errorCode == CL_SUCCESS);
             CHECK(std::string(actual) == expected);

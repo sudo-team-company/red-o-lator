@@ -18,6 +18,8 @@ struct CLKernel {
              std::vector<std::string> instructions,
              std::vector<KernelArgument> arguments);
 
+    ~CLKernel();
+
     void setArgument(cl_uint index, size_t size, const void* value);
 
     KernelArgument getArgument(cl_uint index);
