@@ -76,8 +76,8 @@ jobs:
         run: sudo mkdir -p /etc/OpenCL/vendors &&
              echo ${{github.workspace}}/build/lib/libred-o-lator-icd.so | sudo tee /etc/OpenCL/vendors/red-o-lator.icd
 
-      - name: Test red-o-lator
-        run: ctest --test-dir ${{github.workspace}}/build
-              -C ${{env.BUILD_TYPE}}
-              -VV --output-on-failure
-              --debug
+#      - name: Test red-o-lator
+#        run: ctest --test-dir ${{github.workspace}}/build
+#              -C ${{env.BUILD_TYPE}}
+#              -VV --output-on-failure
+#              --debug
