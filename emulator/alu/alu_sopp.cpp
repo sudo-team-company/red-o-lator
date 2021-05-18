@@ -29,25 +29,27 @@ void run_s_cbranch_cdbguser(WfStateSOPP& state) {
 }
 
 void run_s_cbranch_execnz(WfStateSOPP& state) {
-    state.PC = state.EXEC != 0 ? state.RELADDR : state.PC + 4;
+    if (state.EXEC != 0)
+        state.PC = state.RELADDR;
 }
 
 void run_s_cbranch_execz(WfStateSOPP& state) {
-    state.PC = state.EXEC == 0 ? state.RELADDR : state.PC + 4;
+    if (state.EXEC == 0)
+        state.PC = state.RELADDR;
 }
 
 void run_s_cbranch_scc0(WfStateSOPP& state) {
-    state.PC = state.SCC == 0 ? state.RELADDR : state.PC + 4;
+    if (state.SCC == 0) state.PC =  state.RELADDR;
 }
 
 void run_s_cbranch_scc1(WfStateSOPP& state) {
-    state.PC = state.SCC == 1 ? state.RELADDR : state.PC + 4;
+    state.PC = (state.SCC == 1) ? state.RELADDR : state.PC;
 }
 void run_s_cbranch_vccnz(WfStateSOPP& state) {
-    state.PC = state.VCC != 0 ? state.RELADDR : state.PC + 4;
+    state.PC = state.VCC != 0 ? state.RELADDR : state.PC;
 }
 void run_s_cbranch_vccz(WfStateSOPP& state) {
-    state.PC = state.VCC == 0 ? state.RELADDR : state.PC + 4;
+    state.PC = state.VCC == 0 ? state.RELADDR : state.PC;
 }
 
 void run_s_decperflevel(WfStateSOPP& state) {

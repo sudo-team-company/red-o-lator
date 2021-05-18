@@ -43,3 +43,13 @@ int32_t sign_ext(int16_t i) {
     return (int32_t) i;
 }
 
+uint64_t to_uin64_t(const std::vector<uint32_t>& data) {
+    uint64_t result = 0;
+    auto maxInd = std::min((size_t) data.size(), size_t(2)) - 1;
+
+    for (size_t i = 0; i <= maxInd; ++i) {
+        result |= (uint64_t(data[i]) << 32 * (maxInd - i));
+    }
+
+    return result;
+}

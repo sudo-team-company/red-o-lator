@@ -9,28 +9,27 @@
 #include "../reg/reg_info.h"
 #include "instr_info.h"
 
-using namespace reg;
 
 enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST };
 
 struct Operand {
     OperandType type;
-    std::variant<int16_t, uint32_t, double, RegisterType> value;
+    std::variant<int16_t, uint32_t, float, RegisterType> value;
     int waitcnt;
-    size_t reg_amount = 0;
+    size_t regAmount = 0;
 
     explicit Operand(int16_t i) : type(INT_CONST), value(i) {}
     explicit Operand(uint32_t u) : type(LITERAL_CONST), value(u) {}
-    explicit Operand(double d) : type(FLOAT), value(d) {}
+    explicit Operand(float f) : type(FLOAT), value(f) {}
     explicit Operand(RegisterType regs, size_t n)
-        : type(REGISTER), value(regs), reg_amount(n) {}
+        : type(REGISTER), value(regs), regAmount(n) {}
 
     OperandType get_type() const {
         return type;
     }
 
     size_t get_reg_amount() const {
-        return reg_amount;
+        return regAmount;
     }
 };
 
@@ -51,7 +50,19 @@ struct Instruction {
         return operands.size();
     }
 
+    uint32_t get_addr() const {
+        return addr;
+    };
+
    private:
     InstrKey instrKey;
     std::vector<std::unique_ptr<Operand>> operands;
+    uint32_t addr;
+};
+
+struct KernelCode {
+    Instruction* get_instr(uint64_t);
+
+   private:
+    std::vector<std::unique_ptr<Instruction>> code;
 };

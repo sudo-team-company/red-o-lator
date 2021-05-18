@@ -8,19 +8,15 @@
 #include "../reg/register.h"
 
 struct WfStateSOP1 {
-    uint64_t SDST;
-    uint64_t SSRC0;
-    uint64_t EXEC;
-    uint32_t M0;
-    uint64_t PC;
-    bool SCC;
-
-    WfStateSOP1(uint64_t SDST,
-                uint64_t SSRC0,
-                uint64_t EXEC,
-                uint32_t M0,
-                uint64_t PC,
-                bool SCC)
+    uint64_t SDST = 0;
+    uint64_t SSRC0 = 0;
+    uint64_t EXEC = 0;
+    uint32_t M0 = 0;
+    uint64_t PC = 0;
+    bool SCC = false;
+    WfStateSOP1() {};
+    WfStateSOP1(
+        uint64_t SDST, uint64_t SSRC0, uint64_t EXEC, uint32_t M0, uint64_t PC, bool SCC)
         : SDST(SDST), SSRC0(SSRC0), EXEC(EXEC), M0(M0), PC(PC), SCC(SCC) {}
 };
 

@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <cassert>
 #include <cstdint>
+#include <vector>
 
 uint16_t bit_count(uint32_t);
 
@@ -20,6 +21,8 @@ uint64_t rev_bit(uint64_t);
 int32_t sign_ext(int8_t);
 
 int32_t sign_ext(int16_t);
+
+uint64_t to_uin64_t(const std::vector<uint32_t>&);
 
 template<typename T>
 static inline

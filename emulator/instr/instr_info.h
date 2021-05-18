@@ -701,14 +701,14 @@ enum InstrKey {
     /**
      * Syntax:S_SET_GPR_IDX_ON SSRC0(0), IMM8
      * Description:  Enable GPR indexing mode. Vector operations after this will
-     * perform relative GPR addressing based on the contents of M0. The
-     * structure SQ_M0_GPR_IDX_WORD may be used to decode M0. The raw
+     * perform relative GPR addressing based on the contents of m0Reg_. The
+     * structure SQ_M0_GPR_IDX_WORD may be used to decode m0Reg_. The raw
      * contents of the S1 field are read and used to set the enable bits.
      * S1[0] = VSRC0_REL, S1[1] = VSRC1_REL, S1[2] = VSRC2_REL and S1[3]
      * = VDST_REL
      * Operation:
      * MODE = (MODE & ~(1U<<27)) | (1U<<27)
-     * M0 = (M0 & 0xffff0f00) | ((IMM8 & 15)<<12) | (SSRC0 & 0xff)
+     * m0Reg_ = (m0Reg_ & 0xffff0f00) | ((IMM8 & 15)<<12) | (SSRC0 & 0xff)
      */
     S_SET_GPR_IDX_ON,
     /**
@@ -852,15 +852,15 @@ enum InstrKey {
     /**
      * Syntax: S_SENDMSG SENDMSG(MSG, GS_OP, STREAMID)
      * Description: Send message. List of messages:
-     *      INTERRUPT, MSG_INTERRUPT - interrupt. M0&0xff - carries user data,
+     *      INTERRUPT, MSG_INTERRUPT - interrupt. m0Reg_&0xff - carries user data,
      * IDs also sent (wave_id, cu_id, ...) GS, MSG_GS GS_DONE, MSG_GS_DONE
      *      SYSMSG, MSG_SYSMSG, SYSTEM, MSG_SYSTEM
      * List of the GSOP's:
-     *      NOP, GS_NOP - M0&0xff defines wave id. only GS_DONE
+     *      NOP, GS_NOP - m0Reg_&0xff defines wave id. only GS_DONE
      *      CUT, GS_CUT - (SIMM16 & 0x300)>>8 - streamid, EXEC also sent,
-     * M0&0xff - gs waveID EMIT, GS_EMIT - (SIMM16 & 0x300)>>8 - streamid, EXEC
-     * also sent, M0&0xff - gs waveID EMIT_CUT, GS_EMIT_CUT, EMIT-CUT - (SIMM16
-     * & 0x300)>>8 - streamid, EXEC also sent, M0&0xff - gs waveID
+     * m0Reg_&0xff - gs waveID EMIT, GS_EMIT - (SIMM16 & 0x300)>>8 - streamid, EXEC
+     * also sent, m0Reg_&0xff - gs waveID EMIT_CUT, GS_EMIT_CUT, EMIT-CUT - (SIMM16
+     * & 0x300)>>8 - streamid, EXEC also sent, m0Reg_&0xff - gs waveID
      */
     S_SENDMSG,
     /**
@@ -872,7 +872,7 @@ enum InstrKey {
      * Syntax: S_SET_GPR_IDX_MODE SIMM16
      * Description: Set GPR indexing mode (12-15 bits in MO).
      * Operation:
-     * M0 = (M0 & 0xffff0fff) | ((SIMM16 & 15)<<12)
+     * m0Reg_ = (m0Reg_ & 0xffff0fff) | ((SIMM16 & 15)<<12)
      */
     S_SET_GPR_IDX_MODE,
     /**
@@ -914,7 +914,7 @@ enum InstrKey {
     S_TRAP,
     /**
      *  Syntax: S_TTRACEDATA
-     *  Description: Send M0 as user data to thread-trace.
+     *  Description: Send m0Reg_ as user data to thread-trace.
      */
     S_TTRACEDATA,
     /**
@@ -1177,25 +1177,25 @@ enum InstrKey {
     /**
      * Syntax: S_MOVRELD_B32 SDST, SSRC0
      * Operation:
-     * SGPR[SDST_NUMBER + M0] = SSRC0
+     * SGPR[SDST_NUMBER + m0Reg_] = SSRC0
      */
     S_MOVRELD_B32,
     /**
      * Syntax: S_MOVRELD_B64 SDST, SSRC0
      * Operation:
-     * SGPR[SDST_NUMBER + M0 : SDST_NUMBER + M0 + 1] = SSRC0
+     * SGPR[SDST_NUMBER + m0Reg_ : SDST_NUMBER + m0Reg_ + 1] = SSRC0
      */
     S_MOVRELD_B64,
     /**
      * Syntax: S_MOVRELS_B32 SDST, SSRC0
      * Operation:
-     * SDST = SGPR[SSRC0_NUMBER + M0]
+     * SDST = SGPR[SSRC0_NUMBER + m0Reg_]
      */
     S_MOVRELS_B32,
     /**
      * Syntax: S_MOVRELS_B64 SDST(2), SSRC0(2)
      * Operation:
-     * SDST = SGPR[SSRC0_NUMBER + M0 : SSRC0_NUMBER + M0 + 1]
+     * SDST = SGPR[SSRC0_NUMBER + m0Reg_ : SSRC0_NUMBER + m0Reg_ + 1]
      */
     S_MOVRELS_B64,
     /**
@@ -1273,7 +1273,7 @@ enum InstrKey {
     /**
      * Syntax S_SET_GPR_IDX_IDX SSRC0(1)
      * Operation:
-     * M0 = (M0 & 0xffffff00) | (SSRC0 & 0xff)
+     * m0Reg_ = (m0Reg_ & 0xffffff00) | (SSRC0 & 0xff)
      */
     S_SET_GPR_IDX_IDX,
     /**

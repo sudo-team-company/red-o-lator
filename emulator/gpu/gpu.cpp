@@ -1,5 +1,5 @@
 //
-// Created by Diana Kudaiberdieva on 15.05.2021.
+// Created by Diana Kudaiberdieva
 //
 
 #include "gpu.h"

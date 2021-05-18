@@ -334,8 +334,16 @@ void run_s_xor_saveexec_b64(WfStateSOP1& state) {
     state.SCC = state.EXEC != 0;
 }
 
-void run_sop1(InstrKey instr, WfStateSOP1& state) {
-    switch (instr) {
+void run_sop1(const Instruction& instr, Wavefront* wf) {
+    assert(instr.get_operands_count() <= 2 && "Unexpected amount of operands for SOP1");
+
+    auto state = WfStateSOP1(wf);
+
+    //S_CBRANCH_JOIN, S_SET_GPR_IDX_IDX only SRC0
+    // S_RFE_B64 , S_SETPC_B64 src0(2)
+    //S_GETPC_B64 only SDTS(2)
+
+    switch (instr.get_instr_key()) {
         case S_ABS_I32:
             run_s_abs_i32(state);
             break;
@@ -388,6 +396,7 @@ void run_sop1(InstrKey instr, WfStateSOP1& state) {
             run_s_brev_b64(state);
             break;
         case S_CBRANCH_JOIN:
+            //only dst
             run_s_cbranch_join(state);
             break;
         case S_CMOV_B32:
@@ -421,6 +430,7 @@ void run_sop1(InstrKey instr, WfStateSOP1& state) {
             run_s_flbit_i32_i64(state);
             break;
         case S_GETPC_B64:
+            //only dst
             run_s_getpc_b64(state);
             break;
         case S_MOV_B32:
@@ -466,6 +476,7 @@ void run_sop1(InstrKey instr, WfStateSOP1& state) {
             run_s_quadmask_b64(state);
             break;
         case S_RFE_B64:
+            //only src0
             run_s_rfe_b64(state);
             break;
         case S_SET_GPR_IDX_IDX:

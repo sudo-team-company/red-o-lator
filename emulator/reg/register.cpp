@@ -6,7 +6,6 @@
 
 #include "register.h"
 
-using namespace reg;
 
 ModeReg::ModeReg(uint32_t i) {
     value = std::bitset<32>(i);

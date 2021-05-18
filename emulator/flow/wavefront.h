@@ -5,6 +5,8 @@
 #ifndef RED_O_LATOR_WAVEFRONT_H
 #define RED_O_LATOR_WAVEFRONT_H
 
+#define DEFAULT_WAVEFRONT_SIZE 64
+
 #include <array>
 #include <cassert>
 #include <cstdint>
@@ -12,59 +14,85 @@
 #include <vector>
 #include "../instr/instruction.h"
 #include "../reg/register.h"
+#include "kernel.h"
+#include "wf_state.h"
 
-struct WorkGroup {};
+struct Wavefront;
+struct WorkItem;
+
+struct WorkGroup {
+    int IDX, IDY, IDZ;
+    int sizeX, sizeY, sizeZ;
+    size_t size;
+
+   public:
+    KernelCode* kernelCode;
+    std::vector<std::unique_ptr<WorkItem>> workItems;
+    std::vector<std::unique_ptr<Wavefront>> wavefronts;
+
+    WorkGroup(int sizeX, int sizeY, int sizeZ)
+        : sizeX(sizeX), sizeY(sizeY), sizeZ(sizeZ) {}
+    int actualSizeX, actualSizeY, actualSizeZ;
+
+    void setIds(int idX, int idY, int idZ);
+    void setActualSize(int sizeX, int sizeY, int sizeZ);
+};
 
 struct Wavefront {
-    std::shared_ptr<WorkGroup> WG;
-    uint64_t EXEC;
-    uint64_t PC;
-    uint64_t VCC;
-    uint32_t M0;
-    bool SCC;
-    StatusReg STATUS_REG;
-    ModeReg MODE_REG;
+    WorkGroup* workGroup;
+    std::vector<uint32_t> scalarRegFile;
+    std::vector<uint32_t> vectorRegFile;
+    uint64_t programCounter;
+    uint64_t execReg;
+    uint64_t vccReg;
+    std::unique_ptr<StatusReg> statusReg;
+    std::unique_ptr<ModeReg> modeReg;
+    uint32_t m0Reg;
+    int vgprsnum;
+    bool sccReg;
 
-    std::vector<uint32_t> S_REG_FILE;
+    std::vector<WorkItem*> workItems;
+    bool atBarrier;
+    bool completed;
 
-    explicit Wavefront(int sgprsnum = 16)
-        : EXEC(0), PC(0), VCC(0), STATUS_REG(0), MODE_REG(0) {
-        S_REG_FILE = std::vector<uint32_t>(sgprsnum);
+    explicit Wavefront(WorkGroup* wg, int sgprsnum, int vgprsnum)
+        : workGroup(wg),
+          programCounter(0),
+          execReg(0),
+          vccReg(0),
+          statusReg(std::make_unique<StatusReg>(0)),
+          modeReg(std::make_unique<ModeReg>(0)),
+          vgprsnum(vgprsnum),
+          atBarrier(false),
+          completed(false) {
+        scalarRegFile = std::vector<uint32_t>(sgprsnum);
+        vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum);
     }
 
-    std::vector<uint32_t> read_reg(const reg::RegisterType regType,
-                                   size_t reg_amount) {
-        std::vector<uint32_t> data(0);
+    Instruction* get_cur_instr();
+    void to_next_instr();
 
-        bool isScalarReg = is_s_reg(regType);
-        bool isVectorReg = is_v_reg(regType);
+    void set_v_reg(size_t wiInd, size_t vInd, uint32_t value);
 
-        assert(reg_amount > 1 && (isScalarReg || isVectorReg) && "Only scalar or vector register can be multiple operands");
+    WfStateSOP1 get_sop1_state(const Instruction&);
 
-        if (isScalarReg) {
-            for (size_t i = 0; i < reg_amount; i++) {
-                auto cur_reg = static_cast<int>(regType) - reg::S0 + i;
-                //todo there is clear instruction for this case in specification. Think later
-                assert(is_valid_register_ind(cur_reg) && "Scalar register is out of range");
-                data.push_back(S_REG_FILE[cur_reg]);
-            }
-        } else if (isVectorReg) {
-            //todo
-        } else if (regType == reg::EXEC) {
-            data.push_back(uint32_t(EXEC));
-            data.push_back(uint32_t(EXEC >> 32));
-        } else if (regType == reg::SCC) {
-            data.push_back((uint32_t) SCC);
-        } else if (regType == reg::VCC) {
-            data.push_back(uint32_t(VCC));
-            data.push_back(uint32_t(VCC >> 32));
-        } else if (regType == reg::M0) {
-            data.push_back(M0);
-        } else {
-            assert(false && "Another register types are unsupported yet");
-        }
-        return data;
-    };
+   private:
+    std::vector<uint32_t> read_operand(const Operand&);
+};
+
+struct WorkItem {
+    WorkGroup* workGroup;
+    int localIdX, localIdY, localIdZ;
+    int globalIdX, globalIdY, globalIdZ;
+
+    WorkItem(WorkGroup* workGroup, int idX, int idY, int idZ)
+        : workGroup(workGroup),
+          localIdX(idX),
+          localIdY(idY),
+          localIdZ(idZ),
+          globalIdX(workGroup->IDX * workGroup->sizeX + idX),
+          globalIdY(workGroup->IDY * workGroup->sizeY + idY),
+          globalIdZ(workGroup->IDZ * workGroup->sizeZ + idZ) {}
 };
 
 #endif  // RED_O_LATOR_WAVEFRONT_H

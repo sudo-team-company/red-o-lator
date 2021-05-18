@@ -5,7 +5,6 @@
 #ifndef RED_O_LATOR_REG_INFO_H
 #define RED_O_LATOR_REG_INFO_H
 
-namespace reg {
 enum RegisterType {
     /**
      * Points to the memory address of the next shader instruction to execute.
@@ -467,6 +466,5 @@ enum RegisterType {
     V254,
     V255
 };
-}
 
 #endif  // RED_O_LATOR_REG_INFO_H

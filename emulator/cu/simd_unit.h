@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <memory>
+#include "../common/types.h"
 
 struct ComputeUnit;
 
@@ -19,6 +20,8 @@ struct SimdUnit {
     SimdUnit(ComputeUnit* cu) :
           cu(cu),
           vectorRegFile(new uint8_t[64 * 1024]) {}
+
+    void run(time_t);
 };
 
 #endif  // RED_O_LATOR_SIMD_UNIT_H

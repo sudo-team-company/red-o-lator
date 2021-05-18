@@ -1,6 +1,7 @@
 * each SIMD has:
     - its own PC
     - instruction buffer for 10 wavefronts
+    - 64KB reg gile
 * Wavefront has:
 
 * Cluster of 4 CU:
@@ -16,6 +17,12 @@
     - 64KB Lds
     - 16 buffers to track barrier instructions, which force a wavefront to synchronize globally
     - 8KB scalar register file that is divided into 512 entries for each SIMD
+
+* MEMORY CONTOLLER:
+    - The GCN memory controller has direct access to all GCN device
+      memory and the host-specified areas of system memory. To satisfy read and write requests, the
+      memory controller performs the functions of a direct-memory access (DMA) controller, including
+      computing memory-address offsets based on the format of the requested data in memory. I
 
 Вопросы:
 1. 128?? Полтакта? While the SIMDfs in each Compute Unit can execute 128 floating point operations per clock cycle

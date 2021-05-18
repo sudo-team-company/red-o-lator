@@ -37,3 +37,16 @@ TEST_CASE("rev_bit - reverses bits") {
         CHECK(rev_bit(value32) == expected);
     }
 }
+
+TEST_CASE("to_uin64_t - converts vector<uint32_t> to uint64_t") {
+    SUBCASE("vector size is 2") {
+        auto data = std::vector<uint32_t>{0x12344321, 0x56788765, 0xffffffff};
+        uint64_t expectedResult = 0x1234432156788765;
+        CHECK(to_uin64_t(data) == expectedResult);
+    }
+    SUBCASE("vector size is 1") {
+        auto data = std::vector<uint32_t>{0x12344321};
+        uint64_t expectedResult = 0x0000000012344321;
+        CHECK(to_uin64_t(data) == expectedResult);
+    }
+}

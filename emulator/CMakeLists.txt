@@ -2,6 +2,7 @@ add_executable(emulator
         util/util.cpp
         flow/wavefront.cpp
         alu/alu_sop1.cpp
+        alu/alu.cpp
         alu/alu_sop2.cpp
         alu/alu_sopp.cpp
         alu/alu_sopc.cpp
@@ -17,7 +18,8 @@ add_executable(emulator
         cu/wf_buffer.cpp
         gpu/cluster.cpp
         gpu/gpu.cpp
-        gpu/command_queue.h
+        gpu/command_processor.cpp
+        flow/dispatcher.cpp
         main.cpp
         )
 

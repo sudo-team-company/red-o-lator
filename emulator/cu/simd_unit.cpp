@@ -3,3 +3,6 @@
 //
 
 #include "simd_unit.h"
+void SimdUnit::run(time_t time) {
+
+}

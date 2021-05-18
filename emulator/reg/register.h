@@ -10,15 +10,15 @@
 #include "reg_info.h"
 
 constexpr bool is_valid_register_ind(int i) {
-    return i >= reg::PC && i <= reg::V255;
+    return i >= PC && i <= V255;
 }
 
-constexpr bool is_s_reg(reg::RegisterType type) {
-    return type >= reg::S0 && type <= reg::S101;
+constexpr bool is_s_reg(RegisterType type) {
+    return type >= S0 && type <= S101;
 }
 
-constexpr bool is_v_reg(reg::RegisterType type) {
-    return type >= reg::V0 && type <= reg::V255;
+constexpr bool is_v_reg(RegisterType type) {
+    return type >= V0 && type <= V255;
 }
 
 struct ModeReg {
@@ -179,6 +179,6 @@ struct StatusReg {
     bool must_export();    // 27
 };
 
-int get_register_size(reg::RegisterType registerType);
+int get_register_size(RegisterType registerType);
 
 #endif  // RED_O_LATOR_REGISTER_H

@@ -9,23 +9,28 @@
 #include "scalar_unit.h"
 #include "scheduler.h"
 #include "simd_unit.h"
+#include "../flow/wavefront.h"
 
 #define SIMD_COUNT 4
 
 struct ComputeUnit {
     std::array<std::unique_ptr<SimdUnit>, SIMD_COUNT> simds;
     std::unique_ptr<ScalarUnit> scalarUnit;
-    std::unique_ptr<uint8_t[]> localDS;
+//    std::unique_ptr<uint8_t[]> localDS;
     std::unique_ptr<Scheduler> scheduler;
 
     ComputeUnit()
         : scalarUnit(new ScalarUnit(this)),
-          localDS(new uint8_t[64 * 1024]),
+//          localDS(new uint8_t[64 * 1024]),
           scheduler(new Scheduler(this)) {
         std::fill(simds.begin(), simds.end(), new SimdUnit(this));
     }
 
     static ComputeUnit build();
+
+    void runWorkGroup(WorkGroup* wg);
+
+    void runWavefront(Wavefront*);
 };
 
 
