@@ -7,6 +7,7 @@ on:
 env:
   BUILD_TYPE: Release
   PKG_CONFIG_PATH: ${{github.workspace}}/CLRX/lib/pkgconfig
+  THREAD_COUNT: 9
 
 jobs:
   build:
@@ -30,7 +31,7 @@ jobs:
           cmake -H${{github.workspace}}/OpenCL-ICD-Loader -B ${{github.workspace}}/OpenCL-ICD-Loader/build
 
       - name: Build ICD Loader
-        run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build --config Debug -j 16
+        run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build --config Debug -j ${{env.THREAD_COUNT}}
 
       - name: Install ICD Loader
         run: cmake --install ${{github.workspace}}/OpenCL-ICD-Loader/build
@@ -49,7 +50,7 @@ jobs:
              -DBUILD_STATIC_EXE=OFF
 
       - name: Build CLRX
-        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Debug -j 16
+        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Debug -j ${{env.THREAD_COUNT}}
 
       - name: Install CLRX
         run: cmake --install ${{github.workspace}}/CLRX-mirror/build/ --config Debug --prefix ${{github.workspace}}/CLRX
@@ -61,4 +62,7 @@ jobs:
               -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
 
       - name: Build red-o-lator
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j 16
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j ${{env.THREAD_COUNT}}
+
+      - name: Test red-o-lator
+        run: ctest -C ${{env.BUILD_TYPE}} --parallel ${{env.THREAD_COUNT}}
