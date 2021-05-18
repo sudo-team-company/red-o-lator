@@ -46,10 +46,10 @@ TEST_SUITE("Device API") {
                 platform, CL_DEVICE_TYPE_ALL, 1, deviceList.data(), nullptr);
 
             REQUIRE(errorCode == CL_SUCCESS);
-            REQUIRE(deviceList[0] == kDevice);
+            REQUIRE(deviceList[0] != nullptr);
         }
 
-        SUBCASE("should fail if platfrom is null") {
+        SUBCASE("should fail if platform is null") {
             const auto errorCode = clGetDeviceIDs(nullptr, CL_DEVICE_TYPE_ALL,
                                                   1, nullptr, nullptr);
 
@@ -82,7 +82,7 @@ TEST_SUITE("Device API") {
                                devices.data(), nullptr);
 
             REQUIRE(errorCode == CL_SUCCESS);
-            REQUIRE(devices[0] == kDevice);
+            REQUIRE(devices[0] != nullptr);
         }
 
         SUBCASE("should return device if combination of flags is passed") {
@@ -94,14 +94,14 @@ TEST_SUITE("Device API") {
                                1, devices.data(), nullptr);
 
             REQUIRE(errorCode == CL_SUCCESS);
-            REQUIRE(devices[0] == kDevice);
+            REQUIRE(devices[0] != nullptr);
         }
     }
 
     TEST_CASE("clGetDeviceInfo") {
         SUBCASE("Hardcoded parameters") {
             SUBCASE("platform") {
-                checkDeviceParameter(CL_DEVICE_PLATFORM, kPlatform);
+                checkDeviceParameter(CL_DEVICE_PLATFORM, test::getPlatform());
             }
 
             SUBCASE("parent device") {
@@ -111,18 +111,18 @@ TEST_SUITE("Device API") {
 
             SUBCASE("OpenCL version") {
                 checkDeviceStringParameter(CL_DEVICE_OPENCL_C_VERSION,
-                                           kPlatform->openClVersion);
+                                           test::getPlatform()->openClVersion);
             }
 
             SUBCASE("driver version") {
                 checkDeviceStringParameter(CL_DRIVER_VERSION,
-                                           kPlatform->driverVersion);
+                                           test::getPlatform()->driverVersion);
             }
 
             SUBCASE("device version") {
                 const auto deviceVersion =
-                    std::string(kPlatform->openClVersion) + " AMD (" +
-                    kPlatform->driverVersion + ")";
+                    std::string(test::getPlatform()->openClVersion) + " AMD (" +
+                    test::getPlatform()->driverVersion + ")";
                 checkDeviceStringParameter(CL_DEVICE_VERSION, deviceVersion);
             }
 
@@ -154,7 +154,7 @@ TEST_SUITE("Device API") {
 
         SUBCASE("should not fail with AMD ext") {
             checkDeviceStringParameter(CL_DEVICE_BOARD_NAME_AMD,
-                                          "Radeon RX 570 Series");
+                                       "Radeon RX 570 Series");
         }
 
         SUBCASE("should fail with null device") {
