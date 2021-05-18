@@ -39,10 +39,14 @@ const std::set<std::string>
 
 const std::set<std::string>
     ImageKernelArgumentInfo::typeNameVariants =  // NOLINT(cert-err58-cpp)
-    std::set<std::string>{"image",          "image1d", "image1d_array",
-                          "image1d_buffer", "image2d", "image2d_array",
-                          "image3d"};
+    std::set<std::string>{"image1d_t", "image1d_array_t",
+                          "image1d_buffer_t", "image2d_t", "image2d_array_t",
+                          "image3d_t"};
 
 const std::set<std::string>
     SamplerKernelArgumentInfo::typeNameVariants =  // NOLINT(cert-err58-cpp)
-    std::set<std::string>{"sampler"};
+    std::set<std::string>{"sampler_t"};
+
+const std::set<std::string>
+    EventKernelArgumentInfo::typeNameVariants =  // NOLINT(cert-err58-cpp)
+    std::set<std::string>{"event_t"};

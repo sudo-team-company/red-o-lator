@@ -7,7 +7,7 @@
         const auto out = std::make_shared<type>(); \
         parse(out);                                \
         result = out;                              \
-    } while (0);
+    } while (0)
 
 std::shared_ptr<KernelArgumentInfo> KernelArgumentInfoParser::parse() {
     auto splitLine =
@@ -37,27 +37,31 @@ std::shared_ptr<KernelArgumentInfo> KernelArgumentInfoParser::parse() {
 
     std::shared_ptr<KernelArgumentInfo> result;
     if (utils::endsWith(argType, "*")) {
-        PARSE_ARGUMENT(PointerKernelArgumentInfo)
+        PARSE_ARGUMENT(PointerKernelArgumentInfo);
 
     } else if (utils::contains(ScalarKernelArgumentInfo::typeNameVariants,
                                argType)) {
-        PARSE_ARGUMENT(ScalarKernelArgumentInfo)
+        PARSE_ARGUMENT(ScalarKernelArgumentInfo);
 
     } else if (utils::contains(VectorKernelArgumentInfo::typeNameVariants,
                                argType)) {
-        PARSE_ARGUMENT(VectorKernelArgumentInfo)
+        PARSE_ARGUMENT(VectorKernelArgumentInfo);
 
     } else if (utils::contains(StructureKernelArgumentInfo::typeNameVariants,
                                argType)) {
-        PARSE_ARGUMENT(StructureKernelArgumentInfo)
+        PARSE_ARGUMENT(StructureKernelArgumentInfo);
 
     } else if (utils::contains(ImageKernelArgumentInfo::typeNameVariants,
                                argType)) {
-        PARSE_ARGUMENT(ImageKernelArgumentInfo)
+        PARSE_ARGUMENT(ImageKernelArgumentInfo);
 
     } else if (utils::contains(SamplerKernelArgumentInfo::typeNameVariants,
                                argType)) {
-        PARSE_ARGUMENT(SamplerKernelArgumentInfo)
+        PARSE_ARGUMENT(SamplerKernelArgumentInfo);
+
+    } else if (utils::contains(EventKernelArgumentInfo::typeNameVariants,
+                               argType)) {
+        PARSE_ARGUMENT(EventKernelArgumentInfo);
     }
 
     result->index = argIndex;
@@ -164,6 +168,11 @@ void KernelArgumentInfoParser::parse(
             throwParseError("sampler", param);
         }
     }
+}
+
+void KernelArgumentInfoParser::parse(
+    const std::shared_ptr<EventKernelArgumentInfo>& outInfo) {
+    throw KernelArgumentInfoParseError("Event parsing is not supported yet");
 }
 
 void KernelArgumentInfoParser::parse(
