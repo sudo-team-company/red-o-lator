@@ -2,4 +2,4 @@
 // Created by Diana Kudaiberdieva.
 //
 
-#include "kernel.h"
+#include "kernel_config.h"

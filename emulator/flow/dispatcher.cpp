@@ -25,10 +25,10 @@ WorkGroup* Dispatcher::next_wg() {
 
     auto workGroup = new WorkGroup{kernelInfo.ndRangeSizeX, kernelInfo.ndRangeSizeY,
                                    kernelInfo.ndRangeSizeZ};
-    workGroup->setIds(curIdX, curIdY, curIdZ);
-    workGroup->setActualSize(std::min(kernelInfo.wgSizeX, xSize),
-                             std::min(kernelInfo.wgSizeY, ySize),
-                             std::min(kernelInfo.wgSizeZ, zSize));
+    workGroup->set_ids(curIdX, curIdY, curIdZ);
+    workGroup->set_actual_size(std::min(kernelInfo.wgSizeX, xSize),
+                               std::min(kernelInfo.wgSizeY, ySize),
+                               std::min(kernelInfo.wgSizeZ, zSize));
     workGroup->kernelCode = code;
     set_workitems(workGroup);
     set_wavefronts(workGroup);
@@ -81,12 +81,12 @@ void Dispatcher::init_wf_regs(Wavefront* wf) {
     }
 
     if (kernelInfo.enable_sgpr_workgroup_info()) {
-        assert("Unsupported");
+        assert(false && "Unsupported");
         sgprInd++;
     }
 
     if (kernelInfo.enable_scratch()) {
-        assert("Unsupported");
+        assert(false && "Unsupported");
         sgprInd++;
     }
 
@@ -112,5 +112,5 @@ void Dispatcher::init_mode_reg(Wavefront* wf) const {
 }
 
 void Dispatcher::init_status_reg(Wavefront* wf) {
-    // todo
+    //todo ?
 }

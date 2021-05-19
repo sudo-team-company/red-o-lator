@@ -14,7 +14,7 @@
 #include <vector>
 #include "../instr/instruction.h"
 #include "../reg/register.h"
-#include "kernel.h"
+#include "kernel_config.h"
 #include "wf_state.h"
 
 struct Wavefront;
@@ -23,7 +23,6 @@ struct WorkItem;
 struct WorkGroup {
     int IDX, IDY, IDZ;
     int sizeX, sizeY, sizeZ;
-    size_t size;
 
    public:
     KernelCode* kernelCode;
@@ -34,8 +33,9 @@ struct WorkGroup {
         : sizeX(sizeX), sizeY(sizeY), sizeZ(sizeZ) {}
     int actualSizeX, actualSizeY, actualSizeZ;
 
-    void setIds(int idX, int idY, int idZ);
-    void setActualSize(int sizeX, int sizeY, int sizeZ);
+    void set_ids(int idX, int idY, int idZ);
+    void set_actual_size(int sizeX, int sizeY, int sizeZ);
+    bool all_wf_completed();
 };
 
 struct Wavefront {
@@ -65,19 +65,34 @@ struct Wavefront {
           vgprsnum(vgprsnum),
           atBarrier(false),
           completed(false) {
-        scalarRegFile = std::vector<uint32_t>(sgprsnum);
-        vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum);
+        scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));
+        vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
     }
 
-    Instruction* get_cur_instr();
+    Instruction* get_cur_instr() const;
     void to_next_instr();
 
     void set_v_reg(size_t wiInd, size_t vInd, uint32_t value);
 
     WfStateSOP1 get_sop1_state(const Instruction&);
+    void update_with_sop1_state(const Instruction&, const WfStateSOP1&);
 
-   private:
+    WfStateSOP2 get_sop2_state(const Instruction&);
+    void update_with_sop2_state(const Instruction&, const WfStateSOP2&);
+
+    WfStateSOPK get_sopk_state() const;
+    WfStateSOPK get_sopk_state(const Instruction&);
+    void update_with_sopk_state(const Instruction&, const WfStateSOPK&);
+
+    WfStateSOPC get_sopc_state(const Instruction&);
+    void update_with_sopc_state(const WfStateSOPC&);
+
+    WfStateSOPP get_common_sopp_state(const Instruction& instruction) const;
+    void update_with_common_sopp_state(const Instruction& instruction, const WfStateSOPP& state);
+
     std::vector<uint32_t> read_operand(const Operand&);
+
+    void write_operand(const Operand&, uint64_t);
 };
 
 struct WorkItem {

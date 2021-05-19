@@ -4,42 +4,49 @@
 
 #include "alu.h"
 
-void run_s_barrier(WfStateSOPP& state) {
-    // todo
-}
+void set_reladdr_and_run(const Instruction& instruction,
+                         Wavefront* wf,
+                         WfStateSOPP& state,
+                         void (*exec)(WfStateSOPP&));
 
 void run_s_branch(WfStateSOPP& state) {
     state.PC = state.RELADDR;
 }
 
 void run_s_cbranch_cdbgsys(WfStateSOPP& state) {
-    // todo
+    if (state.STATUS->cond_dbg_sys()) {
+        state.PC = state.RELADDR;
+    }
 }
 
 void run_s_cbranch_cdbgsys_and_user(WfStateSOPP& state) {
-    // todo
+    if (state.STATUS->cond_dbg_sys() && state.STATUS->cond_dbg_user()) {
+        state.PC = state.RELADDR;
+    }
 }
 
 void run_s_cbranch_cdbgsys_or_user(WfStateSOPP& state) {
-    // todo
+    if (state.STATUS->cond_dbg_sys() || state.STATUS->cond_dbg_user()) {
+        state.PC = state.RELADDR;
+    }
 }
 
 void run_s_cbranch_cdbguser(WfStateSOPP& state) {
-    // todo
+    if (state.STATUS->cond_dbg_user()) {
+        state.PC = state.RELADDR;
+    }
 }
 
 void run_s_cbranch_execnz(WfStateSOPP& state) {
-    if (state.EXEC != 0)
-        state.PC = state.RELADDR;
+    if (state.EXEC != 0) state.PC = state.RELADDR;
 }
 
 void run_s_cbranch_execz(WfStateSOPP& state) {
-    if (state.EXEC == 0)
-        state.PC = state.RELADDR;
+    if (state.EXEC == 0) state.PC = state.RELADDR;
 }
 
 void run_s_cbranch_scc0(WfStateSOPP& state) {
-    if (state.SCC == 0) state.PC =  state.RELADDR;
+    if (state.SCC == 0) state.PC = state.RELADDR;
 }
 
 void run_s_cbranch_scc1(WfStateSOPP& state) {
@@ -53,39 +60,35 @@ void run_s_cbranch_vccz(WfStateSOPP& state) {
 }
 
 void run_s_decperflevel(WfStateSOPP& state) {
-    //todo
-}
-
-void run_s_endpgm(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_endpgm_ordered_ps_done(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_endpgm_saved(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_icache_inv(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_incperflevel(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_nop(WfStateSOPP& state) {
-    //todo
+    //do nothing
 }
 
 void run_s_sendmsg(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_sendmsghalt(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_set_gpr_idx_mode(WfStateSOPP& state) {
@@ -93,79 +96,86 @@ void run_s_set_gpr_idx_mode(WfStateSOPP& state) {
 }
 
 void run_s_set_gpr_idx_off(WfStateSOPP& state) {
-    state.MODE.gpr_idx_en(0);
+    state.MODE->gpr_idx_en(0);
 }
 
 void run_s_sethalt(WfStateSOPP& state) {
-    state.STATUS.halt(state.SIMM16 & 1);
+    state.STATUS->halt(state.SIMM16 & 1);
 }
 
 void run_s_setkill(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_setprio(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_sleep(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 void run_s_trap(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_ttracedata(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
 void run_s_waitcnt(WfStateSOPP& state) {
-    //todo
+    // todo
 }
 
-void run_sopp(InstrKey instr, WfStateSOPP& state) {
-    switch (instr) {
+void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
+    auto instrKey = instruction.get_instr_key();
+
+    auto state = wavefront->get_common_sopp_state(instruction);
+
+    switch (instrKey) {
         case S_BARRIER:
-            run_s_barrier(state);
+        case S_ENDPGM:
+            assert("unexpected instruction in SOPP");
             break;
+
         case S_BRANCH:
+            set_reladdr_and_run(instruction, wavefront, state, run_s_branch);
             run_s_branch(state);
             break;
         case S_CBRANCH_CDBGSYS:
-            run_s_cbranch_cdbgsys(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_cdbgsys);
             break;
         case S_CBRANCH_CDBGSYS_AND_USER:
-            run_s_cbranch_cdbgsys_and_user(state);
+            set_reladdr_and_run(instruction, wavefront, state,
+                                run_s_cbranch_cdbgsys_and_user);
             break;
         case S_CBRANCH_CDBGSYS_OR_USER:
-            run_s_cbranch_cdbgsys_or_user(state);
+            set_reladdr_and_run(instruction, wavefront, state,
+                                run_s_cbranch_cdbgsys_or_user);
             break;
         case S_CBRANCH_CDBGUSER:
-            run_s_cbranch_cdbguser(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_cdbguser);
             break;
         case S_CBRANCH_EXECNZ:
-            run_s_cbranch_execnz(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_execnz);
             break;
         case S_CBRANCH_EXECZ:
-            run_s_cbranch_execz(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_execz);
             break;
         case S_CBRANCH_SCC0:
-            run_s_cbranch_scc0(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_scc0);
             break;
         case S_CBRANCH_SCC1:
-            run_s_cbranch_scc1(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_scc1);
             break;
         case S_CBRANCH_VCCNZ:
-            run_s_cbranch_vccnz(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_vccnz);
             break;
         case S_CBRANCH_VCCZ:
-            run_s_cbranch_vccz(state);
+            set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_vccz);
             break;
+
         case S_DECPERFLEVEL:
             run_s_decperflevel(state);
-            break;
-        case S_ENDPGM:
-            run_s_endpgm(state);
             break;
         case S_ENDPGM_ORDERED_PS_DONE:
             run_s_endpgm_ordered_ps_done(state);
@@ -217,6 +227,17 @@ void run_sopp(InstrKey instr, WfStateSOPP& state) {
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error(std::string("Unexpected instruction key: ") + get_instr_str(instr));
+            throw std::runtime_error(std::string("Unexpected instruction key: ") +
+                                     get_instr_str(instrKey));
     }
+
+    wavefront->update_with_common_sopp_state(instruction, state);
+}
+
+void set_reladdr_and_run(const Instruction& instruction,
+                         Wavefront* wf,
+                         WfStateSOPP& state,
+                         void (*exec)(WfStateSOPP&)) {
+    state.RELADDR = to_uin64_t(wf->read_operand(*instruction[0]));
+    exec(state);
 }

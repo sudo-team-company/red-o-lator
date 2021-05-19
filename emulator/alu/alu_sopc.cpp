@@ -78,17 +78,19 @@ void run_s_cmp_lt_u32(WfStateSOPC& state) {
     state.SCC = state.SSRC0 < state.SSRC1;
 }
 void run_s_set_gpr_idx_on(WfStateSOPC& state) {
-    state.MODE.gpr_idx_en(1);
+    state.MODE->gpr_idx_en(1);
     // todo differs from official doc
-    state.M0 = ((state.IMM8 & 15) << 12) | (state.SSRC0 & 0xff);
+    //SRC1 -> IMM8
+    state.M0 = ((state.SSRC1 & 15) << 12) | (state.SSRC0 & 0xff);
 }
 void run_s_setvskip(WfStateSOPC& state) {
-    state.MODE.vskip((state.SSRC0 & 1 << (state.SSRC1 & 31)) != 0);
+    state.MODE->vskip((state.SSRC0 & 1 << (state.SSRC1 & 31)) != 0);
 }
 
+void run_sopc(const Instruction& instruction, Wavefront* wavefront)  {
+    auto state = wavefront->get_sopc_state(instruction);
 
-void run_sopc(InstrKey instr, WfStateSOPC& state) {
-    switch (instr) {
+    switch (instruction.get_instr_key()) {
         case S_BITCMP0_B32:
             run_s_bitcmp0_b32(state);
             break;
@@ -154,6 +156,7 @@ void run_sopc(InstrKey instr, WfStateSOPC& state) {
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error(std::string("Unexpected instruction key: ") + get_instr_str(instr));
+            throw std::runtime_error(std::string("Unexpected instruction key: ") + get_instr_str(instruction.get_instr_key()));
     }
+    wavefront->update_with_sopc_state(state);
 }

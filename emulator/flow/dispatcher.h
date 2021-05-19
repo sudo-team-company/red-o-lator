@@ -6,7 +6,7 @@
 #define RED_O_LATOR_DISPATCHER_H
 
 
-#include "kernel.h"
+#include "kernel_config.h"
 #include "wavefront.h"
 class Dispatcher {
    private:

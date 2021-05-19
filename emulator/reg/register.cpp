@@ -110,6 +110,9 @@ uint8_t StatusReg::wave_prio() const {
 bool StatusReg::priv() {
     return value[5];
 }
+void StatusReg::priv(bool p) {
+    value[5] = p;
+}
 bool StatusReg::trap_en() {
     return value[6];
 }

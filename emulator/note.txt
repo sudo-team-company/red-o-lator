@@ -29,6 +29,7 @@
 2. Может ли wavefront состоять из менее чем 64 work item?
 3. Instruction buffer для 10 wavefront? Значит wavefront по размеру фикссированы?
 4. Each SIMD-VU has 10 wavefront instruction buffer, and it takes 4 cycles to execute one wavefront.
+5. Shader processor interpolator ?
 
 
 

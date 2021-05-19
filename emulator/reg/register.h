@@ -84,6 +84,7 @@ struct StatusReg {
      * access to the TTMP, TMA, and TBA registers
      */
     bool priv();           // 5
+    void priv(bool);
     /**
      * Indicates that a trap handler is present. When set to zero, traps are not taken.
      */

@@ -60,8 +60,7 @@ void run_s_bfe_i32(WfStateSOP2& state) {
         state.SDST = 0;
     }
     if (shift + length < 32) {
-        state.SDST =
-            int32_t(state.SSRC0 << (32 - shift - length)) >> (32 - length);
+        state.SDST = int32_t(state.SSRC0 << (32 - shift - length)) >> (32 - length);
     } else {
         state.SDST = int32_t(state.SSRC0) >> shift;
     }
@@ -75,8 +74,7 @@ void run_s_bfe_i64(WfStateSOP2& state) {
         state.SDST = 0;
     }
     if (shift + length < 64) {
-        state.SDST =
-            int64_t(state.SSRC0 << (64 - shift - length)) >> (64 - length);
+        state.SDST = int64_t(state.SSRC0 << (64 - shift - length)) >> (64 - length);
     } else {
         state.SDST = int64_t(state.SSRC0) >> shift;
     }
@@ -111,13 +109,11 @@ void run_s_bfe_u64(WfStateSOP2& state) {
     state.SCC = state.SDST != 0;
 }
 void run_s_bfm_b32(WfStateSOP2& state) {
-    state.SDST = ((uint32_t(1) << (state.SSRC0 & 31)) - 1)
-                 << (state.SSRC1 & 31);
+    state.SDST = ((uint32_t(1) << (state.SSRC0 & 31)) - 1) << (state.SSRC1 & 31);
 }
 
 void run_s_bfm_b64(WfStateSOP2& state) {
-    state.SDST = ((uint64_t(1) << (state.SSRC0 & 63)) - 1)
-                 << (state.SSRC1 & 63);
+    state.SDST = ((uint64_t(1) << (state.SSRC0 & 63)) - 1) << (state.SSRC1 & 63);
 }
 
 void run_s_cbranch_g_fork(WfStateSOP2& state) {
@@ -267,8 +263,11 @@ void run_s_pack_ll_b32_b16(WfStateSOP2& state) {
     state.SDST = (state.SSRC0 & 0xffff) | ((state.SSRC1 & 0xffff) << 16);
 }
 
+// Return from exception handler and continue. This instruction may
+// only be used within a trap handler.
 void run_s_rfe_restore_b64(WfStateSOP2& state) {
-    // todo
+    state.STATUS->priv(0);
+    state.PC = state.SSRC0;
 }
 
 void run_s_subb_u32(WfStateSOP2& state) {
@@ -311,8 +310,22 @@ void run_s_xor_b64(WfStateSOP2& state) {
     state.SCC = state.SDST != 0;
 }
 
-void run_sop2(InstrKey instr, WfStateSOP2& state) {
-    switch (instr) {
+void run_sop2(const Instruction& instruction, Wavefront* wf) {
+    auto state = wf->get_sop2_state(instruction);
+    //    S_CBRANCH_G_FORK SSRC0(2), SSRC1(2)
+    //    S_RFE_RESTORE_B64  SDST(2), SSRC0(1)
+
+    switch (instruction.get_instr_key()) {
+        case S_CBRANCH_G_FORK:
+            // todo
+            // run_s_cbranch_g_fork(state);
+            break;
+        case S_RFE_RESTORE_B64:
+            state.SDST = to_uin64_t(wf->read_operand(*instruction[0]));
+            state.SSRC0 = to_uin64_t(wf->read_operand(*instruction[1]));
+            run_s_rfe_restore_b64(state);
+            break;
+
         case S_ABSDIFF_I32:
             run_s_absdiff_i32(state);
             break;
@@ -360,9 +373,6 @@ void run_sop2(InstrKey instr, WfStateSOP2& state) {
             break;
         case S_BFM_B64:
             run_s_bfm_b64(state);
-            break;
-        case S_CBRANCH_G_FORK:
-            run_s_cbranch_g_fork(state);
             break;
         case S_CSELECT_B32:
             run_s_cselect_b32(state);
@@ -448,9 +458,6 @@ void run_sop2(InstrKey instr, WfStateSOP2& state) {
         case S_PACK_LL_B32_B16:
             run_s_pack_ll_b32_b16(state);
             break;
-        case S_RFE_RESTORE_B64:
-            run_s_rfe_restore_b64(state);
-            break;
         case S_SUBB_U32:
             run_s_subb_u32(state);
             break;
@@ -474,6 +481,9 @@ void run_sop2(InstrKey instr, WfStateSOP2& state) {
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error(std::string("Unexpected instruction key: ") + get_instr_str(instr));
+            throw std::runtime_error(std::string("Unexpected instruction key: ") +
+                                     get_instr_str(instruction.get_instr_key()));
     }
+
+    wf->update_with_sop2_state(instruction, state);
 }

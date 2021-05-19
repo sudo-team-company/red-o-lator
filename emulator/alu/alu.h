@@ -12,11 +12,11 @@
 
 void run_instr(const Instruction& instr, Wavefront* wf);
 
-WfStateSOP1 prepare_wf_state_sop1(const Instruction&, Wavefront*);
 void run_sop1(const Instruction&, Wavefront*);
-void run_sop2(InstrKey instr, WfStateSOP2& state);
-void run_sopk(InstrKey instr, WfStateSOPK& state);
-void run_sopc(InstrKey instr, WfStateSOPC& state);
-void run_sopp(InstrKey instr, WfStateSOPP& state);
+void run_sop2(const Instruction&, Wavefront*);
+void run_sopk(const Instruction&, Wavefront*);
+void run_sopc(const Instruction&, Wavefront*);
+void run_sopp(const Instruction&, Wavefront*);
+void run_smem(const Instruction&, Wavefront*);
 
 #endif  // RED_O_LATOR_ALU_H

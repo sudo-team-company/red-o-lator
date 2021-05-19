@@ -1865,9 +1865,9 @@ enum InstrKey {
 };
 
 enum InstrFormat {
-    SOP1_FORMAT,
-    SOP2_FORMAT,
-    SOPK_FORMAT, SOPP, SMEM, SOPC, VOP1, VOP2, VOPC, VINTRP, VOP3A, VOP3B, VOP3P, FLAT
+    SOP1,
+    SOP2,
+    SOPK, SOPP, SMEM, SOPC, VOP1, VOP2, VOPC, VINTRP, VOP3A, VOP3B, VOP3P, FLAT
 };
 
 //todo use this function to parse asm

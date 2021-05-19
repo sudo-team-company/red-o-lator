@@ -2,8 +2,8 @@
 // Created by Diana Kudaiberdieva
 //
 
-#ifndef RED_O_LATOR_KERNEL_H
-#define RED_O_LATOR_KERNEL_H
+#ifndef RED_O_LATOR_KERNEL_CONFIG_H
+#define RED_O_LATOR_KERNEL_CONFIG_H
 
 #define DEFAULT_SGPRS_AMOUNT 16
 
@@ -28,7 +28,7 @@ struct KernelConfig {
     uint32_t floatmode;
     bool useargs;
     bool usesetup;
-    bool priority;
+    uint8_t priority;
 
     uint8_t user_sgpr() {
         return uint8_t((pgmrsrc2 >> 1) & 0x1f);
@@ -60,4 +60,4 @@ struct KernelConfig {
 
 
 
-#endif  // RED_O_LATOR_KERNEL_H
+#endif  // RED_O_LATOR_KERNEL_CONFIG_H

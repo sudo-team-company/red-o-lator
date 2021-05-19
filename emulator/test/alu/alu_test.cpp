@@ -7,7 +7,7 @@
 #include "../../doctest.h"
 
 struct WfStateSOP1Test : WfStateSOP1 {
-    WfStateSOP1Test() : WfStateSOP1(0, 0, 0, 0, 0, false) {}
+    WfStateSOP1Test() : WfStateSOP1(0, 0, 0, 0, 0, nullptr, false) {}
 
    public:
     void clear() {
@@ -16,18 +16,22 @@ struct WfStateSOP1Test : WfStateSOP1 {
         EXEC = 0;
         M0 = 0;
         PC = 0;
+        MODE_REG = nullptr;
         SCC = false;
     }
 };
 
 struct WfStateSOP2Test : WfStateSOP2 {
-    WfStateSOP2Test() : WfStateSOP2(0, 0, 0, false) {}
+    WfStateSOP2Test() : WfStateSOP2(0, 0, 0, 0, 0, nullptr, false) {}
 
    public:
     void clear() {
         SSRC0 = 0;
         SSRC1 = 0;
         SDST = 0;
+        EXEC = 0;
+        PC = 0;
+        MODE_REG = nullptr;
         SCC = false;
     }
 };

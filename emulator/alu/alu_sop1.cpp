@@ -6,7 +6,7 @@
 
 void run_s_abs_i32(WfStateSOP1& state) {
     auto SRC0 = int32_t(state.SSRC0);
-    state.SDST =  uint64_t(SRC0 < 0 ? -SRC0 : SRC0) & 0xffffffff;
+    state.SDST = uint64_t(SRC0 < 0 ? -SRC0 : SRC0) & 0xffffffff;
     state.SCC = state.SDST != 0;
 }
 
@@ -92,8 +92,17 @@ void run_s_brev_b64(WfStateSOP1& state) {
     state.SDST = rev_bit(state.SSRC0);
 }
 
-void run_s_cbranch_join(WfStateSOP1& state) {
-    // todo
+void run_s_cbranch_join(WfStateSOP1& state, Wavefront* wf) {
+    uint8_t csp = state.MODE->csp();
+    if (uint64_t(csp) == state.SSRC0) {
+        //        state.PC += 4;
+    } else {
+        csp--;
+        state.EXEC =
+            uint64_t(wf->scalarRegFile[csp * 4]) << 32 | wf->scalarRegFile[csp * 4 + 1];
+        state.PC = uint64_t(wf->scalarRegFile[csp * 4 + 2]) << 32 |
+                   wf->scalarRegFile[csp * 4 + 3];
+    }
 }
 
 void run_s_cmov_b32(WfStateSOP1& state) {
@@ -209,7 +218,12 @@ void run_s_mov_b64(WfStateSOP1& state) {
     state.SDST = state.SSRC0;
 }
 
-void run_s_movreld_b32(WfStateSOP1& state) {
+void run_s_movreld_b32(const Instruction& instruction,
+                       WfStateSOP1& state,
+                       Wavefront* wf) {
+    assert(instruction.get_operands_count() > 0);
+    auto dst = *instruction[0];
+    assert(std::holds_alternative<RegisterType>(dst.value) && dst.regAmount == 1);
     // todo
 }
 
@@ -278,8 +292,11 @@ void run_s_quadmask_b64(WfStateSOP1& state) {
     state.SCC = state.SDST != 0;
 }
 
+// Return from exception handler and continue. This instruction may
+// only be used within a trap handler.
 void run_s_rfe_b64(WfStateSOP1& state) {
-    // todo
+    state.STATUS->priv(0);
+    state.PC = state.SSRC0;
 }
 
 void run_s_set_gpr_idx_idx(WfStateSOP1& state) {
@@ -337,13 +354,35 @@ void run_s_xor_saveexec_b64(WfStateSOP1& state) {
 void run_sop1(const Instruction& instr, Wavefront* wf) {
     assert(instr.get_operands_count() <= 2 && "Unexpected amount of operands for SOP1");
 
-    auto state = WfStateSOP1(wf);
-
-    //S_CBRANCH_JOIN, S_SET_GPR_IDX_IDX only SRC0
-    // S_RFE_B64 , S_SETPC_B64 src0(2)
-    //S_GETPC_B64 only SDTS(2)
+    auto state = wf->get_sop1_state(instr);
 
     switch (instr.get_instr_key()) {
+        case S_CBRANCH_JOIN:
+            assert(instr.get_operands_count() == 1);
+            state.SSRC0 = to_uin64_t(wf->read_operand(*instr[0]));
+            run_s_cbranch_join(state, wf);
+            break;
+        case S_SET_GPR_IDX_IDX:
+            assert(instr.get_operands_count() == 1);
+            state.SSRC0 = to_uin64_t(wf->read_operand(*instr[0]));
+            run_s_set_gpr_idx_idx(state);
+            break;
+        case S_RFE_B64:
+            assert(instr.get_operands_count() == 1);
+            state.SSRC0 = to_uin64_t(wf->read_operand(*instr[0]));
+            run_s_rfe_b64(state);
+            break;
+        case S_SETPC_B64:
+            assert(instr.get_operands_count() == 1);
+            state.SSRC0 = to_uin64_t(wf->read_operand(*instr[0]));
+            run_s_setpc_b64(state);
+            break;
+        case S_GETPC_B64:
+            assert(instr.get_operands_count() == 1);
+            state.SDST = to_uin64_t(wf->read_operand(*instr[0]));
+            run_s_getpc_b64(state);
+            wf->write_operand(*instr[0], state.SDST);
+            break;
         case S_ABS_I32:
             run_s_abs_i32(state);
             break;
@@ -395,10 +434,6 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
         case S_BREV_B64:
             run_s_brev_b64(state);
             break;
-        case S_CBRANCH_JOIN:
-            //only dst
-            run_s_cbranch_join(state);
-            break;
         case S_CMOV_B32:
             run_s_cmov_b32(state);
             break;
@@ -429,10 +464,6 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
         case S_FLBIT_I32_I64:
             run_s_flbit_i32_i64(state);
             break;
-        case S_GETPC_B64:
-            //only dst
-            run_s_getpc_b64(state);
-            break;
         case S_MOV_B32:
             run_s_mov_b32(state);
             break;
@@ -440,7 +471,7 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
             run_s_mov_b64(state);
             break;
         case S_MOVRELD_B32:
-            run_s_movreld_b32(state);
+            //run_s_movreld_b32(state);
             break;
         case S_MOVRELD_B64:
             run_s_movreld_b64(state);
@@ -475,16 +506,6 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
         case S_QUADMASK_B64:
             run_s_quadmask_b64(state);
             break;
-        case S_RFE_B64:
-            //only src0
-            run_s_rfe_b64(state);
-            break;
-        case S_SET_GPR_IDX_IDX:
-            run_s_set_gpr_idx_idx(state);
-            break;
-        case S_SETPC_B64:
-            run_s_setpc_b64(state);
-            break;
         case S_SEXT_I32_I8:
             run_s_sext_i32_i8(state);
             break;
@@ -510,4 +531,6 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
             assert(false && "Unknown instruction met!");
             throw std::runtime_error("Unexpected instruction key");
     }
+
+    wf->update_with_sop1_state(instr, state);
 }

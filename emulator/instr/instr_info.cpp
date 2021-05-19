@@ -894,7 +894,7 @@ InstrFormat get_instr_format(InstrKey instrKey) {
         case S_WQM_B64:
         case S_XNOR_SAVEEXEC_B64:
         case S_XOR_SAVEEXEC_B64:
-            return SOP1_FORMAT;
+            return SOP1;
         case S_ABSDIFF_I32:
         case S_ADDC_U32:
         case S_ADD_I32:
@@ -948,7 +948,7 @@ InstrFormat get_instr_format(InstrKey instrKey) {
         case S_XNOR_B64:
         case S_XOR_B32:
         case S_XOR_B64:
-            return SOP2_FORMAT;
+            return SOP2;
         case S_ADDK_I32:
         case S_CALL_B64:
         case S_CBRANCH_I_FORK:
@@ -970,7 +970,7 @@ InstrFormat get_instr_format(InstrKey instrKey) {
         case S_MULK_I32:
         case S_SETREG_B32:
         case S_SETREG_IMM32_B32:
-            return SOPK_FORMAT;
+            return SOPK;
         case S_BITCMP0_B32:
         case S_BITCMP0_B64:
         case S_BITCMP1_B32:
@@ -1122,9 +1122,9 @@ InstrFormat get_instr_format(InstrKey instrKey) {
 uint8_t get_instr_width(InstrKey instrKey) {
     auto instr_format = get_instr_format(instrKey);
     switch (instr_format) {
-        case SOP1_FORMAT:
-        case SOP2_FORMAT:
-        case SOPK_FORMAT:
+        case SOP1:
+        case SOP2:
+        case SOPK:
         case SOPP:
         case SOPC:
         case VOP1:

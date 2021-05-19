@@ -10,14 +10,8 @@ add_executable(emulator
         reg/register.cpp
         instr/instruction.cpp
         instr/instr_info.cpp
-        instr/temp.cpp
-        cu/scalar_unit.cpp
         cu/compute_unit.cpp
-        cu/simd_unit.cpp
         cu/scheduler.cpp
-        cu/wf_buffer.cpp
-        gpu/cluster.cpp
-        gpu/gpu.cpp
         gpu/command_processor.cpp
         flow/dispatcher.cpp
         main.cpp
