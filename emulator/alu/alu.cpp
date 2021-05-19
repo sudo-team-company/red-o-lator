@@ -5,7 +5,7 @@
 #include "alu.h"
 
 void run_instr(const Instruction& instr, Wavefront* wf) {
-    auto instrFormat = get_instr_format(instr.get_instr_key());
+    auto instrFormat = get_instr_format(instr.get_key());
     switch (instrFormat) {
         case SOP1:
             run_sop1(instr, wf);

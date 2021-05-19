@@ -14,7 +14,9 @@ add_executable(emulator
         cu/scheduler.cpp
         gpu/command_processor.cpp
         flow/dispatcher.cpp
-        main.cpp
+        main/KernelLoader.cpp
+        main/KernelLoader.h
+        main/main.cpp
         )
 
 add_executable(util_test

@@ -4,7 +4,7 @@
 
 #include "instr_info.h"
 
-InstrKey get_instr_key(const char * instruction) {
+InstrKey get_instr_key(const std::string& instruction) {
     static std::unordered_map<const char *, InstrKey> instruction_repo{
         // SOP1_FORMAT
         {"s_abs_i32", S_ABS_I32},
@@ -295,7 +295,7 @@ InstrKey get_instr_key(const char * instruction) {
         {"flat_store_dword", FLAT_STORE_DWORD}
     };
 
-    auto it = instruction_repo.find(instruction);
+    auto it = instruction_repo.find(instruction.c_str());
 
     if (it == instruction_repo.end()) {
         throw std::runtime_error("Undefined instruction!");

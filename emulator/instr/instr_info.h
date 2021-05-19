@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 #include <cassert>
+#include <string>
 
 enum InstrKey {
 
@@ -1874,7 +1875,7 @@ enum InstrFormat {
 /**
  * @return InstructionKey for the given mnemonic
  */
-InstrKey get_instr_key(const char *);
+InstrKey get_instr_key(const std::string&);
 
 /**
  * @return mnemonic for InstrKey

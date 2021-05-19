@@ -3,26 +3,25 @@
 //
 
 #include <memory>
+#include <set>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
+#include "../../common/common/common.hpp"
 #include "../reg/reg_info.h"
 #include "instr_info.h"
-
 
 enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST };
 
 struct Operand {
     OperandType type;
-    std::variant<int16_t, uint32_t, float, RegisterType> value;
-    int waitcnt;
+    std::variant<int, uint32_t, float, RegisterType> value;
+    int lgkmcnt = -1;
+    int vmcnt = -1;
     size_t regAmount = 0;
 
-    explicit Operand(int16_t i) : type(INT_CONST), value(i) {}
-    explicit Operand(uint32_t u) : type(LITERAL_CONST), value(u) {}
-    explicit Operand(float f) : type(FLOAT), value(f) {}
-    explicit Operand(RegisterType regs, size_t n)
-        : type(REGISTER), value(regs), regAmount(n) {}
+    explicit Operand(const std::string&);
 
     OperandType get_type() const {
         return type;
@@ -31,10 +30,17 @@ struct Operand {
     size_t get_reg_amount() const {
         return regAmount;
     }
+
+   private:
+    static std::set<std::string> float_values;
+    bool is_float(const std::string&);
+    bool is_scalar(const std::string&);
+    bool is_vector(const std::string&);
+    std::pair<RegisterType, size_t> get_register(const std::string&);
 };
 
 struct Instruction {
-    InstrKey get_instr_key() const {
+    InstrKey get_key() const {
         return instrKey;
     }
 
@@ -52,6 +58,19 @@ struct Instruction {
 
     uint32_t get_addr() const {
         return addr;
+    };
+
+    Instruction(const std::string& addr,
+                const std::string& instr,
+                const std::vector<std::string>& args) {
+        instrKey = get_instr_key(instr);
+        operands = std::vector<std::unique_ptr<Operand>>();
+        for (auto& arg : args) {
+            if (arg.empty()) {
+                // todo log strange behaviour
+            }
+            operands.push_back(std::make_unique<Operand>(arg));
+        }
     };
 
    private:

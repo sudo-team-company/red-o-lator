@@ -356,7 +356,7 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
 
     auto state = wf->get_sop1_state(instr);
 
-    switch (instr.get_instr_key()) {
+    switch (instr.get_key()) {
         case S_CBRANCH_JOIN:
             assert(instr.get_operands_count() == 1);
             state.SSRC0 = to_uin64_t(wf->read_operand(*instr[0]));

@@ -39,7 +39,7 @@ struct WorkGroup {
 };
 
 struct Wavefront {
-    WorkGroup* workGroup;
+    WorkGroup* workGroup = nullptr;
     std::vector<uint32_t> scalarRegFile;
     std::vector<uint32_t> vectorRegFile;
     uint64_t programCounter;
