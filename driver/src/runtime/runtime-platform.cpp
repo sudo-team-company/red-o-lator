@@ -1,9 +1,10 @@
 #include <common/common.hpp>
 #include <cstring>
+#include <iostream>
 #include <optional>
 
-#include "runtime-commons.h"
 #include "icd/icd.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
                                                  cl_platform_id* platforms,
@@ -105,4 +106,13 @@ clGetExtensionFunctionAddress(const char* func_name) {
 CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
     cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms) {
     return clGetPlatformIDs(num_entries, platforms, num_platforms);
+}
+
+
+CL_API_ENTRY void* CL_API_CALL clGetExtensionFunctionAddressForPlatform(
+    cl_platform_id platform, const char* func_name) {
+    std::cerr << "Unimplemented OpenCL API call: "
+                 "clGetExtensionFunctionAddressForPlatform"
+              << std::endl;
+    return nullptr;
 }

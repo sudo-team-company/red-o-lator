@@ -65,7 +65,6 @@ set(SOURCES
         src/runtime/runtime-memory-buffer.cpp
         src/runtime/runtime-memory-image.cpp
         src/runtime/runtime-memory.cpp
-        src/runtime/runtime-other.cpp
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
@@ -129,7 +128,7 @@ add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
 set(E2E_TEST_SOURCES
         test/e2e/runner.cpp
         test/e2e/runtime/runtime-e2e-test.cpp
-        test/e2e/runtime/test-commons.hpp)
+        )
 
 add_executable(red-o-lator-icd-test-e2e ${E2E_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-e2e PRIVATE OpenCL::OpenCL red-o-lator-common)

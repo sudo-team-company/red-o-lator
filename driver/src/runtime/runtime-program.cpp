@@ -265,3 +265,9 @@ clUnloadPlatformCompiler(cl_platform_id platform) {
               << std::endl;
     return CL_INVALID_PLATFORM;
 }
+
+CL_API_ENTRY cl_int CL_API_CALL
+clUnloadCompiler(void) {
+    std::cerr << "Unimplemented OpenCL API call: clUnloadCompiler" << std::endl;
+    return CL_INVALID_PLATFORM;
+}

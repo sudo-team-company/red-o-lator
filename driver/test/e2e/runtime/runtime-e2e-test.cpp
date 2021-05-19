@@ -107,7 +107,4 @@ TEST_CASE("a_plus_b") {
     //                                       &globalWorkOffset, &globalWorkSize,
     //                                       &localWorkSize, 0, nullptr,
     //                                       nullptr);
-
-    // TODO(executeKernel): memory release stuff
-
 }

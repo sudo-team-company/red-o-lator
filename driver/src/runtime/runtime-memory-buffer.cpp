@@ -100,12 +100,13 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
 
     } else {
         if (flags & CL_MEM_ALLOC_HOST_PTR) {
-            // TODO: handle this properly, looks like memory is always allocated
-            //  at host accessible memory
-            mem->address = new std::byte[mem->size];
-        } else {
-            mem->address = new std::byte[mem->size];
+            // TODO: support CL_MEM_ALLOC_HOST_PTR
+            kLogger.warn(
+                "CL_MEM_ALLOC_HOST_PTR is not supported,"
+                "will act like flag was not specified!");
         }
+
+        mem->address = new std::byte[mem->size];
 
         if (flags & CL_MEM_COPY_HOST_PTR) {
             memcpy(mem->address, host_ptr, mem->size);
