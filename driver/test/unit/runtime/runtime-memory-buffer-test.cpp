@@ -178,6 +178,28 @@ TEST_SUITE("Memory buffer API") {
     }
 
     TEST_CASE("clEnqueue{Read/Write}Buffer") {
-        
+        SUBCASE("host access") {
+            SUBCASE("host can't read from write-only memory") {}
+
+            SUBCASE("host can't write to read-only memory") {}
+
+            SUBCASE("host can't read or write to no-access memory") {}
+
+            SUBCASE("host can read and write to no-host-flags memory") {}
+        }
+
+        SUBCASE("host ptr != nullptr") {
+            SUBCASE("CL_MEM_USE_HOST_PTR") {
+                SUBCASE("read return hostPtr from host changes buffer") {}
+
+                SUBCASE("writing to hostPtr from host changes buffer") {}
+            }
+
+            SUBCASE("CL_MEM_COPY_HOST_PTR") {
+                SUBCASE("memory from host_ptr is copied to buffer") {}
+
+                SUBCASE("writing to hostPtr does not change buffer") {}
+            }
+        }
     }
 }
