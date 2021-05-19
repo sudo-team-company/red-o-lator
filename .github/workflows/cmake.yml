@@ -7,6 +7,7 @@ on:
 env:
   BUILD_TYPE: Release
   PKG_CONFIG_PATH: ${{github.workspace}}/CLRX/lib/pkgconfig
+  RED_O_LATOR_DEVICE_CONFIG_PATH: ${{github.workspace}}/driver/resources/rx-570.ini
   THREAD_COUNT: 9
 
 jobs:
@@ -64,8 +65,19 @@ jobs:
       - name: Build red-o-lator
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j ${{env.THREAD_COUNT}}
 
-      - name: Test red-o-lator
-        run: ctest --test-dir ${{github.workspace}}/build
-              -C ${{env.BUILD_TYPE}}
-              -V --output-on-failure
-              -j ${{env.THREAD_COUNT}}
+      - name: Install ICD to the Windows system
+        if: runner.os == 'Windows'
+        run: cd ${{github.workspace}}/driver/install &&
+             python register-icd-win.py ${{github.workspace}}/build/lib/${{env.BUILD_TYPE}}/red-o-lator-icd.lib &&
+             cd ${{github.workspace}}
+
+      - name: Install ICD to the Unix system
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: sudo mkdir -p /etc/OpenCL/vendors &&
+             echo ${{github.workspace}}/build/lib/libred-o-lator-icd.so | sudo tee /etc/OpenCL/vendors/red-o-lator.icd
+
+#      - name: Test red-o-lator
+#        run: ctest --test-dir ${{github.workspace}}/build
+#              -C ${{env.BUILD_TYPE}}
+#              -VV --output-on-failure
+#              --debug

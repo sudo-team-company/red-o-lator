@@ -74,9 +74,7 @@ TEST_CASE("a_plus_b") {
                                  &error);
     CHECK(error == CL_SUCCESS);
 
-    const std::string binaryPath =
-        "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/test/"
-        "resources/kernels/weighted_sum_kernel/weighted_sum_kernel.bin";
+    const std::string binaryPath = "test/resources/kernels/a_plus_b.bin";
     const auto binary = readBinaryFile(binaryPath);
 
     CHECK_FALSE(binary.empty());
@@ -91,7 +89,7 @@ TEST_CASE("a_plus_b") {
     error = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);
     CHECK(error == CL_SUCCESS);
 
-    const std::string kernelName = "weighted_sum_kernel";
+    const std::string kernelName = "a_plus_b";
     cl_kernel kernel = clCreateKernel(program, kernelName.c_str(), &error);
     CHECK(error == CL_SUCCESS);
 

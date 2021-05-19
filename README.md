@@ -5,8 +5,7 @@ Emulator for GCN GPUs
 ## Configuration
  
 ### ICD-Loader
-
-Project does not provide bundled OpenCL ICD loader so you should install it on your own.
+Project does not provide bundled OpenCL ICD loader so you must install it on your own.
 
 Example of such loader is https://github.com/khronosgroup/opencl-icd-loader
 
@@ -16,10 +15,13 @@ TODO: make it automated and cross-platform.
 
 ### CLRX
 1. Install CLRX from https://github.com/CLRX/CLRX-mirror
-2. Either:
-   * set environment variable PKG_CONFIG_PATH to include *.pc files from this installation
+2. Set environment variable PKG_CONFIG_PATH to include *.pc files from this installation
      (will be found in CLRX `make install` logs)
-   * copy CLRX *.pc files to `./driver/pkgconfig`
+    
+### GPU config
+Set environment variable `RED_O_LATOR_DEVICE_CONFIG_PATH` with device config path.
+
+Example of such config can be found in `driver/resources/rx-570.ini`.
 
 ### CLion
 

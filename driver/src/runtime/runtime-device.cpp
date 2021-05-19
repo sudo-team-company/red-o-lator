@@ -19,8 +19,14 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
 
     if (!kDevice) {
         const auto deviceConfigurationFile =
-            "/home/newuserkk/Projects/ITMO/thesis/red-o-lator/driver/resources/"
-            "rx-570.ini";
+            std::getenv("RED_O_LATOR_DEVICE_CONFIG_PATH");
+
+        if (!deviceConfigurationFile) {
+            RETURN_ERROR(CL_INVALID_DEVICE,
+                         "Could not found device config path! Set "
+                         "RED_O_LATOR_DEVICE_CONFIG_PATH environment variable.");
+        }
+
         try {
             kDeviceConfigurationParser.load(deviceConfigurationFile);
 
@@ -69,10 +75,10 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
     // TODO(clGetDeviceInfo, future): parameters validation according to
     //  OpenCL spec
 
-    return getParamInfo(param_name, param_value_size, param_value,
-                 param_value_size_ret, [&]() {
-                     return kDeviceConfigurationParser.getParameter(param_name);
-                 });
+    return getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            return kDeviceConfigurationParser.getParameter(param_name);
+        });
 }
 
 CL_API_ENTRY cl_int CL_API_CALL

@@ -65,3 +65,4 @@ CMakeFiles/
 build/
 *.cmake
 CMakeCache.txt
+Testing
