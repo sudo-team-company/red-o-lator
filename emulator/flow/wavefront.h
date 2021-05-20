@@ -48,6 +48,7 @@ struct Wavefront {
     std::unique_ptr<StatusReg> statusReg;
     std::unique_ptr<ModeReg> modeReg;
     uint32_t m0Reg;
+    int sgprsnum;
     int vgprsnum;
     bool sccReg;
 
@@ -62,11 +63,13 @@ struct Wavefront {
           vccReg(0),
           statusReg(std::make_unique<StatusReg>(0)),
           modeReg(std::make_unique<ModeReg>(0)),
+          sgprsnum(sgprsnum),
           vgprsnum(vgprsnum),
           atBarrier(false),
           completed(false) {
         scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));
         vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
+        workItems = std::vector<WorkItem*>();
     }
 
     Instruction* get_cur_instr() const;
@@ -91,8 +94,8 @@ struct Wavefront {
     void update_with_common_sopp_state(const Instruction& instruction, const WfStateSOPP& state);
 
     std::vector<uint32_t> read_operand(const Operand&);
-
-    void write_operand(const Operand&, uint64_t);
+    void write_operand_to_gpr(const Operand&, const std::vector<uint32_t>&);
+    void write_operand_to_gpr(const Operand&, uint64_t);
 };
 
 struct WorkItem {

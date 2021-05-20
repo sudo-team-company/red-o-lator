@@ -24,6 +24,7 @@ int32_t sign_ext(int16_t);
 
 uint64_t to_uin64_t(const std::vector<uint32_t>&);
 
+std::vector<uint32_t> to_uint32_v(const std::vector<uint8_t>&);
 template<typename T>
 static inline
 constexpr bool get_bit(uint8_t n, T value) {

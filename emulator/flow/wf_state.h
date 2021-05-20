@@ -125,4 +125,10 @@ struct WfStateSOPK {
     WfStateSOPK(uint64_t PC, bool SCC) : PC(PC), SCC(SCC) {}
 };
 
+struct WfStateSMEM {
+    uint64_t BASE;
+    std::vector<uint32_t> SDST;
+    uint64_t OFFSET;
+};
+
 #endif  // RED_O_LATOR_WF_STATE_H

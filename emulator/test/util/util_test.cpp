@@ -50,3 +50,28 @@ TEST_CASE("to_uin64_t - converts vector<uint32_t> to uint64_t") {
         CHECK(to_uin64_t(data) == expectedResult);
     }
 }
+
+TEST_CASE("to_uint32_v - converts vector<uint8_t> to vector<uint32_t>") {
+    SUBCASE("4 uint8 to 1 uint32") {
+        auto data = std::vector<uint8_t>{0x12, 0x34, 0x56, 0x78};
+        uint32_t expectedResult = 0x12345678;
+        auto actualResult = to_uint32_v(data);
+        CHECK(actualResult.size() == 1);
+        CHECK(actualResult[0] == expectedResult);
+    }
+    SUBCASE("12 uint8 to 3 uint32") {
+        auto data = std::vector<uint8_t>{
+            0x12, 0x34, 0x56, 0x78,
+            0x00, 0x01, 0xff, 0xc0,
+            0xfe, 0xdc, 0xab, 0x98
+        };
+        uint32_t expectedResult0 = 0x12345678;
+        uint32_t expectedResult1 = 0x0001ffc0;
+        uint32_t expectedResult2 = 0xfedcab98;
+        auto actualResult = to_uint32_v(data);
+        CHECK(actualResult.size() == 3);
+        CHECK(actualResult[0] == expectedResult0);
+        CHECK(actualResult[1] == expectedResult1);
+        CHECK(actualResult[2] == expectedResult2);
+    }
+}

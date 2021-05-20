@@ -381,7 +381,7 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
             assert(instr.get_operands_count() == 1);
             state.SDST = to_uin64_t(wf->read_operand(*instr[0]));
             run_s_getpc_b64(state);
-            wf->write_operand(*instr[0], state.SDST);
+            wf->write_operand_to_gpr(*instr[0], state.SDST);
             break;
         case S_ABS_I32:
             run_s_abs_i32(state);

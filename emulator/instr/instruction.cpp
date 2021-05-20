@@ -6,9 +6,7 @@
 
 Instruction* KernelCode::get_instr(uint64_t address) {
     assert(address % 4 && "Wrong instr address: not a multiple of 4");
-    size_t index = address % 4;
-    assert(index >= 0 && index < code.size() && "Wrong instr address: out of range");
-    Instruction* instr = code[index].get();
+    Instruction* instr = code[address].get();
     assert(instr != nullptr && "Wrong instruction address: instr is nullptr");
     return instr;
 }
@@ -51,23 +49,45 @@ bool Operand::is_vector(const std::string& arg) {
 
 std::pair<RegisterType, size_t> Operand::get_register(const std::string& arg) {
     if (arg == "vcc") {
-        return std::make_pair(VCC, 0);
+        return std::make_pair(VCC, 1);
     }
     if (arg == "scc") {
-        return std::make_pair(SCC, 0);
+        return std::make_pair(SCC, 1);
+    }
+    auto bracketPos = arg.find('[');
+    size_t regAmount = 1;
+    int fromRegInd;
+    if (bracketPos != -1) {
+        auto colonPos = arg.find(':');
+        if (colonPos == -1) {
+            throw std::runtime_error("Invalid instruction argument: " + arg);
+        }
+        fromRegInd = stoi(arg.substr(bracketPos + 1));
+        auto toRegInd = stoi(arg.substr(colonPos + 1));
+        regAmount += toRegInd - fromRegInd;
+        if (regAmount <= 0) throw std::runtime_error("Invalid register range: " + arg);
     }
 
-    if (arg.find('[') != -1) {
-        // todo
-    }
     if (is_scalar(arg)) {
-        auto sgprInd = stoi(arg.substr(1));
-        return std::make_pair(RegisterType(sgprInd + S0), 0);
+        auto sgprInd = regAmount > 1 ? fromRegInd : stoi(arg.substr(1));
+        return std::make_pair(RegisterType(sgprInd + S0), regAmount);
     }
     if (is_vector(arg)) {
-        auto vgprInd = stoi(arg.substr(1));
-        return std::make_pair(RegisterType(vgprInd + V0), 0);
+        auto vgprInd = regAmount > 1 ? fromRegInd : stoi(arg.substr(1));
+        return std::make_pair(RegisterType(vgprInd + V0), regAmount);
     }
 
     throw std::runtime_error("Unsupported instruction argument: " + arg);
+}
+Instruction::Instruction(const std::string& addr,
+                         const std::string& instr,
+                         const std::vector<std::string>& args) {
+    instrKey = get_instr_key(instr);
+    operands = std::vector<std::unique_ptr<Operand>>();
+    for (auto& arg : args) {
+        if (arg.empty()) {
+            // todo log strange behaviour
+        }
+        operands.push_back(std::make_unique<Operand>(arg));
+    }
 }

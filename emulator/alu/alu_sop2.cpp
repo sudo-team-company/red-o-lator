@@ -315,7 +315,7 @@ void run_sop2(const Instruction& instruction, Wavefront* wf) {
     //    S_CBRANCH_G_FORK SSRC0(2), SSRC1(2)
     //    S_RFE_RESTORE_B64  SDST(2), SSRC0(1)
 
-    switch (instruction.get_instr_key()) {
+    switch (instruction.get_key()) {
         case S_CBRANCH_G_FORK:
             // todo
             // run_s_cbranch_g_fork(state);
@@ -324,6 +324,7 @@ void run_sop2(const Instruction& instruction, Wavefront* wf) {
             state.SDST = to_uin64_t(wf->read_operand(*instruction[0]));
             state.SSRC0 = to_uin64_t(wf->read_operand(*instruction[1]));
             run_s_rfe_restore_b64(state);
+            wf->write_operand_to_gpr(*instruction[0], state.SDST);
             break;
 
         case S_ABSDIFF_I32:
@@ -482,7 +483,7 @@ void run_sop2(const Instruction& instruction, Wavefront* wf) {
         default:
             assert(false && "Unknown instruction met!");
             throw std::runtime_error(std::string("Unexpected instruction key: ") +
-                                     get_instr_str(instruction.get_instr_key()));
+                                     get_instr_str(instruction.get_key()));
     }
 
     wf->update_with_sop2_state(instruction, state);

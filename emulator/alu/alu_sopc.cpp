@@ -90,7 +90,7 @@ void run_s_setvskip(WfStateSOPC& state) {
 void run_sopc(const Instruction& instruction, Wavefront* wavefront)  {
     auto state = wavefront->get_sopc_state(instruction);
 
-    switch (instruction.get_instr_key()) {
+    switch (instruction.get_key()) {
         case S_BITCMP0_B32:
             run_s_bitcmp0_b32(state);
             break;
@@ -156,7 +156,7 @@ void run_sopc(const Instruction& instruction, Wavefront* wavefront)  {
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error(std::string("Unexpected instruction key: ") + get_instr_str(instruction.get_instr_key()));
+            throw std::runtime_error(std::string("Unexpected instruction key: ") + get_instr_str(instruction.get_key()));
     }
     wavefront->update_with_sopc_state(state);
 }

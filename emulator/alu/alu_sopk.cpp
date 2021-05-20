@@ -73,7 +73,7 @@ void run_s_setreg_imm32_b32(WfStateSOPK& state) {
 }
 
 void run_sopk(const Instruction& instruction, Wavefront* wf) {
-    auto instrKey = instruction.get_instr_key();
+    auto instrKey = instruction.get_key();
 
     // S_CALL_B64 SDST(2), RELADDR
     //  S_CBRANCH_I_FORK SSRC0(2), RELADDR
@@ -87,7 +87,7 @@ void run_sopk(const Instruction& instruction, Wavefront* wf) {
             state.SDST = to_uin64_t(wf->read_operand(*instruction[0]));
             state.RELADDR = to_uin64_t(wf->read_operand(*instruction[1]));
             run_s_call_b64(state);
-            wf->write_operand(*instruction[0], state.SDST);
+            wf->write_operand_to_gpr(*instruction[0], state.SDST);
             return;
         }
         case S_CBRANCH_I_FORK: {

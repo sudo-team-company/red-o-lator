@@ -1875,7 +1875,7 @@ enum InstrFormat {
 /**
  * @return InstructionKey for the given mnemonic
  */
-InstrKey get_instr_key(const std::string&);
+InstrKey get_instr_key(std::string_view);
 
 /**
  * @return mnemonic for InstrKey

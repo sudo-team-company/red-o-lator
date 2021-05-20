@@ -1,7 +1,7 @@
 * each SIMD has:
     - its own PC
     - instruction buffer for 10 wavefronts
-    - 64KB reg gile
+    - 64KB reg file
 * Wavefront has:
 
 * Cluster of 4 CU:

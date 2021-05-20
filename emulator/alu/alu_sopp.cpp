@@ -127,7 +127,7 @@ void run_s_waitcnt(WfStateSOPP& state) {
 }
 
 void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
-    auto instrKey = instruction.get_instr_key();
+    auto instrKey = instruction.get_key();
 
     auto state = wavefront->get_common_sopp_state(instruction);
 
@@ -139,7 +139,6 @@ void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
 
         case S_BRANCH:
             set_reladdr_and_run(instruction, wavefront, state, run_s_branch);
-            run_s_branch(state);
             break;
         case S_CBRANCH_CDBGSYS:
             set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_cdbgsys);

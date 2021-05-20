@@ -62,17 +62,7 @@ struct Instruction {
 
     Instruction(const std::string& addr,
                 const std::string& instr,
-                const std::vector<std::string>& args) {
-        instrKey = get_instr_key(instr);
-        operands = std::vector<std::unique_ptr<Operand>>();
-        for (auto& arg : args) {
-            if (arg.empty()) {
-                // todo log strange behaviour
-            }
-            operands.push_back(std::make_unique<Operand>(arg));
-        }
-    };
-
+                const std::vector<std::string>& args);
    private:
     InstrKey instrKey;
     std::vector<std::unique_ptr<Operand>> operands;
@@ -83,5 +73,5 @@ struct KernelCode {
     Instruction* get_instr(uint64_t);
 
    private:
-    std::vector<std::unique_ptr<Instruction>> code;
+    std::unordered_map<std::uint64_t, std::unique_ptr<Instruction>> code;
 };
