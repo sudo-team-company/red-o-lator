@@ -1,22 +1,22 @@
 #include "MainFrame.h"
 #include <wx/grid.h>
-#include <wx/propgrid/propgrid.h>
+#include "EmulatorApp.h"
 #include "Events.h"
-#include "ParametersTable.h"
-#include "Toolbar.h"
 
-MainFrame::MainFrame(const wxString& title,
+MainFrame::MainFrame(const EmulatorApp* parent,
+                     const wxString& title,
                      const wxSize& size,
                      Preferences& preferences)
-    : preferences(preferences),
+    : app(parent),
+      preferences(preferences),
       wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size) {
     auiManager.SetManagedWindow(this);
 
     menuBar = new MenuBar(preferences);
     wxFrameBase::SetMenuBar(menuBar);
-    wxFrameBase::CreateStatusBar();
+    wxFrameBase::CreateStatusBar(5);
 
-    wxAuiToolBar* toolbar = new Toolbar(this);
+    toolbar = new Toolbar(this);
 
     auiManager.AddPane(toolbar, wxAuiPaneInfo()
                                     .Name("Toolbar")
@@ -28,36 +28,18 @@ MainFrame::MainFrame(const wxString& title,
                                     .DockFixed(true));
 
     textEditor = new CodeViewer(this, preferences);
+    paramsPanel = new ParametersTable(this);
+    kernelPanel = new KernelPanel(this);
+    memoryPanel = new MemoryView(this);
+    registersPanel = new RegistersTable(this);
 
-    auto paramsPanel = new ParametersTable(this);
-
-    auto kernelsPanel = new wxListBox(this, SELECT_KERNEL,
-                                      wxDefaultPosition, wxSize(200, 150));
-    wxFont font(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL,
-                            wxFONTWEIGHT_BOLD);
-    kernelsPanel->SetFont(font);
-
-    auto registersPanel =
-        new wxTextCtrl(this, wxID_ANY, _("Registers"), wxDefaultPosition,
-                       wxSize(300, 150), wxNO_BORDER | wxTE_MULTILINE);
-
-
-    auto memoryPanel =
-        new wxTextCtrl(this, wxID_ANY, _("Memory view"), wxDefaultPosition,
-                       wxSize(200, 250), wxNO_BORDER | wxTE_MULTILINE);
-
-    auiManager.AddPane(kernelsPanel, wxLEFT, wxT("Available kernels"));
+    auiManager.AddPane(kernelPanel, wxLEFT, wxT("Available kernels"));
     auiManager.AddPane(registersPanel, wxRIGHT, wxT("Registers"));
     auiManager.AddPane(paramsPanel, wxBOTTOM, wxT("Parameters view"));
     auiManager.AddPane(memoryPanel, wxBOTTOM, wxT("Memory view"));
     auiManager.AddPane(textEditor, wxAuiPaneInfo().CenterPane().Hide());
 
     auiManager.Update();
-    kernelsPanel->Append("kernelExample1");
-    kernelsPanel->Append("kernelExample2");
-    kernelsPanel->Append("kernelExample3");
-
-    kernelsPanel->Select(0);
 
     MainFrame::bindEvents();
 }
@@ -95,15 +77,109 @@ void MainFrame::onToggleAddressMargin(wxCommandEvent& event) {
     textEditor->adjustAddressMargin();
 }
 
-void MainFrame::onKernelSelected(wxCommandEvent& event) {
-    int selection = event.GetSelection();
-}
-
 void MainFrame::bindEvents() {
-    Bind(wxEVT_MENU, &MainFrame::onOpen, this, OPEN);
     Bind(wxEVT_MENU, &MainFrame::onExit, this, EXIT);
     Bind(wxEVT_MENU, &MainFrame::onAbout, this, ABOUT);
     Bind(wxEVT_MENU, &MainFrame::onToggleAddressMargin, this,
          TOGGLE_ADDRESS_MARGIN);
-    Bind(wxEVT_LISTBOX, &MainFrame::onKernelSelected, this, SELECT_KERNEL);
+    Bind(wxEVT_MENU, &MainFrame::onOpen, this, OPEN);
+    Bind(wxEVT_BUTTON, &MainFrame::onRequestMemory, this, REQUEST_MEMORY);
+}
+
+void MainFrame::enableTool(int toolId, bool state) {
+    toolbar->EnableTool(toolId, state);
+}
+
+void MainFrame::selectKernel(int kernelIdx) {
+    kernelPanel->Select(kernelIdx);
+}
+
+void MainFrame::updateKernelList(const std::vector<std::string>& kernels) {
+    auto toWx = [](const std::string& name) { return wxString(name); };
+    std::vector<wxString> out(kernels.size());
+    std::transform(kernels.begin(), kernels.end(), out.begin(), toWx);
+    kernelPanel->Set(out);
+}
+
+void MainFrame::enableKernelList(bool state) {
+    kernelPanel->Enable(state);
+}
+
+void MainFrame::enableModelList(bool state) {
+    toolbar->choiceModel->Enable(state);
+}
+
+void MainFrame::enableMemoryPanel(bool state) {
+    memoryPanel->addressButton->Enable(state);
+    memoryPanel->addressInput->Enable(state);
+}
+
+void MainFrame::setParameters(const ParametersCategory& category,
+                              const std::vector<Parameter>& parameters) {
+    wxPGProperty* categoryPtr;
+
+    switch (category) {
+        case ParametersCategory::GLOBAL:
+            categoryPtr = paramsPanel->globalCategory;
+            break;
+
+        case ParametersCategory::KERNEL:
+            categoryPtr = paramsPanel->kernelCategory;
+            break;
+        default:
+            return;
+    }
+
+    categoryPtr->DeleteChildren();
+    for (auto& param : parameters) {
+        auto prop = categoryPtr->AppendChild(
+            new wxStringProperty(param.name, wxPG_LABEL, param.value));
+        paramsPanel->SetPropertyReadOnly(prop, true);
+    }
+}
+
+void MainFrame::setInstructions(const std::vector<Instruction>& instructions) {
+    textEditor->setInstructions(instructions);
+
+    auiManager.GetPane(textEditor).Show();
+    auiManager.Update();
+}
+
+void MainFrame::setExecutionMarker(size_t address) {
+    textEditor->setExecutionMarker(address);
+}
+
+void MainFrame::removeExecutionMarker() {
+    textEditor->clearExecutionMarker();
+}
+
+void MainFrame::onSetBreakpoint(size_t address) const {
+    app->onSetBreakpoint(address);
+}
+
+void MainFrame::onRemoveBreakpoint(size_t address) const {
+    app->onRemoveBreakpoint(address);
+}
+
+void MainFrame::onRequestMemory(wxCommandEvent& event) {
+    auto value = memoryPanel->addressInput->GetValue();
+    auto hexString = value.utf8_string();
+    if (hexString.empty()) {
+        hexString = "0";
+    }
+    auto address = std::stoull(hexString, nullptr, 16);
+    app->onRequestMemory(address);
+}
+
+void MainFrame::setMemoryView(const void* memory, size_t size, size_t address) {
+    memoryPanel->setMemoryView(memory, size, address);
+}
+
+void MainFrame::setModelChoice(const std::vector<std::string>& models,
+                               size_t currentIdx) {
+    auto choice = toolbar->choiceModel;
+    for (auto& model : models) {
+        choice->Append(model);
+    }
+    choice->SetSelection(static_cast<int>(currentIdx));
 }

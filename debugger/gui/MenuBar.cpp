@@ -3,8 +3,7 @@
 
 MenuBar::MenuBar(const Preferences& preferences) {
     auto* menuFile = new wxMenu;
-    menuFile->Append(OPEN, "&Open...\tCtrl-O", "Load kernel sources from file");
-    menuFile->AppendSeparator();
+
     menuFile->Append(EXIT, "&Exit", "Close program");
 
     auto* menuHelp = new wxMenu;

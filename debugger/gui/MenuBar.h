@@ -1,7 +1,7 @@
 #ifndef RED_O_LATOR_MENUBAR_H
 #define RED_O_LATOR_MENUBAR_H
 
-#include "Preferences.h"
+#include "../data/Preferences.h"
 #include "wx.h"
 
 class MenuBar : public wxMenuBar {

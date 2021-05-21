@@ -1,5 +1,4 @@
 #include "Toolbar.h"
-#include <wx/artprov.h>
 #include "Events.h"
 #include "MainFrame.h"
 #include "resources/embedded/abort.c"
@@ -7,11 +6,11 @@
 #include "resources/embedded/forward.c"
 #include "resources/embedded/next.c"
 #include "resources/embedded/pause.c"
-#include "resources/embedded/play.c"
+#include "resources/embedded/record.c"
 
 Toolbar::Toolbar(wxWindow* parent)
     : wxAuiToolBar(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize) {
-    auto playImg = loadToolbarIcon(play_png);
+    auto recordImg = loadToolbarIcon(record_png);
     auto pauseImg = loadToolbarIcon(pause_png);
     auto forwardImg = loadToolbarIcon(forward_png);
     auto stopImg = loadToolbarIcon(abort_png);
@@ -19,29 +18,23 @@ Toolbar::Toolbar(wxWindow* parent)
 
     SetWindowStyle(wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
 
-    AddTool(OPEN, "Open",
-            wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER,
-                                     toolbarElementSize),
-            "Open");
-    AddTool(ABOUT, "Settings",
-            wxArtProvider::GetBitmap(wxART_EXECUTABLE_FILE, wxART_OTHER,
-                                     toolbarElementSize),
-            "Settings");
+    choiceModel =
+        new wxChoice(this, SELECT_MODEL, wxDefaultPosition, wxSize(200, 24));
+    choiceModel->SetLabel("Select GPU Model");
 
-    AddSeparator();
+    AddControl(choiceModel);
+
     AddStretchSpacer(1);
-    AddTool(RUN, "Run", playImg, "Run");
-    AddTool(PAUSE, "Pause", pauseImg, "Resume");
+
+    AddTool(ATTACH, "Attach", recordImg, "Attach");
+    AddTool(PAUSE, "Pause", pauseImg, "Pause");
     AddTool(RESUME, "Resume", forwardImg, "Resume");
     AddTool(STEP, "Step", nextImg, "Step");
     AddTool(STOP, "Stop", stopImg, "Stop");
-    EnableTool(PAUSE, false);
-    EnableTool(RESUME, false);
-    EnableTool(STEP, false);
-    EnableTool(STOP, false);
 
     AddStretchSpacer(1);
-    AddSpacer(55);
+    AddSpacer(200);
+
     Realize();
 }
 
