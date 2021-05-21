@@ -18,17 +18,21 @@ constexpr bool is_v_reg(RegisterType type) {
 }
 
 struct ProgramCounter {
+
     void set_value(uint64_t value) {
         value_ = value;
         used_ = true;
     }
+
     void add(uint64_t value) {
         value_ += value;
         used_ = true;
     }
-    void next(uint64_t value) {
+
+    void hidden_add(uint64_t value) {
         value_ += value;
     }
+
     uint64_t get_value() const {
         return value_;
     }

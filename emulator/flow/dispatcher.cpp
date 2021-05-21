@@ -35,9 +35,9 @@ WorkGroup* Dispatcher::next_wg() {
     return workGroup;
 }
 void Dispatcher::set_workitems(WorkGroup* wg) {
-    for (int x = 0; x < wg->actualSizeX; x++) {
-        for (int y = 0; y < wg->actualSizeY; y++) {
-            for (int z = 0; z < wg->actualSizeZ; z++) {
+    for (int x = 0; x < wg->actualSizeX_; x++) {
+        for (int y = 0; y < wg->actualSizeY_; y++) {
+            for (int z = 0; z < wg->actualSizeZ_; z++) {
                 wg->workItems.push_back(std::make_unique<WorkItem>(wg, x, y, z));
             }
         }

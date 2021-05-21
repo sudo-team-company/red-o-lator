@@ -10,9 +10,9 @@ void WorkGroup::set_ids(int idX, int idY, int idZ) {
     IDZ = idZ;
 }
 void WorkGroup::set_actual_size(int x, int y, int z) {
-    actualSizeX = sizeX;
-    actualSizeY = sizeY;
-    actualSizeZ = sizeZ;
+    actualSizeX_ = x;
+    actualSizeY_ = y;
+    actualSizeZ_ = z;
 }
 bool WorkGroup::all_wf_completed() {
     for (auto& wavefront : wavefronts) {
@@ -29,7 +29,7 @@ Instruction* Wavefront::get_cur_instr() const {
 void Wavefront::to_next_instr() {
     if (programCounter->was_used()) return;
     auto curInstrKey =  get_cur_instr()->get_key();
-    programCounter += get_instr_width(curInstrKey) / 8;
+    programCounter->hidden_add(get_instr_width(curInstrKey) / 8);
 }
 
 void Wavefront::set_vgpr(size_t wiInd, size_t vInd, uint32_t value) {
@@ -56,6 +56,7 @@ WfStateSOP1 Wavefront::get_sop1_state(const Instruction& instr) {
     state.SDST = to_uin64_t(read_operand(*instr[0]));
     state.SSRC0 = to_uin64_t(read_operand(*instr[1]));
     state.DEST_TYPE = std::get<RegisterType>(instr[0]->value);
+    state.SRC0_TYPE = std::get<RegisterType>(instr[1]->value);
     return state;
 }
 
@@ -285,11 +286,11 @@ std::vector<uint32_t> Wavefront::read_reg_operand(const Operand& operand, int wi
 
     switch (regType) {
         case EXEC:
-            return {static_cast<uint32_t>(execReg), static_cast<uint32_t>(execReg >> 32)};
+            return {static_cast<uint32_t>(execReg >> 32), static_cast<uint32_t>(execReg)};
         case SCC:
             return {static_cast<uint32_t>(sccReg)};
         case VCC:
-            return {static_cast<uint32_t>(vccReg), static_cast<uint32_t>(vccReg >> 32)};
+            return {static_cast<uint32_t>(vccReg >> 32), static_cast<uint32_t>(vccReg)};
         case M0:
             return {m0Reg};
         default:
@@ -348,7 +349,7 @@ void Wavefront::write_operand_to_gpr(const Operand& operand,
         // todo log
     }
 }
-bool Wavefront::work_item_masked(size_t wiInd) {
+bool Wavefront::work_item_masked(size_t wiInd) const {
     return (execReg & (1 << wiInd)) != 0;
 }
 
@@ -356,4 +357,9 @@ void Wavefront::set_sgpr_pair(size_t sgprInd, uint64_t data) {
     assert(sgprInd % 2 == 0 && "SGPR-pair should be aligned");
     scalarRegFile[sgprInd] = static_cast<uint32_t>(data >> 32);
     scalarRegFile[sgprInd + 1] = static_cast<uint32_t>(data);
+}
+
+uint64_t Wavefront::read_sgpr_pair(size_t sgprInd){
+    assert(sgprInd % 2 == 0 && "SGPR-pair should be aligned");
+    return static_cast<uint64_t>(scalarRegFile[sgprInd]) << 32 | static_cast<uint64_t>(scalarRegFile[sgprInd + 1]);
 }

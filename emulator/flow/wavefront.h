@@ -29,9 +29,10 @@ struct WorkGroup {
     std::vector<std::unique_ptr<WorkItem>> workItems;
     std::vector<std::unique_ptr<Wavefront>> wavefronts;
 
+    int actualSizeX_, actualSizeY_, actualSizeZ_;
+
     WorkGroup(int sizeX, int sizeY, int sizeZ)
         : sizeX(sizeX), sizeY(sizeY), sizeZ(sizeZ) {}
-    int actualSizeX, actualSizeY, actualSizeZ;
 
     void set_ids(int idX, int idY, int idZ);
     void set_actual_size(int sizeX, int sizeY, int sizeZ);
@@ -77,6 +78,7 @@ struct Wavefront {
     void to_next_instr();
 
     void set_sgpr_pair(size_t,uint64_t);
+    uint64_t read_sgpr_pair(size_t);
 
     void set_vgpr(size_t wiInd, size_t vInd, uint32_t value);
     uint32_t read_vgpr(size_t wiInd, size_t vInd);
@@ -117,7 +119,7 @@ struct Wavefront {
     void write_operand_to_gpr(const Operand&, uint64_t);
     void write_operand_to_gpr(const Operand&, uint64_t, int);
 
-    bool work_item_masked(size_t wiInd);
+    bool work_item_masked(size_t wiInd) const;
 
    private:
     std::vector<uint32_t> read_reg_operand(const Operand&, int);

@@ -119,8 +119,27 @@ static inline void run_s_bfm_b64(WfStateSOP2& state) {
     state.SDST = ((uint64_t(1) << (state.SSRC0 & 63)) - 1) << (state.SSRC1 & 63);
 }
 
-static inline void run_s_cbranch_g_fork(WfStateSOP2& state) {
-    // todo
+static inline void run_s_cbranch_g_fork(WfStateSOP2& state, Wavefront* wavefront) {
+    uint64_t passes = (state.EXEC & state.SSRC0);
+    uint64_t failures = (state.EXEC & ~state.SSRC0);
+    uint8_t CSP = state.MODE->csp();
+    if (passes == state.EXEC)
+        state.PC->set_value(state.SSRC1);
+    else if (failures == state.EXEC)
+        state.PC->add(4);
+    else if (bit_count(failures) < bit_count(passes)) {
+        state.EXEC = failures;
+        wavefront->set_sgpr_pair(CSP*4, passes);
+        wavefront->set_sgpr_pair(CSP*4 + 2, state.SSRC1);
+        state.MODE->csp(CSP + 1);
+        state.PC->add(4);        /* jump to failure */
+    } else {
+        state.EXEC = passes;
+        wavefront->set_sgpr_pair(CSP * 4, failures);
+        wavefront->set_sgpr_pair(CSP * 4 + 2, state.PC->get_value() + 4);
+        state.MODE->csp(CSP + 1);
+        state.PC->set_value(state.SSRC1);     /* jump to passes */
+    }
 }
 
 static inline void run_s_cselect_b32(WfStateSOP2& state) {
@@ -313,13 +332,12 @@ static inline void run_s_xor_b64(WfStateSOP2& state) {
 
 void run_sop2(const Instruction& instruction, Wavefront* wf) {
     auto state = wf->get_sop2_state(instruction);
-    //    S_CBRANCH_G_FORK SSRC0(2), SSRC1(2)
-    //    S_RFE_RESTORE_B64  SDST(2), SSRC0(1)
 
     switch (instruction.get_key()) {
         case S_CBRANCH_G_FORK:
-            // todo
-            // run_s_cbranch_g_fork(state);
+            state.SSRC0 = to_uin64_t(wf->read_operand(*instruction[0]));
+            state.SSRC1 = to_uin64_t(wf->read_operand(*instruction[1]));
+            run_s_cbranch_g_fork(state, wf);
             break;
         case S_RFE_RESTORE_B64:
             state.SDST = to_uin64_t(wf->read_operand(*instruction[0]));
@@ -483,8 +501,6 @@ void run_sop2(const Instruction& instruction, Wavefront* wf) {
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error(std::string("Unexpected instruction key: ") +
-                                     get_instr_str(instruction.get_key()));
     }
 
     wf->update_with_sop2_state(instruction, state);

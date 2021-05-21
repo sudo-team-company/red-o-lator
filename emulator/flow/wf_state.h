@@ -12,6 +12,7 @@ struct WfStateSOP1 {
     uint64_t SSRC0 = 0;
     uint64_t EXEC = 0;
     RegisterType DEST_TYPE;
+    RegisterType SRC0_TYPE;
     uint32_t M0 = 0;
     ProgramCounter* PC = 0;
     ModeReg* MODE = nullptr;

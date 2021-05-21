@@ -95,7 +95,7 @@ static inline void run_s_brev_b64(WfStateSOP1& state) {
 static inline void run_s_cbranch_join(WfStateSOP1& state, Wavefront* wf) {
     uint8_t csp = state.MODE->csp();
     if (uint64_t(csp) == state.SSRC0) {
-        //        state.PC += 4;
+        state.PC->add(4);
     } else {
         csp--;
         state.EXEC = static_cast<uint64_t>(wf->scalarRegFile[csp * 4]) << 32 |
@@ -219,25 +219,25 @@ static inline void run_s_mov_b64(WfStateSOP1& state) {
     state.SDST = state.SSRC0;
 }
 
-static inline void run_s_movreld_b32(const Instruction& instruction,
-                       WfStateSOP1& state,
-                       Wavefront* wf) {
-    assert(instruction.get_operands_count() > 0);
-    auto dst = *instruction[0];
-    assert(std::holds_alternative<RegisterType>(dst.value) && dst.regAmount == 1);
-    // todo
+static inline void run_s_movreld_b32(WfStateSOP1& state, Wavefront* wf) {
+    assert(is_s_reg(state.DEST_TYPE));
+    wf->scalarRegFile[state.DEST_TYPE - S0 + state.M0] =
+        static_cast<uint32_t>(state.SSRC0);
 }
 
-static inline void run_s_movreld_b64(WfStateSOP1& state) {
-    // todo
+static inline void run_s_movreld_b64(WfStateSOP1& state, Wavefront* wf) {
+    assert(is_s_reg(state.DEST_TYPE));
+    wf->set_sgpr_pair(state.DEST_TYPE - S0 + state.M0, state.SSRC0);
 }
 
-static inline void run_s_movrels_b32(WfStateSOP1& state) {
-    // todo
+static inline void run_s_movrels_b32(WfStateSOP1& state, Wavefront* wf) {
+    assert(is_s_reg(state.SRC0_TYPE));
+    state.SDST = wf->scalarRegFile[state.SRC0_TYPE - S0 + state.M0];
 }
 
-static inline void run_s_movrels_b64(WfStateSOP1& state) {
-    // todo
+static inline void run_s_movrels_b64(WfStateSOP1& state, Wavefront* wf) {
+    assert(is_s_reg(state.SRC0_TYPE));
+    state.SDST = wf->read_sgpr_pair(state.SRC0_TYPE - S0 + state.M0);
 }
 
 static inline void run_s_nand_saveexec_b64(WfStateSOP1& state) {
@@ -472,16 +472,16 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
             run_s_mov_b64(state);
             break;
         case S_MOVRELD_B32:
-            // run_s_movreld_b32(state);
+            run_s_movreld_b32(state, wf);
             break;
         case S_MOVRELD_B64:
-            run_s_movreld_b64(state);
+            run_s_movreld_b64(state, wf);
             break;
         case S_MOVRELS_B32:
-            run_s_movrels_b32(state);
+            run_s_movrels_b32(state, wf);
             break;
         case S_MOVRELS_B64:
-            run_s_movrels_b64(state);
+            run_s_movrels_b64(state, wf);
             break;
         case S_NAND_SAVEEXEC_B64:
             run_s_nand_saveexec_b64(state);
@@ -530,7 +530,6 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error("Unexpected instruction key");
     }
 
     wf->update_with_sop1_state(instr, state);
