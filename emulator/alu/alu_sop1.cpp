@@ -98,10 +98,8 @@ static inline void run_s_cbranch_join(WfStateSOP1& state, Wavefront* wf) {
         state.PC->add(4);
     } else {
         csp--;
-        state.EXEC = static_cast<uint64_t>(wf->scalarRegFile[csp * 4]) << 32 |
-                     wf->scalarRegFile[csp * 4 + 1];
-        uint64_t value = static_cast<uint64_t>(wf->scalarRegFile[csp * 4 + 2]) << 32 |
-                         wf->scalarRegFile[csp * 4 + 3];
+        state.EXEC = wf->read_sgpr_pair(csp * 4);
+        uint64_t value =wf->read_sgpr_pair(csp * 4 + 2);
         state.PC->set_value(value);
     }
 }

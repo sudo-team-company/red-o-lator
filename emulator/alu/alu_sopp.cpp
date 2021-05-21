@@ -59,36 +59,8 @@ static inline void run_s_cbranch_vccz(WfStateSOPP& state) {
     if (state.VCC == 0) state.PC->set_value(state.RELADDR);
 }
 
-static inline void run_s_decperflevel(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_endpgm_ordered_ps_done(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_endpgm_saved(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_icache_inv(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_incperflevel(WfStateSOPP& state) {
-    // todo
-}
-
 static inline void run_s_nop(WfStateSOPP& state) {
     //do nothing
-}
-
-static inline void run_s_sendmsg(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_sendmsghalt(WfStateSOPP& state) {
-    // todo
 }
 
 static inline void run_s_set_gpr_idx_mode(WfStateSOPP& state) {
@@ -101,25 +73,6 @@ static inline void run_s_set_gpr_idx_off(WfStateSOPP& state) {
 
 static inline void run_s_sethalt(WfStateSOPP& state) {
     state.STATUS->halt(state.SIMM16 & 1);
-}
-
-static inline void run_s_setkill(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_setprio(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_sleep(WfStateSOPP& state) {
-    // todo
-}
-static inline void run_s_trap(WfStateSOPP& state) {
-    // todo
-}
-
-static inline void run_s_ttracedata(WfStateSOPP& state) {
-    // todo
 }
 
 static inline void run_s_waitcnt(WfStateSOPP& state) {
@@ -172,30 +125,8 @@ void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
         case S_CBRANCH_VCCZ:
             set_reladdr_and_run(instruction, wavefront, state, run_s_cbranch_vccz);
             break;
-
-        case S_DECPERFLEVEL:
-            run_s_decperflevel(state);
-            break;
-        case S_ENDPGM_ORDERED_PS_DONE:
-            run_s_endpgm_ordered_ps_done(state);
-            break;
-        case S_ENDPGM_SAVED:
-            run_s_endpgm_saved(state);
-            break;
-        case S_ICACHE_INV:
-            run_s_icache_inv(state);
-            break;
-        case S_INCPERFLEVEL:
-            run_s_incperflevel(state);
-            break;
         case S_NOP:
             run_s_nop(state);
-            break;
-        case S_SENDMSG:
-            run_s_sendmsg(state);
-            break;
-        case S_SENDMSGHALT:
-            run_s_sendmsghalt(state);
             break;
         case S_SET_GPR_IDX_MODE:
             run_s_set_gpr_idx_mode(state);
@@ -206,28 +137,11 @@ void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
         case S_SETHALT:
             run_s_sethalt(state);
             break;
-        case S_SETKILL:
-            run_s_setkill(state);
-            break;
-        case S_SETPRIO:
-            run_s_setprio(state);
-            break;
-        case S_SLEEP:
-            run_s_sleep(state);
-            break;
-        case S_TRAP:
-            run_s_trap(state);
-            break;
-        case S_TTRACEDATA:
-            run_s_ttracedata(state);
-            break;
         case S_WAITCNT:
             run_s_waitcnt(state);
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error(std::string("Unexpected instruction key: ") +
-                                     get_instr_str(instrKey));
     }
 
     wavefront->update_with_common_sopp_state(instruction, state);

@@ -120,5 +120,5 @@ void Dispatcher::init_mode_reg(Wavefront* wf) const {
 }
 
 void Dispatcher::init_status_reg(Wavefront* wf) {
-    //todo ?
+    //todo
 }

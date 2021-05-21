@@ -1895,7 +1895,6 @@ InstrFormat get_instr_format(InstrKey);
 /**
  * @return instruction's width in bits
  */
- //todo wrong works
 uint8_t get_instr_width(InstrKey);
 
 

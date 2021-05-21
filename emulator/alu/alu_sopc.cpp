@@ -77,9 +77,9 @@ static inline void run_s_cmp_lt_i32(WfStateSOPC& state) {
 static inline void run_s_cmp_lt_u32(WfStateSOPC& state) {
     state.SCC = state.SSRC0 < state.SSRC1;
 }
+
 static inline void run_s_set_gpr_idx_on(WfStateSOPC& state) {
     state.MODE->gpr_idx_en(1);
-    // todo differs from official doc
     //SRC1 -> IMM8
     state.M0 = ((state.SSRC1 & 15) << 12) | (state.SSRC0 & 0xff);
 }
@@ -156,7 +156,6 @@ void run_sopc(const Instruction& instruction, Wavefront* wavefront)  {
             break;
         default:
             assert(false && "Unknown instruction met!");
-            throw std::runtime_error(std::string("Unexpected instruction key: ") + get_instr_str(instruction.get_key()));
     }
     wavefront->update_with_sopc_state(state);
 }
