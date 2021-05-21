@@ -100,11 +100,11 @@ TEST_CASE("a_plus_b") {
     clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
     clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
 
-    //    size_t globalWorkOffset = 0;
-    //    size_t globalWorkSize = 0;
-    //    size_t localWorkSize = 0;
-    //    error = clEnqueueNDRangeKernel(commandQueue, kernel, 1,
-    //                                       &globalWorkOffset, &globalWorkSize,
-    //                                       &localWorkSize, 0, nullptr,
-    //                                       nullptr);
+        size_t globalWorkOffset = 0;
+        size_t globalWorkSize = 0;
+        size_t localWorkSize = 0;
+        error = clEnqueueNDRangeKernel(commandQueue, kernel, 1,
+                                           &globalWorkOffset, &globalWorkSize,
+                                           &localWorkSize, 0, nullptr,
+                                           nullptr);
 }

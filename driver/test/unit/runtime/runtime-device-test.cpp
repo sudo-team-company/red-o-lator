@@ -144,6 +144,18 @@ TEST_SUITE("Device API") {
             }
         }
 
+        SUBCASE("should get array of items correctly") {
+            size_t out[3];
+            const auto error = clGetDeviceInfo(
+                test::getDevice(), CL_DEVICE_MAX_WORK_ITEM_SIZES,
+                3 * sizeof(size_t), out, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(out[0] == 1024);
+            CHECK(out[1] == 1024);
+            CHECK(out[2] == 1024);
+        }
+
         SUBCASE("should fail with wrong parameter query") {
             char out[20];
             const auto error =

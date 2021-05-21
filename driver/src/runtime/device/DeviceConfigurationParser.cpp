@@ -206,10 +206,12 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, cl_uint)
     PARSE_PARAMETER_WITH_BODY(CL_DEVICE_MAX_WORK_ITEM_SIZES, [&]() {
         // TODO: get actual CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS value
-        // TODO: CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS not working
-        const auto values = parseArray(parameterValue, parseNumber<size_t>);
-        result = static_cast<void*>(const_cast<size_t*>(values.data()));
+        const std::vector<size_t> values =
+            parseArray(parameterValue, parseNumber<size_t>);
         resultSize = values.size() * sizeof(size_t);
+        auto* valuesArray = new size_t[values.size()];
+        memcpy(valuesArray, values.data(), resultSize);
+        result = CLObjectInfoParameterValueTypeArray(valuesArray);
     })
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_WORK_GROUP_SIZE, size_t)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, cl_uint)

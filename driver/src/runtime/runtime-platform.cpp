@@ -111,8 +111,5 @@ CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
 
 CL_API_ENTRY void* CL_API_CALL clGetExtensionFunctionAddressForPlatform(
     cl_platform_id platform, const char* func_name) {
-    std::cerr << "Unimplemented OpenCL API call: "
-                 "clGetExtensionFunctionAddressForPlatform"
-              << std::endl;
-    return nullptr;
+    return clGetExtensionFunctionAddress(func_name);
 }

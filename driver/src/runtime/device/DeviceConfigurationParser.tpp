@@ -9,6 +9,10 @@ T DeviceConfigurationParser::requireParameter(cl_device_info parameter) const {
         if (std::holds_alternative<std::string>(value)) {
             nonCastedValue =
                 reinterpret_cast<const void*>(&std::get<std::string>(value));
+        } else if (std::holds_alternative<CLObjectInfoParameterValueTypeArray>(
+                       value)) {
+            nonCastedValue =
+                std::get<CLObjectInfoParameterValueTypeArray>(value).array;
         } else {
             nonCastedValue = std::get<void*>(value);
         }

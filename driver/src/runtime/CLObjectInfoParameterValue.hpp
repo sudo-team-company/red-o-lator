@@ -1,8 +1,16 @@
 #pragma once
 
+#include <string>
 #include <variant>
 
-using CLObjectInfoParameterValueType = std::variant<void*, std::string>;
+struct CLObjectInfoParameterValueTypeArray {
+    explicit CLObjectInfoParameterValueTypeArray(void* array) : array(array) {}
+
+    const void* array;
+};
+
+using CLObjectInfoParameterValueType =
+    std::variant<void*, std::string, CLObjectInfoParameterValueTypeArray>;
 
 struct CLObjectInfoParameterValue {
     CLObjectInfoParameterValue(CLObjectInfoParameterValueType value,

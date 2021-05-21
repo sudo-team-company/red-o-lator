@@ -1,5 +1,6 @@
 #include <common/test/doctest.h>
 
+#include <algorithm>
 #include <cstring>
 #include <vector>
 
@@ -177,7 +178,51 @@ TEST_SUITE("Memory buffer API") {
         }
     }
 
+    TEST_CASE("clEnqueueReadBuffer") {
+        SUBCASE("content without flags is initialized to zero") {
+            const auto size = 8;
+            const auto sizeBytes = size * sizeof(cl_uint);
+
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer(0, sizeBytes);
+
+            auto out = std::vector<cl_uint>(size);
+            out.assign(size, 1);
+            const auto error =
+                clEnqueueReadBuffer(queue, buffer, true, 0, sizeBytes,
+                                    out.data(), 0, nullptr, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(std::all_of(out.begin(), out.end(), [](auto value) {
+                return value == 0;
+            }));
+        }
+
+        SUBCASE("should read immediately if blocking_read is true") {}
+
+        SUBCASE(
+            "should read after blocking operation if blocking_read is false") {}
+
+        SUBCASE("should read memory block with offset") {}
+    }
+
+    TEST_CASE("clEnqueueWriteBuffer") {
+        SUBCASE("should write immediately if blocking_write is true") {}
+
+        SUBCASE(
+            "should write after blocking operation if blocking_write is "
+            "false") {}
+
+        SUBCASE("should write to memory block with offset") {}
+    }
+
     TEST_CASE("clEnqueue{Read/Write}Buffer") {
+        SUBCASE("should fail if ptr or size is not set") {}
+
+        SUBCASE(
+            "should fail if requested size if more than buffer size with "
+            "repect to offset") {}
+
         SUBCASE("host access") {
             SUBCASE("host can't read from write-only memory") {}
 
@@ -188,18 +233,14 @@ TEST_SUITE("Memory buffer API") {
             SUBCASE("host can read and write to no-host-flags memory") {}
         }
 
-        SUBCASE("host ptr != nullptr") {
-            SUBCASE("CL_MEM_USE_HOST_PTR") {
-                SUBCASE("read return hostPtr from host changes buffer") {}
+        SUBCASE("CL_MEM_USE_HOST_PTR") {
+            SUBCASE("writing to hostPtr from host changes buffer") {}
+        }
 
-                SUBCASE("writing to hostPtr from host changes buffer") {}
-            }
+        SUBCASE("CL_MEM_COPY_HOST_PTR") {
+            SUBCASE("memory from host_ptr is copied to buffer") {}
 
-            SUBCASE("CL_MEM_COPY_HOST_PTR") {
-                SUBCASE("memory from host_ptr is copied to buffer") {}
-
-                SUBCASE("writing to hostPtr does not change buffer") {}
-            }
+            SUBCASE("writing to hostPtr does not change buffer") {}
         }
     }
 }
