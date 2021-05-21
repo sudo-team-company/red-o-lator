@@ -5,7 +5,10 @@
 
 class ParametersTable : public wxPropertyGrid {
    public:
-    ParametersTable(wxWindow* parent);
+    explicit ParametersTable(wxWindow* parent);
+
+    wxPGProperty* globalCategory;
+    wxPGProperty* kernelCategory;
 };
 
 #endif  // RED_O_LATOR_PARAMETERSTABLE_H

@@ -1,8 +1,8 @@
 #ifndef RED_O_LATOR_TOOLBAR_H
 #define RED_O_LATOR_TOOLBAR_H
 
-#include "wx.h"
 #include <wx/aui/aui.h>
+#include "wx.h"
 
 class Toolbar : public wxAuiToolBar {
    private:
@@ -12,6 +12,8 @@ class Toolbar : public wxAuiToolBar {
 
    public:
     Toolbar(wxWindow* parent);
+
+    wxChoice* choiceModel;
 };
 
 #endif  // RED_O_LATOR_TOOLBAR_H

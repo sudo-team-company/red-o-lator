@@ -1,7 +1,8 @@
 #include "CodeViewer.h"
+#include "MainFrame.h"
 
-CodeViewer::CodeViewer(wxWindow* parent, const Preferences& preferences)
-    : preferences(preferences), wxStyledTextCtrl(parent) {
+CodeViewer::CodeViewer(MainFrame* parent, const Preferences& preferences)
+    : preferences(preferences), wxStyledTextCtrl(parent), frame(parent) {
     StyleClearAll();
 
     setUpTextEditor();
@@ -18,11 +19,6 @@ CodeViewer::CodeViewer(wxWindow* parent, const Preferences& preferences)
 void CodeViewer::OnModified(wxStyledTextEvent& event) {
     int type = event.GetModificationType();
     if ((type & (wxSTC_MOD_INSERTTEXT | wxSTC_MOD_DELETETEXT)) == 0) return;
-
-    int lineCount = GetLineCount();
-    for (int i = 0; i < lineCount; ++i) {
-        setAddress(i, i);
-    }
 }
 
 void CodeViewer::OnMarginClick(wxStyledTextEvent& event) {
@@ -37,13 +33,29 @@ void CodeViewer::adjustAddressMargin() {
     SetMarginWidth(MARGIN_ADDRESS, width);
 }
 
-void CodeViewer::setAddress(int line, int value) {
-    MarginSetText(line, wxString::Format("0x%.6X", value));
+void CodeViewer::setAddress(int line, size_t value) {
+    MarginSetText(line, wxString::Format("0x%.6llX", value));
     MarginSetStyle(line, MARGIN_ADDRESS_STYLE);
 }
 
+void CodeViewer::setLabel(int line, const wxString& name) {
+    MarginSetText(line, name);
+    MarginSetStyle(line, MARGIN_LABEL_STYLE);
+}
+
 void CodeViewer::setBreakpointMarker(int line) {
-    MarkerAdd(line, MARKER_BREAKPOINT);
+    if (lineMap.find(line) != lineMap.end()) {
+        auto address = lineMap[line];
+        if (breakpoints.find(address) != breakpoints.end()) {
+            breakpoints.erase(address);
+            MarkerDelete(line, MARKER_BREAKPOINT);
+            frame->onRemoveBreakpoint(address);
+        } else {
+            breakpoints.insert(address);
+            MarkerAdd(line, MARKER_BREAKPOINT);
+            frame->onSetBreakpoint(address);
+        }
+    }
 }
 
 void CodeViewer::clearBreakpointMarker(int line) {
@@ -54,6 +66,14 @@ void CodeViewer::setExecutionMarker(int line) {
     clearExecutionMarker();
     MarkerAdd(line, MARKER_EXECUTION_LINE);
     MarkerAdd(line, MARKER_EXECUTION_CURSOR);
+}
+
+void CodeViewer::setExecutionMarker(size_t address) {
+    if (addressMap.find(address) != addressMap.end()) {
+        setExecutionMarker(addressMap[address]);
+    } else {
+        clearExecutionMarker();
+    }
 }
 
 void CodeViewer::clearExecutionMarker() {
@@ -117,8 +137,10 @@ void CodeViewer::setUpMargins() {
     wxFont font(10, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
                 wxFONTWEIGHT_BOLD);
     StyleSetFont(MARGIN_ADDRESS_STYLE, font);
-    StyleSetForeground(MARGIN_ADDRESS_STYLE, wxColour(0, 100, 200));
+    StyleSetForeground(MARGIN_ADDRESS_STYLE, "SKY BLUE");
     StyleSetBackground(MARGIN_ADDRESS_STYLE, wxColour(240, 240, 240));
+    StyleSetFont(MARGIN_LABEL_STYLE, font);
+    StyleSetBackground(MARGIN_LABEL_STYLE, "PALE GREEN");
 
     SetMarginSensitive(MARGIN_MARKERS, true);
 
@@ -141,4 +163,32 @@ void CodeViewer::setUpMarkers() {
     MarkerDefine(MARKER_BREAKPOINT, wxSTC_MARK_CIRCLE, black, red);
     MarkerDefine(MARKER_EXECUTION_LINE, wxSTC_MARK_BACKGROUND, yellow, yellow);
     MarkerDefine(MARKER_EXECUTION_CURSOR, wxSTC_MARK_ARROW, gray, yellow);
+}
+
+void CodeViewer::setInstructions(const std::vector<Instruction>& instructions) {
+    addressMap.clear();
+    lineMap.clear();
+
+    MarkerDeleteAll(MARKER_BREAKPOINT);
+    MarkerDeleteAll(MARKER_EXECUTION_LINE);
+    MarkerDeleteAll(MARKER_EXECUTION_CURSOR);
+
+    SetReadOnly(false);
+
+    ClearAll();
+    for (int line = 0; line < instructions.size(); line++) {
+        auto& instr = instructions[line];
+        if (instr.isLabel) {
+            NewLine();
+            setLabel(line, instr.text);
+        } else {
+            AddText(instr.text);
+            NewLine();
+            setAddress(line, instr.address);
+            addressMap[instr.address] = line;
+            lineMap[line] = instr.address;
+        }
+    }
+
+    SetReadOnly(true);
 }
