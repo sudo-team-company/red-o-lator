@@ -9,6 +9,9 @@ add_executable(emulator
         alu/alu_sopc.cpp
         alu/alu_sopk.cpp
         alu/alu_smem.cpp
+        alu/alu_vop1.cpp
+        alu/alu_vop2.cpp
+        alu/alu_vop3.cpp
         reg/register.cpp
         instr/instruction.cpp
         instr/instr_info.cpp
@@ -26,12 +29,35 @@ add_executable(util_test
 add_executable(alu_test
         alu/alu_sop1.cpp
         alu/alu_sop2.cpp
+        alu/alu_vop1.cpp
         util/util.cpp
         test/alu/alu_test.cpp
         flow/wavefront.cpp
         reg/register.cpp
         instr/instruction.cpp
         instr/instr_info.cpp
+        )
+
+add_executable(wf_exec_test
+        test/wavefront_exec/wf_exec_test.cpp
+        cu/compute_unit.cpp
+        alu/alu.cpp
+        alu/alu_sop1.cpp
+        alu/alu_sop2.cpp
+        alu/alu_sopc.cpp
+        alu/alu_sopk.cpp
+        alu/alu_sopp.cpp
+        alu/alu_smem.cpp
+        alu/alu_vop1.cpp
+        alu/alu_vop2.cpp
+        gpu/storage.cpp
+        util/util.cpp
+        flow/wavefront.cpp
+        reg/register.cpp
+        instr/instruction.cpp
+        instr/instr_info.cpp
+        flow/dispatcher.cpp
+        ../common/common/common.hpp
         )
 
 target_link_libraries(emulator driver)

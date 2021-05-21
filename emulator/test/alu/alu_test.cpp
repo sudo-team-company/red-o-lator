@@ -66,6 +66,7 @@ TEST_CASE("run_s_bcnt0_i32_b32") {
         CHECK(wavefront->scalarRegFile[2] == 0);
         CHECK(!wavefront->sccReg);
     }
+    delete wavefront;
 }
 
 TEST_CASE("run_s_bcnt0_i32_b64") {
@@ -86,6 +87,7 @@ TEST_CASE("run_s_bcnt0_i32_b64") {
         CHECK(wavefront->scalarRegFile[2] == 48);
         CHECK(wavefront->sccReg);
     }
+    delete wavefront;
 }
 
 TEST_CASE("run_s_bcnt1_i32_b32}") {
@@ -110,6 +112,7 @@ TEST_CASE("run_s_bcnt1_i32_b32}") {
         CHECK(wavefront->scalarRegFile[6] == 32);
         CHECK(wavefront->sccReg);
     }
+    delete wavefront;
 }
 TEST_CASE("run_s_bcnt1_i32_b64}") {
     auto* wavefront = new Wavefront(nullptr, 4, 0);
@@ -128,6 +131,7 @@ TEST_CASE("run_s_bcnt1_i32_b64}") {
         CHECK(wavefront->scalarRegFile[2] == 16);
         CHECK(wavefront->sccReg);
     }
+    delete wavefront;
 }
 TEST_CASE("run_s_ff0_i32_b32") {
     auto* wavefront = new Wavefront(nullptr, 1, 0);
@@ -159,7 +163,9 @@ TEST_CASE("run_s_ff0_i32_b32") {
         CHECK(int32_t(wavefront->scalarRegFile[0]) == -1);
         CHECK(wavefront->scalarRegFile[0] == 0xffffffff);
     }
+    delete wavefront;
 }
+
 TEST_CASE("run_s_ff0_i32_b64") {
     auto* wavefront = new Wavefront(nullptr, 101, 0);
     Instruction instruction = Instruction("", "s_ff0_i32_b64", {"s0", "s[99:100]"});
@@ -171,6 +177,7 @@ TEST_CASE("run_s_ff0_i32_b64") {
         CHECK(int32_t(wavefront->scalarRegFile[0]) == -1);
         CHECK(wavefront->scalarRegFile[0] == 0xffffffff);
     }
+    delete wavefront;
 }
 TEST_CASE("run_s_ff1_i32_b32") {
     auto* wavefront = new Wavefront(nullptr, 101, 0);
@@ -196,6 +203,7 @@ TEST_CASE("run_s_ff1_i32_b32") {
         run_sop1(instruction, wavefront);
         CHECK(wavefront->scalarRegFile[99] == 16);
     }
+    delete wavefront;
 }
 TEST_CASE("run_s_flbit_i32_b32") {
     auto* wavefront = new Wavefront(nullptr, 1, 0);
@@ -231,6 +239,7 @@ TEST_CASE("run_s_flbit_i32_b32") {
         run_sop1(instruction, wavefront);
         CHECK(wavefront->scalarRegFile[0] == 0);
     }
+    delete wavefront;
 }
 
 // SOP2
@@ -267,4 +276,30 @@ TEST_CASE(
         CHECK(wavefront->scalarRegFile[6] == 0x7ffffffe);
         CHECK(wavefront->sccReg);
     }
+    delete wavefront;
+}
+
+static inline void fill_empty_wi(Wavefront* wf, size_t wiAmount) {
+    assert(wiAmount <= 64);
+
+    for (size_t i = 0; i < wiAmount; ++i) {
+        wf->workItems.push_back(nullptr);
+    }
+}
+
+//VOP1
+TEST_CASE("run_v_mov_b32") {
+    Instruction instruction = Instruction("", "v_mov_b32", {"v3", "s1"});
+    auto* wavefront = new Wavefront(nullptr, 2, 4);
+    fill_empty_wi(wavefront, 64);
+
+    SUBCASE("value from s1 should be in all v0") {
+        wavefront->scalarRegFile[1] = 0x12345678;
+        run_vop1(instruction, wavefront);
+        for (size_t wi = 0; wi < wavefront->workItems.size(); ++wi) {
+            CHECK(wavefront->read_vgpr(wi, 3) == 0x12345678);
+        }
+    }
+
+    delete wavefront;
 }

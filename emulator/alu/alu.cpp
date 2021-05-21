@@ -20,14 +20,17 @@ void run_instr(const Instruction& instr, Wavefront* wf) {
             run_sopp(instr, wf);
             break;
         case SMEM:
-            assert(false && "Unsupported yet");
             run_smem(instr, wf);
             break;
         case SOPC:
             run_sopc(instr, wf);
             break;
         case VOP1:
+            run_vop1(instr, wf);
+            break;
         case VOP2:
+            run_vop2(instr, wf);
+            break;
         case VOPC:
         case VINTRP:
         case VOP3A:

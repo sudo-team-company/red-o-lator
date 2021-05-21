@@ -15,7 +15,7 @@ class Dispatcher {
     int curIdZ = 0;
     size_t dispatchedWg = 0;
     size_t wgAmount;
-    KernelConfig kernelInfo;
+    KernelConfig kernelConfig;
     KernelCode* code;
 
     void set_workitems(WorkGroup* wg);
@@ -24,9 +24,10 @@ class Dispatcher {
     void init_mode_reg(Wavefront*) const;
     void init_status_reg(Wavefront*);
     void incr_ids();
+
    public:
-    Dispatcher(KernelConfig info, KernelCode* code);
-    bool has_next_wg();
+    Dispatcher(KernelConfig config, KernelCode* code);
+    bool has_next_wg() const;
     WorkGroup* next_wg();
 };
 

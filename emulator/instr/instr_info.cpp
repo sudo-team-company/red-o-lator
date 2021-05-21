@@ -834,6 +834,10 @@ char const* get_instr_str(InstrKey instr) noexcept {
             return "s_v_cmp_eq_i32";
         case FLAT_STORE_DWORD:
             return "s_flat_store_dword";
+        case V_SUB_U32:
+            return "V_SUB_U32";
+        case V_MUL_LO_U32:
+            return "V_MUL_LO_U32";
     }
     assert(false && "Unknown command");
     return "(unknown instruction)";
@@ -1109,7 +1113,9 @@ InstrFormat get_instr_format(InstrKey instrKey) {
             return VOP1;
         case V_ADD_U32:
         case V_ADDC_U32:
+        case V_SUB_U32:
             return VOP2;
+        case V_MUL_LO_U32:
         case V_LSHLREV_B64:
             return VOP3A;
         case V_CMP_EQ_I32:

@@ -9,18 +9,20 @@
 #include <cstdint>
 
 struct Storage {
-    std::vector<uint8_t> data;
 
     ~Storage() { delete storage_; }
     Storage(Storage& other) = delete;
     void operator=(const Storage& other) = delete;
     static Storage* get_instance();
 
+    void init(size_t bufferSize);
     std::vector<uint8_t> read_data(uint64_t, uint32_t, uint32_t);
+    void write_data(uint64_t, uint32_t, uint32_t);
 
    private:
+    std::vector<uint8_t> data_;
     Storage() {
-        data = std::vector<uint8_t>();
+        data_ = std::vector<uint8_t>();
     }
 
     static Storage* storage_;

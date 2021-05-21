@@ -68,14 +68,18 @@ struct Wavefront {
           atBarrier(false),
           completed(false) {
         scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));
-        vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
+        vectorRegFile =
+            std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
         workItems = std::vector<WorkItem*>();
     }
 
     Instruction* get_cur_instr() const;
     void to_next_instr();
 
-    void set_v_reg(size_t wiInd, size_t vInd, uint32_t value);
+    void set_sgpr_pair(size_t,uint64_t);
+
+    void set_vgpr(size_t wiInd, size_t vInd, uint32_t value);
+    uint32_t read_vgpr(size_t wiInd, size_t vInd);
 
     WfStateSOP1 get_sop1_state(const Instruction&);
     void update_with_sop1_state(const Instruction&, const WfStateSOP1&);
@@ -90,12 +94,30 @@ struct Wavefront {
     WfStateSOPC get_sopc_state(const Instruction&);
     void update_with_sopc_state(const WfStateSOPC&);
 
-    WfStateSOPP get_common_sopp_state(const Instruction& instruction) const;
-    void update_with_common_sopp_state(const Instruction& instruction, const WfStateSOPP& state);
+    WfStateSOPP get_common_sopp_state(const Instruction&) const;
+    void update_with_common_sopp_state(const Instruction&,
+                                       const WfStateSOPP&);
+
+    WfStateSMEM get_smem_state(const Instruction&);
+    void update_with_smem_state(const Instruction&, const WfStateSMEM&);
+
+    WfStateVOP1 get_vop1_state(const Instruction&);
+    void update_with_vop1_state(const Instruction&, const WfStateVOP1&);
+
+    WfStateVOP2 get_vop2_state(const Instruction&);
+    void update_with_vop2_state(const Instruction&, const WfStateVOP2&);
 
     std::vector<uint32_t> read_operand(const Operand&);
+    std::vector<uint32_t> read_operand(const Operand&, int);
     void write_operand_to_gpr(const Operand&, const std::vector<uint32_t>&);
+    void write_operand_to_gpr(const Operand&, const std::vector<uint32_t>&, int);
     void write_operand_to_gpr(const Operand&, uint64_t);
+    void write_operand_to_gpr(const Operand&, uint64_t, int);
+
+    bool work_item_masked(size_t wiInd);
+
+   private:
+    std::vector<uint32_t> read_reg_operand(const Operand&, int);
 };
 
 struct WorkItem {

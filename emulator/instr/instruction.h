@@ -11,6 +11,7 @@
 #include "../../common/common/common.hpp"
 #include "../reg/reg_info.h"
 #include "instr_info.h"
+#include <memory>
 
 enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST };
 
@@ -60,7 +61,7 @@ struct Instruction {
         return addr;
     };
 
-    Instruction(const std::string& addr,
+    Instruction(uint32_t addr,
                 const std::string& instr,
                 const std::vector<std::string>& args);
    private:
@@ -71,7 +72,9 @@ struct Instruction {
 
 struct KernelCode {
     Instruction* get_instr(uint64_t);
-
+    void add_instr(uint32_t addr,
+                   const std::string& instr,
+                   const std::vector<std::string>& args);
    private:
-    std::unordered_map<std::uint64_t, std::unique_ptr<Instruction>> code;
+    std::unordered_map<std::uint64_t, std::unique_ptr<Instruction>> code = std::unordered_map<std::uint64_t, std::unique_ptr<Instruction>>();
 };

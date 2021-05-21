@@ -5,11 +5,10 @@
 #include "compute_unit.h"
 
 void ComputeUnit::run_work_group(WorkGroup* wg) {
-    while (wg->all_wf_completed()) {
-        for (size_t i = 0; i < wg->wavefronts.size(); ++i) {
-            auto* wf = wg->wavefronts[i].get();
+    while (!wg->all_wf_completed()) {
+        for (auto& wavefront : wg->wavefronts) {
+            auto* wf = wavefront.get();
             run_wavefront(wf);
-
         }
         resolve_barrier(wg);
     }
@@ -19,6 +18,10 @@ void ComputeUnit::run_wavefront(Wavefront* wavefront) {
     while (true) {
         Instruction* curInstr = wavefront->get_cur_instr();
         InstrKey instrKey = curInstr->get_key();
+
+        if (instrKey == S_WAITCNT) {  // ignored now
+            continue;
+        }
 
         if (instrKey == S_ENDPGM) {
             wavefront->completed = true;
@@ -36,8 +39,9 @@ void ComputeUnit::run_wavefront(Wavefront* wavefront) {
 
 void ComputeUnit::resolve_barrier(WorkGroup* wg) {
     if (wg->all_wf_completed()) return;
-    for (size_t i = 0; i < wg->wavefronts.size(); ++i) {
-        auto*  wf = wg->wavefronts[i].get();
+    for (auto& wavefront : wg->wavefronts) {
+        auto* wf = wavefront.get();
+        if (!wf->atBarrier) assert(false && "Illegal wavefront state");
         wf->atBarrier = false;
     }
 }

@@ -1841,10 +1841,15 @@ enum InstrKey {
      */
     V_ADD_U32,
 
+    V_SUB_U32,
+
     /**
      * todo not in ofdoc
      */
     V_ADDC_U32,
+
+    //VOP3
+    V_MUL_LO_U32,
 
     // VOP3A
     /**

@@ -5,10 +5,15 @@
 #include "instruction.h"
 
 Instruction* KernelCode::get_instr(uint64_t address) {
-    assert(address % 4 && "Wrong instr address: not a multiple of 4");
+    assert(address % 4 == 0&& "Wrong instr address: not a multiple of 4");
     Instruction* instr = code[address].get();
     assert(instr != nullptr && "Wrong instruction address: instr is nullptr");
     return instr;
+}
+void KernelCode::add_instr(uint32_t addr,
+                           const std::string& instr,
+                           const std::vector<std::string>& args) {
+    code[addr] = std::make_unique<Instruction>(Instruction{addr, instr, args});
 }
 
 std::set<std::string> Operand::float_values = {"0.5", "-0.5", "1.0", "-1.0",
@@ -54,8 +59,14 @@ std::pair<RegisterType, size_t> Operand::get_register(const std::string& arg) {
     if (arg == "scc") {
         return std::make_pair(SCC, 1);
     }
+    if (utils::starts_with(arg, "lgkmcnt")) {
+        return std::make_pair(LGKMCNT, 1);
+    }
+    if (utils::starts_with(arg, "vmcnt")) {
+        return std::make_pair(VMCNT, 1);
+    }
     auto bracketPos = arg.find('[');
-    size_t regAmount = 1;
+    size_t regCount = 1;
     int fromRegInd;
     if (bracketPos != -1) {
         auto colonPos = arg.find(':');
@@ -64,24 +75,24 @@ std::pair<RegisterType, size_t> Operand::get_register(const std::string& arg) {
         }
         fromRegInd = stoi(arg.substr(bracketPos + 1));
         auto toRegInd = stoi(arg.substr(colonPos + 1));
-        regAmount += toRegInd - fromRegInd;
-        if (regAmount <= 0) throw std::runtime_error("Invalid register range: " + arg);
+        regCount += toRegInd - fromRegInd;
+        if (regCount <= 0) throw std::runtime_error("Invalid register range: " + arg);
     }
 
     if (is_scalar(arg)) {
-        auto sgprInd = regAmount > 1 ? fromRegInd : stoi(arg.substr(1));
-        return std::make_pair(RegisterType(sgprInd + S0), regAmount);
+        auto sgprInd = regCount > 1 ? fromRegInd : stoi(arg.substr(1));
+        return std::make_pair(RegisterType(sgprInd + S0), regCount);
     }
     if (is_vector(arg)) {
-        auto vgprInd = regAmount > 1 ? fromRegInd : stoi(arg.substr(1));
-        return std::make_pair(RegisterType(vgprInd + V0), regAmount);
+        auto vgprInd = regCount > 1 ? fromRegInd : stoi(arg.substr(1));
+        return std::make_pair(RegisterType(vgprInd + V0), regCount);
     }
 
     throw std::runtime_error("Unsupported instruction argument: " + arg);
 }
-Instruction::Instruction(const std::string& addr,
+Instruction::Instruction(uint32_t addr,
                          const std::string& instr,
-                         const std::vector<std::string>& args) {
+                         const std::vector<std::string>& args): addr(addr) {
     instrKey = get_instr_key(instr);
     operands = std::vector<std::unique_ptr<Operand>>();
     for (auto& arg : args) {

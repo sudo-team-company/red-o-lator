@@ -9,121 +9,121 @@ void set_reladdr_and_run(const Instruction& instruction,
                          WfStateSOPP& state,
                          void (*exec)(WfStateSOPP&));
 
-void run_s_branch(WfStateSOPP& state) {
+static inline void run_s_branch(WfStateSOPP& state) {
     state.PC = state.RELADDR;
 }
 
-void run_s_cbranch_cdbgsys(WfStateSOPP& state) {
+static inline void run_s_cbranch_cdbgsys(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys()) {
         state.PC = state.RELADDR;
     }
 }
 
-void run_s_cbranch_cdbgsys_and_user(WfStateSOPP& state) {
+static inline void run_s_cbranch_cdbgsys_and_user(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys() && state.STATUS->cond_dbg_user()) {
         state.PC = state.RELADDR;
     }
 }
 
-void run_s_cbranch_cdbgsys_or_user(WfStateSOPP& state) {
+static inline void run_s_cbranch_cdbgsys_or_user(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys() || state.STATUS->cond_dbg_user()) {
         state.PC = state.RELADDR;
     }
 }
 
-void run_s_cbranch_cdbguser(WfStateSOPP& state) {
+static inline void run_s_cbranch_cdbguser(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_user()) {
         state.PC = state.RELADDR;
     }
 }
 
-void run_s_cbranch_execnz(WfStateSOPP& state) {
+static inline void run_s_cbranch_execnz(WfStateSOPP& state) {
     if (state.EXEC != 0) state.PC = state.RELADDR;
 }
 
-void run_s_cbranch_execz(WfStateSOPP& state) {
+static inline void run_s_cbranch_execz(WfStateSOPP& state) {
     if (state.EXEC == 0) state.PC = state.RELADDR;
 }
 
-void run_s_cbranch_scc0(WfStateSOPP& state) {
+static inline void run_s_cbranch_scc0(WfStateSOPP& state) {
     if (state.SCC == 0) state.PC = state.RELADDR;
 }
 
-void run_s_cbranch_scc1(WfStateSOPP& state) {
+static inline void run_s_cbranch_scc1(WfStateSOPP& state) {
     state.PC = (state.SCC == 1) ? state.RELADDR : state.PC;
 }
-void run_s_cbranch_vccnz(WfStateSOPP& state) {
+static inline void run_s_cbranch_vccnz(WfStateSOPP& state) {
     state.PC = state.VCC != 0 ? state.RELADDR : state.PC;
 }
-void run_s_cbranch_vccz(WfStateSOPP& state) {
+static inline void run_s_cbranch_vccz(WfStateSOPP& state) {
     state.PC = state.VCC == 0 ? state.RELADDR : state.PC;
 }
 
-void run_s_decperflevel(WfStateSOPP& state) {
+static inline void run_s_decperflevel(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_endpgm_ordered_ps_done(WfStateSOPP& state) {
+static inline void run_s_endpgm_ordered_ps_done(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_endpgm_saved(WfStateSOPP& state) {
+static inline void run_s_endpgm_saved(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_icache_inv(WfStateSOPP& state) {
+static inline void run_s_icache_inv(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_incperflevel(WfStateSOPP& state) {
+static inline void run_s_incperflevel(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_nop(WfStateSOPP& state) {
+static inline void run_s_nop(WfStateSOPP& state) {
     //do nothing
 }
 
-void run_s_sendmsg(WfStateSOPP& state) {
+static inline void run_s_sendmsg(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_sendmsghalt(WfStateSOPP& state) {
+static inline void run_s_sendmsghalt(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_set_gpr_idx_mode(WfStateSOPP& state) {
+static inline void run_s_set_gpr_idx_mode(WfStateSOPP& state) {
     state.M0 = (state.M0 & 0xffff0fff) | ((state.SIMM16 & 15) << 12);
 }
 
-void run_s_set_gpr_idx_off(WfStateSOPP& state) {
+static inline void run_s_set_gpr_idx_off(WfStateSOPP& state) {
     state.MODE->gpr_idx_en(0);
 }
 
-void run_s_sethalt(WfStateSOPP& state) {
+static inline void run_s_sethalt(WfStateSOPP& state) {
     state.STATUS->halt(state.SIMM16 & 1);
 }
 
-void run_s_setkill(WfStateSOPP& state) {
+static inline void run_s_setkill(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_setprio(WfStateSOPP& state) {
+static inline void run_s_setprio(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_sleep(WfStateSOPP& state) {
+static inline void run_s_sleep(WfStateSOPP& state) {
     // todo
 }
-void run_s_trap(WfStateSOPP& state) {
-    // todo
-}
-
-void run_s_ttracedata(WfStateSOPP& state) {
+static inline void run_s_trap(WfStateSOPP& state) {
     // todo
 }
 
-void run_s_waitcnt(WfStateSOPP& state) {
+static inline void run_s_ttracedata(WfStateSOPP& state) {
     // todo
+}
+
+static inline void run_s_waitcnt(WfStateSOPP& state) {
+    //do nothing
 }
 
 void run_sopp(const Instruction& instruction, Wavefront* wavefront) {

@@ -11,6 +11,8 @@
 #include "../util/util.h"
 
 struct KernelConfig {
+    uint64_t kernArgAddr = 0;
+    uint64_t kernSetupAddr = 0;
     uint32_t pgmrsrc1;
     uint32_t pgmrsrc2;
     int ndRangeSizeX;
@@ -22,12 +24,12 @@ struct KernelConfig {
     int sgprsnum = DEFAULT_SGPRS_AMOUNT;
     int vgprsnum;
     bool dx10clamp = false;
-    bool ieeemode = true;
+    bool ieeemode = false;
+    bool useargs = false;
+    bool usesetup = false;
 
     // todo
     uint32_t floatmode;
-    bool useargs;
-    bool usesetup;
     uint8_t priority;
 
     uint8_t user_sgpr() {

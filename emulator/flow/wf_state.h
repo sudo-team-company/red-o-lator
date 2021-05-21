@@ -127,8 +127,32 @@ struct WfStateSOPK {
 
 struct WfStateSMEM {
     uint64_t BASE;
-    std::vector<uint32_t> SDST;
     uint64_t OFFSET;
+    std::vector<uint32_t> SDST;
+
+    WfStateSMEM(uint64_t BASE, uint64_t OFFSET, std::vector<uint32_t> SDST)
+        : BASE(BASE), OFFSET(OFFSET), SDST(std::move(SDST)) {}
+};
+
+struct WfStateVOP1 {
+    std::vector<uint64_t> VDST;
+    std::vector<uint64_t> SRC0;
+    WfStateVOP1(std::vector<uint64_t> VDST, std::vector<uint64_t> SRC0)
+        : VDST(std::move(VDST)), SRC0(std::move(SRC0)) {}
+};
+
+struct WfStateVOP2 {
+    std::vector<uint64_t> VDST;
+    std::vector<uint64_t> SRC0;
+    std::vector<uint64_t> SRC1;
+     WfStateVOP2(std::vector<uint64_t> VDST, std::vector<uint64_t> SRC0, std::vector<uint64_t> SRC1)
+         : VDST(std::move(VDST)), SRC0(std::move(SRC0)), SRC1(std::move(SRC1)) {}
+};
+
+struct WfStateVOP3 {
+    uint64_t VDST = 0;
+    uint64_t SRC0 = 0;
+    uint64_t SRC1 = 0;
 };
 
 #endif  // RED_O_LATOR_WF_STATE_H
