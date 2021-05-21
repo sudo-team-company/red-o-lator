@@ -10,12 +10,11 @@
 #include "../flow/wavefront.h"
 
 struct ComputeUnit {
-
-    void run_work_group(WorkGroup* wg);
-    void run_wavefront(Wavefront*);
+    static void run_work_group(WorkGroup* wg);
+    static void run_wavefront(Wavefront*);
 
    private:
-    void resolve_barrier(WorkGroup* wg);
+    static void resolve_barrier(WorkGroup* wg);
 };
 
 #endif  // RED_O_LATOR_COMPUTE_UNIT_H

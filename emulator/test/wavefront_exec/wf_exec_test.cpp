@@ -18,11 +18,13 @@
  * }
  */
 TEST_CASE("c = a + b") {
+    auto kernArgAddr = 0;
     // initialize storage
     auto storage = Storage::get_instance();
     storage->init(128);
 
     KernelConfig kernelConfig = KernelConfig();
+    kernelConfig.kernArgAddr = kernArgAddr;
     kernelConfig.vgprsnum = 3;
     kernelConfig.sgprsnum = 12;
     kernelConfig.floatmode = 0xc0;

@@ -31,12 +31,15 @@ void run_instr(const Instruction& instr, Wavefront* wf) {
         case VOP2:
             run_vop2(instr, wf);
             break;
-        case VOPC:
-        case VINTRP:
         case VOP3A:
         case VOP3B:
-        case VOP3P:
+            run_vop3(instr, wf);
+            break;
         case FLAT:
+            run_flat(instr, wf);
+        case VOPC:
+        case VINTRP:
+        case VOP3P:
         default:
             assert(false && "Unsupported instruction type");
     }

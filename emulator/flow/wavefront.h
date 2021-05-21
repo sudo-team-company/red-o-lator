@@ -42,9 +42,9 @@ struct Wavefront {
     WorkGroup* workGroup = nullptr;
     std::vector<uint32_t> scalarRegFile;
     std::vector<uint32_t> vectorRegFile;
-    uint64_t programCounter;
     uint64_t execReg;
     uint64_t vccReg;
+    std::unique_ptr<ProgramCounter> programCounter;
     std::unique_ptr<StatusReg> statusReg;
     std::unique_ptr<ModeReg> modeReg;
     uint32_t m0Reg;
@@ -58,9 +58,9 @@ struct Wavefront {
 
     explicit Wavefront(WorkGroup* wg, int sgprsnum, int vgprsnum)
         : workGroup(wg),
-          programCounter(0),
           execReg(0),
           vccReg(0),
+          programCounter(std::make_unique<ProgramCounter>(0)),
           statusReg(std::make_unique<StatusReg>(0)),
           modeReg(std::make_unique<ModeReg>(0)),
           sgprsnum(sgprsnum),
@@ -106,6 +106,9 @@ struct Wavefront {
 
     WfStateVOP2 get_vop2_state(const Instruction&);
     void update_with_vop2_state(const Instruction&, const WfStateVOP2&);
+
+    WfStateVOP3 get_vop3_state(const Instruction&);
+    void update_with_vop3_state(const Instruction&, const WfStateVOP3&);
 
     std::vector<uint32_t> read_operand(const Operand&);
     std::vector<uint32_t> read_operand(const Operand&, int);

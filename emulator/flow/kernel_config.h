@@ -55,11 +55,6 @@ struct KernelConfig {
     bool enable_sgpr_workgroup_info() {
         return get_bit(10, pgmrsrc2) != 0;
     }
-
 };
-
-
-
-
 
 #endif  // RED_O_LATOR_KERNEL_CONFIG_H

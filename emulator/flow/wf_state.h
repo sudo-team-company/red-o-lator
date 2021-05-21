@@ -11,9 +11,9 @@ struct WfStateSOP1 {
     uint64_t SDST = 0;
     uint64_t SSRC0 = 0;
     uint64_t EXEC = 0;
-    uint64_t PC = 0;
     RegisterType DEST_TYPE;
     uint32_t M0 = 0;
+    ProgramCounter* PC = 0;
     ModeReg* MODE = nullptr;
     StatusReg* STATUS = nullptr;
     bool SCC = false;
@@ -21,7 +21,7 @@ struct WfStateSOP1 {
     WfStateSOP1(uint64_t SDST,
                 uint64_t SSRC0,
                 uint64_t EXEC,
-                uint64_t PC,
+                ProgramCounter* PC,
                 uint32_t M0,
                 ModeReg* modeReg,
                 StatusReg* statusReg,
@@ -29,19 +29,19 @@ struct WfStateSOP1 {
         : SDST(SDST),
           SSRC0(SSRC0),
           EXEC(EXEC),
-          PC(PC),
           M0(M0),
+          PC(PC),
           MODE(modeReg),
           STATUS(statusReg),
           SCC(SCC) {}
 
     WfStateSOP1(uint64_t EXEC,
-                uint64_t PC,
+                ProgramCounter* PC,
                 uint32_t M0,
                 ModeReg* modeReg,
                 StatusReg* statusReg,
                 bool SCC)
-        : EXEC(EXEC), PC(PC), M0(M0), MODE(modeReg), STATUS(statusReg), SCC(SCC) {}
+        : EXEC(EXEC), M0(M0), PC(PC), MODE(modeReg), STATUS(statusReg), SCC(SCC) {}
 };
 
 struct WfStateSOP2 {
@@ -49,7 +49,7 @@ struct WfStateSOP2 {
     uint64_t SSRC0 = 0;
     uint64_t SSRC1 = 0;
     uint64_t EXEC = 0;
-    uint64_t PC = 0;
+    ProgramCounter* PC = 0;
     ModeReg* MODE = nullptr;
     StatusReg* STATUS = nullptr;
     bool SCC = false;
@@ -58,7 +58,7 @@ struct WfStateSOP2 {
                 uint64_t SSRC0,
                 uint64_t SSRC1,
                 uint64_t EXEC,
-                uint64_t PC,
+                ProgramCounter* PC,
                 ModeReg* modeReg,
                 StatusReg* statusReg,
                 bool SCC)
@@ -71,33 +71,36 @@ struct WfStateSOP2 {
           STATUS(statusReg),
           SCC(SCC) {}
 
-    WfStateSOP2(
-        uint64_t EXEC, uint64_t PC, ModeReg* modeReg, StatusReg* statusReg, bool SCC)
+    WfStateSOP2(uint64_t EXEC,
+                ProgramCounter* PC,
+                ModeReg* modeReg,
+                StatusReg* statusReg,
+                bool SCC)
         : EXEC(EXEC), PC(PC), MODE(modeReg), STATUS(statusReg), SCC(SCC) {}
 };
 
 struct WfStateSOPP {
     uint64_t RELADDR = 0;
-    uint64_t PC = 0;
     uint64_t EXEC = 0;
     uint64_t VCC = 0;
     uint32_t M0 = 0;
     uint32_t SIMM16 = 0;
+    ProgramCounter* PC = 0;
     StatusReg* STATUS = nullptr;
     ModeReg* MODE = nullptr;
     bool SCC = false;
 
-    WfStateSOPP(uint64_t PC,
+    WfStateSOPP(ProgramCounter* PC,
                 uint64_t EXEC,
                 uint64_t VCC,
                 uint64_t M0,
                 StatusReg* statusReg,
                 ModeReg* modeReg,
                 bool SCC)
-        : PC(PC),
-          EXEC(EXEC),
+        : EXEC(EXEC),
           VCC(VCC),
           M0(M0),
+          PC(PC),
           STATUS(statusReg),
           MODE(modeReg),
           SCC(SCC) {}
@@ -118,11 +121,11 @@ struct WfStateSOPK {
     uint64_t SDST = 0;
     uint64_t SSRC0 = 0;
     uint64_t RELADDR = 0;
-    uint64_t PC = 0;
+    ProgramCounter* PC = 0;
     uint32_t IMM16 = 0;
     bool SCC = false;
 
-    WfStateSOPK(uint64_t PC, bool SCC) : PC(PC), SCC(SCC) {}
+    WfStateSOPK(ProgramCounter* PC, bool SCC) : PC(PC), SCC(SCC) {}
 };
 
 struct WfStateSMEM {
@@ -145,14 +148,25 @@ struct WfStateVOP2 {
     std::vector<uint64_t> VDST;
     std::vector<uint64_t> SRC0;
     std::vector<uint64_t> SRC1;
-     WfStateVOP2(std::vector<uint64_t> VDST, std::vector<uint64_t> SRC0, std::vector<uint64_t> SRC1)
-         : VDST(std::move(VDST)), SRC0(std::move(SRC0)), SRC1(std::move(SRC1)) {}
+    WfStateVOP2(std::vector<uint64_t> VDST,
+                std::vector<uint64_t> SRC0,
+                std::vector<uint64_t> SRC1)
+        : VDST(std::move(VDST)), SRC0(std::move(SRC0)), SRC1(std::move(SRC1)) {}
 };
 
 struct WfStateVOP3 {
-    uint64_t VDST = 0;
-    uint64_t SRC0 = 0;
-    uint64_t SRC1 = 0;
+    std::vector<uint64_t> VDST;
+    std::vector<uint64_t> SRC0;
+    std::vector<uint64_t> SRC1;
+    std::vector<uint64_t> SRC2;
+    WfStateVOP3(std::vector<uint64_t> VDST,
+                std::vector<uint64_t> SRC0,
+                std::vector<uint64_t> SRC1,
+                std::vector<uint64_t> SRC2)
+        : VDST(std::move(VDST)),
+          SRC0(std::move(SRC0)),
+          SRC1(std::move(SRC1)),
+          SRC2(std::move(SRC2)) {}
 };
 
 #endif  // RED_O_LATOR_WF_STATE_H

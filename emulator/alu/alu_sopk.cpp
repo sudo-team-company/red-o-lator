@@ -11,8 +11,8 @@ static inline void run_s_addk_i32(WfStateSOPK& state) {
                 get_bit(31, temp) != get_bit(31, static_cast<int32_t>(state.SDST));
 }
 static inline void run_s_call_b64(WfStateSOPK& state) {
-    state.SDST = state.PC + 4;
-    state.PC = state.RELADDR;
+    state.SDST = state.PC->get_value() + 4;
+    state.PC->set_value(state.RELADDR);
 }
 static inline void run_s_cbranch_i_fork(WfStateSOPK& state) {
     // todo

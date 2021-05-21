@@ -23,10 +23,11 @@ bool WorkGroup::all_wf_completed() {
     return true;
 }
 Instruction* Wavefront::get_cur_instr() const {
-    return workGroup->kernelCode->get_instr(this->programCounter);
+    return workGroup->kernelCode->get_instr(this->programCounter->get_value());
 }
 
 void Wavefront::to_next_instr() {
+    if (programCounter->was_used()) return;
     auto curInstrKey =  get_cur_instr()->get_key();
     programCounter += get_instr_width(curInstrKey) / 8;
 }
@@ -46,7 +47,7 @@ uint32_t Wavefront::read_vgpr(size_t wiInd, size_t vInd) {
 WfStateSOP1 Wavefront::get_sop1_state(const Instruction& instr) {
     assert(instr.get_operands_count() <= 2 && "Unexpected operands count for SOP1");
 
-    auto state = WfStateSOP1{execReg,       programCounter,  m0Reg,
+    auto state = WfStateSOP1{execReg,       programCounter.get(),  m0Reg,
                              modeReg.get(), statusReg.get(), sccReg};
     if (instr.get_operands_count() < 2) {
         return state;
@@ -63,7 +64,6 @@ void Wavefront::update_with_sop1_state(const Instruction& instr,
     assert(instr.get_operands_count() <= 2 && "Unexpected operands count for SOP1");
 
     execReg = state.EXEC;
-    programCounter = state.PC;
     m0Reg = state.M0;
     sccReg = state.SCC;
 
@@ -78,7 +78,7 @@ WfStateSOP2 Wavefront::get_sop2_state(const Instruction& instruction) {
     assert(instruction.get_operands_count() <= 3 && "Unexpected operands count for SOP2");
 
     auto state =
-        WfStateSOP2(execReg, programCounter, modeReg.get(), statusReg.get(), sccReg);
+        WfStateSOP2(execReg, programCounter.get(), modeReg.get(), statusReg.get(), sccReg);
 
     if (instruction.get_operands_count() < 3) {
         return state;
@@ -94,7 +94,6 @@ void Wavefront::update_with_sop2_state(const Instruction& instruction,
     assert(instruction.get_operands_count() <= 3 && "Unexpected operands count for SOP2");
 
     execReg = state.EXEC;
-    programCounter = state.PC;
     sccReg = state.SCC;
 
     if (instruction.get_operands_count() < 3) {
@@ -105,13 +104,13 @@ void Wavefront::update_with_sop2_state(const Instruction& instruction,
 }
 
 WfStateSOPK Wavefront::get_sopk_state() const {
-    return WfStateSOPK(programCounter, sccReg);
+    return WfStateSOPK(programCounter.get(), sccReg);
 }
 
 WfStateSOPK Wavefront::get_sopk_state(const Instruction& instruction) {
     assert(instruction.get_operands_count() == 2 && "Unexpected operands count for SOPK");
 
-    auto state = WfStateSOPK(programCounter, sccReg);
+    auto state = WfStateSOPK(programCounter.get(), sccReg);
 
     state.SDST = to_uin64_t(read_operand(*instruction[0]));
     state.IMM16 = to_uin64_t(read_operand(*instruction[1]));
@@ -120,7 +119,6 @@ WfStateSOPK Wavefront::get_sopk_state(const Instruction& instruction) {
 
 void Wavefront::update_with_sopk_state(const Instruction& instruction,
                                        const WfStateSOPK& state) {
-    programCounter = state.PC;
     sccReg = state.SCC;
     write_operand_to_gpr(*instruction[0], state.SDST);
 }
@@ -140,13 +138,12 @@ void Wavefront::update_with_sopc_state(const WfStateSOPC& state) {
 }
 
 WfStateSOPP Wavefront::get_common_sopp_state(const Instruction& instruction) const {
-    return WfStateSOPP{programCounter,  execReg,       vccReg, m0Reg,
+    return WfStateSOPP{programCounter.get(),  execReg,       vccReg, m0Reg,
                        statusReg.get(), modeReg.get(), sccReg};
 }
 
 void Wavefront::update_with_common_sopp_state(const Instruction& instruction,
                                               const WfStateSOPP& state) {
-    programCounter = state.PC;
     execReg = state.EXEC;
     vccReg = state.VCC;
     sccReg = state.SCC;
@@ -206,6 +203,33 @@ WfStateVOP2 Wavefront::get_vop2_state(const Instruction& instruction) {
 
 void Wavefront::update_with_vop2_state(const Instruction& instruction,
                                        const WfStateVOP2& state) {
+    for (int i = 0; i < workItems.size(); ++i) {
+        write_operand_to_gpr(*instruction[0], state.VDST[i], i);
+    }
+}
+
+WfStateVOP3 Wavefront::get_vop3_state(const Instruction& instruction) {
+    assert(instruction.get_operands_count() <= 4 &&
+           "Unexpected amount of operands for VOP3 instruction");
+    auto VDST = std::vector<uint64_t>();
+    auto SRC0 = std::vector<uint64_t>();
+    auto SRC1 = std::vector<uint64_t>();
+    auto SRC2 = std::vector<uint64_t>();
+
+    for (int i = 0; i < workItems.size(); ++i) {
+        VDST.push_back(to_uin64_t(read_operand(*instruction[0], i)));
+        SRC0.push_back(to_uin64_t(read_operand(*instruction[1], i)));
+        SRC1.push_back(to_uin64_t(read_operand(*instruction[2], i)));
+        if (instruction.get_operands_count() == 4) {
+            SRC2.push_back(to_uin64_t(read_operand(*instruction[3], i)));
+        }
+    }
+
+    return WfStateVOP3(std::move(VDST), std::move(SRC0), std::move(SRC1), std::move(SRC2));
+}
+
+void Wavefront::update_with_vop3_state(const Instruction& instruction,
+                                       const WfStateVOP3& state) {
     for (int i = 0; i < workItems.size(); ++i) {
         write_operand_to_gpr(*instruction[0], state.VDST[i], i);
     }

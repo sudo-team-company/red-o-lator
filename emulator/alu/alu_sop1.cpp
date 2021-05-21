@@ -4,7 +4,7 @@
 
 #include "alu.h"
 
-static inline static inline void run_s_abs_i32(WfStateSOP1& state) {
+static inline void run_s_abs_i32(WfStateSOP1& state) {
     auto SRC0 = static_cast<int32_t>(state.SSRC0);
     state.SDST = static_cast<uint64_t>(SRC0 < 0 ? -SRC0 : SRC0) & 0xffffffff;
     state.SCC = state.SDST != 0;
@@ -100,8 +100,9 @@ static inline void run_s_cbranch_join(WfStateSOP1& state, Wavefront* wf) {
         csp--;
         state.EXEC = static_cast<uint64_t>(wf->scalarRegFile[csp * 4]) << 32 |
                      wf->scalarRegFile[csp * 4 + 1];
-        state.PC = static_cast<uint64_t>(wf->scalarRegFile[csp * 4 + 2]) << 32 |
-                   wf->scalarRegFile[csp * 4 + 3];
+        uint64_t value = static_cast<uint64_t>(wf->scalarRegFile[csp * 4 + 2]) << 32 |
+                         wf->scalarRegFile[csp * 4 + 3];
+        state.PC->set_value(value);
     }
 }
 
@@ -207,7 +208,7 @@ static inline void run_s_flbit_i32_i64(WfStateSOP1& state) {
 }
 
 static inline void run_s_getpc_b64(WfStateSOP1& state) {
-    state.SDST = state.PC + 4;
+    state.SDST = state.PC->get_value() + 4;
 }
 
 static inline void run_s_mov_b32(WfStateSOP1& state) {
@@ -296,7 +297,7 @@ static inline void run_s_quadmask_b64(WfStateSOP1& state) {
 // only be used within a trap handler.
 static inline void run_s_rfe_b64(WfStateSOP1& state) {
     state.STATUS->priv(0);
-    state.PC = state.SSRC0;
+    state.PC->set_value(state.SSRC0);
 }
 
 static inline void run_s_set_gpr_idx_idx(WfStateSOP1& state) {
@@ -304,7 +305,7 @@ static inline void run_s_set_gpr_idx_idx(WfStateSOP1& state) {
 }
 
 static inline void run_s_setpc_b64(WfStateSOP1& state) {
-    state.PC = state.SSRC0;
+    state.PC->set_value(state.SSRC0);
 }
 
 static inline void run_s_sext_i32_i8(WfStateSOP1& state) {
@@ -316,8 +317,8 @@ static inline void run_s_sext_i32_i16(WfStateSOP1& state) {
 }
 
 static inline void run_s_swappc_b64(WfStateSOP1& state) {
-    state.SDST = state.PC + 4;
-    state.PC = state.SSRC0;
+    state.SDST = state.PC->get_value() + 4;
+    state.PC->set_value(state.SSRC0);
 }
 
 static inline void run_s_wqm_b32(WfStateSOP1& state) {

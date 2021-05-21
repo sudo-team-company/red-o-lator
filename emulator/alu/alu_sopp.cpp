@@ -10,53 +10,53 @@ void set_reladdr_and_run(const Instruction& instruction,
                          void (*exec)(WfStateSOPP&));
 
 static inline void run_s_branch(WfStateSOPP& state) {
-    state.PC = state.RELADDR;
+    state.PC->set_value(state.RELADDR);
 }
 
 static inline void run_s_cbranch_cdbgsys(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys()) {
-        state.PC = state.RELADDR;
+        state.PC->set_value(state.RELADDR);
     }
 }
 
 static inline void run_s_cbranch_cdbgsys_and_user(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys() && state.STATUS->cond_dbg_user()) {
-        state.PC = state.RELADDR;
+        state.PC->set_value(state.RELADDR);
     }
 }
 
 static inline void run_s_cbranch_cdbgsys_or_user(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys() || state.STATUS->cond_dbg_user()) {
-        state.PC = state.RELADDR;
+        state.PC->set_value(state.RELADDR);
     }
 }
 
 static inline void run_s_cbranch_cdbguser(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_user()) {
-        state.PC = state.RELADDR;
+        state.PC->set_value(state.RELADDR);
     }
 }
 
 static inline void run_s_cbranch_execnz(WfStateSOPP& state) {
-    if (state.EXEC != 0) state.PC = state.RELADDR;
+    if (state.EXEC != 0) state.PC->set_value(state.RELADDR);
 }
 
 static inline void run_s_cbranch_execz(WfStateSOPP& state) {
-    if (state.EXEC == 0) state.PC = state.RELADDR;
+    if (state.EXEC == 0) state.PC->set_value(state.RELADDR);
 }
 
 static inline void run_s_cbranch_scc0(WfStateSOPP& state) {
-    if (state.SCC == 0) state.PC = state.RELADDR;
+    if (state.SCC == 0) state.PC->set_value(state.RELADDR);
 }
 
 static inline void run_s_cbranch_scc1(WfStateSOPP& state) {
-    state.PC = (state.SCC == 1) ? state.RELADDR : state.PC;
+    if (state.SCC) state.PC->set_value(state.RELADDR);
 }
 static inline void run_s_cbranch_vccnz(WfStateSOPP& state) {
-    state.PC = state.VCC != 0 ? state.RELADDR : state.PC;
+    if (state.VCC != 0) state.PC->set_value(state.RELADDR);
 }
 static inline void run_s_cbranch_vccz(WfStateSOPP& state) {
-    state.PC = state.VCC == 0 ? state.RELADDR : state.PC;
+    if (state.VCC == 0) state.PC->set_value(state.RELADDR);
 }
 
 static inline void run_s_decperflevel(WfStateSOPP& state) {

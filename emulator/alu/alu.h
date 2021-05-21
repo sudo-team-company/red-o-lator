@@ -21,5 +21,7 @@ void run_sopp(const Instruction&, Wavefront*);
 void run_smem(const Instruction&, Wavefront*);
 void run_vop1(const Instruction&, Wavefront*);
 void run_vop2(const Instruction&, Wavefront*);
+void run_vop3(const Instruction&, Wavefront*);
+void run_flat(const Instruction&, Wavefront*);
 
 #endif  // RED_O_LATOR_ALU_H

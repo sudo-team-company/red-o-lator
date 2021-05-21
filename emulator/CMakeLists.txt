@@ -12,6 +12,7 @@ add_executable(emulator
         alu/alu_vop1.cpp
         alu/alu_vop2.cpp
         alu/alu_vop3.cpp
+        alu/alu_flat.cpp
         reg/register.cpp
         instr/instruction.cpp
         instr/instr_info.cpp

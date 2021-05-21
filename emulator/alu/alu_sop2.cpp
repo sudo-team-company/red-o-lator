@@ -268,7 +268,7 @@ static inline void run_s_pack_ll_b32_b16(WfStateSOP2& state) {
 // only be used within a trap handler.
 static inline void run_s_rfe_restore_b64(WfStateSOP2& state) {
     state.STATUS->priv(0);
-    state.PC = state.SSRC0;
+    state.PC->set_value(state.SSRC0);
 }
 
 static inline void run_s_subb_u32(WfStateSOP2& state) {

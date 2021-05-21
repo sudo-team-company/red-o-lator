@@ -19,10 +19,6 @@ void ComputeUnit::run_wavefront(Wavefront* wavefront) {
         Instruction* curInstr = wavefront->get_cur_instr();
         InstrKey instrKey = curInstr->get_key();
 
-        if (instrKey == S_WAITCNT) {  // ignored now
-            continue;
-        }
-
         if (instrKey == S_ENDPGM) {
             wavefront->completed = true;
             break;
@@ -32,7 +28,9 @@ void ComputeUnit::run_wavefront(Wavefront* wavefront) {
             wavefront->atBarrier = true;
             break;
         }
-        run_instr(*curInstr, wavefront);
+        if (instrKey != S_WAITCNT) {  // S_WAITCNT is always ignored
+            run_instr(*curInstr, wavefront);
+        }
         wavefront->to_next_instr();
     }
 }
