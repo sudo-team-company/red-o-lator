@@ -45,6 +45,12 @@ cl_int getParamInfo(
     if (param_value) {
         if (std::holds_alternative<void*>(result)) {
             memcpy(param_value, &std::get<void*>(result), resultSize);
+
+        } else if (std::holds_alternative<CLObjectInfoParameterValueTypeArray>(
+                       result)) {
+            memcpy(param_value,
+                   std::get<CLObjectInfoParameterValueTypeArray>(result).array,
+                   resultSize);
         } else {
             memcpy(param_value, std::get<std::string>(result).c_str(),
                    resultSize);
