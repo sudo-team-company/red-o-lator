@@ -6,8 +6,8 @@
 #define RED_O_LATOR_DISPATCHER_H
 
 
-#include "kernel_config.h"
-#include "wavefront.h"
+#include "../flow/kernel_config.h"
+#include "../flow/wavefront.h"
 class Dispatcher {
    private:
     int curIdX = 0;

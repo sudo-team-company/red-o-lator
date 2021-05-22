@@ -4,8 +4,8 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../../doctest.h"
-#include "../../cu/compute_unit.h"
-#include "../../flow/dispatcher.h"
+#include "../../gpu/compute_unit.h"
+#include "../../gpu/dispatcher.h"
 
 /**
  *  __kernel void a_plus_b(__global const int* const a,

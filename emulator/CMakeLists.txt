@@ -1,7 +1,7 @@
 add_executable(emulator
         util/util.cpp
         flow/wavefront.cpp
-        flow/dispatcher.cpp
+        gpu/dispatcher.cpp
         alu/alu_sop1.cpp
         alu/alu.cpp
         alu/alu_sop2.cpp
@@ -16,7 +16,7 @@ add_executable(emulator
         reg/register.cpp
         instr/instruction.cpp
         instr/instr_info.cpp
-        cu/compute_unit.cpp
+        gpu/compute_unit.cpp
         gpu/storage.cpp
         main.cpp
         )
@@ -40,7 +40,7 @@ add_executable(alu_test
 
 add_executable(wf_exec_test
         test/wavefront_exec/wf_exec_test.cpp
-        cu/compute_unit.cpp
+        gpu/compute_unit.cpp
         alu/alu.cpp
         alu/alu_sop1.cpp
         alu/alu_sop2.cpp
@@ -58,7 +58,7 @@ add_executable(wf_exec_test
         reg/register.cpp
         instr/instruction.cpp
         instr/instr_info.cpp
-        flow/dispatcher.cpp
+        gpu/dispatcher.cpp
         ../common/common/common.hpp
         )
 
