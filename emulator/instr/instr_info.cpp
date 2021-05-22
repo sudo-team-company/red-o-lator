@@ -292,7 +292,11 @@ InstrKey get_instr_key(std::string_view instruction) {
         {"v_cmp_eq_i32", V_CMP_EQ_I32},
 
         // FLAT
-        {"flat_store_dword", FLAT_STORE_DWORD}
+        {"flat_store_dword", FLAT_STORE_DWORD},
+        {"flat_store_dwordx2", FLAT_STORE_DWORDX2},
+        {"flat_store_dwordx3", FLAT_STORE_DWORDX3},
+        {"flat_store_dwordx4", FLAT_STORE_DWORDX4},
+        {"flat_store_short", FLAT_STORE_SHORT},
     };
 
     auto it = instruction_repo.find(instruction.data());
@@ -835,9 +839,17 @@ char const* get_instr_str(InstrKey instr) noexcept {
         case FLAT_STORE_DWORD:
             return "s_flat_store_dword";
         case V_SUB_U32:
-            return "V_SUB_U32";
+            return "v_sub_u32";
         case V_MUL_LO_U32:
-            return "V_MUL_LO_U32";
+            return "v_mul_lo_u32";
+        case FLAT_STORE_DWORDX2:
+            return "flat_store_dwordx2";
+        case FLAT_STORE_DWORDX3:
+            return "flat_store_dwordx3";
+        case FLAT_STORE_DWORDX4:
+            return "flat_store_dwordx4";
+        case FLAT_STORE_SHORT:
+            return "flat_store_short";
     }
     assert(false && "Unknown command");
     return "(unknown instruction)";
@@ -1121,6 +1133,10 @@ InstrFormat get_instr_format(InstrKey instrKey) {
         case V_CMP_EQ_I32:
             return VOPC;
         case FLAT_STORE_DWORD:
+        case FLAT_STORE_DWORDX2:
+        case FLAT_STORE_DWORDX3:
+        case FLAT_STORE_DWORDX4:
+        case FLAT_STORE_SHORT:
             return FLAT;
     }
 }

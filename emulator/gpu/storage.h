@@ -17,7 +17,10 @@ struct Storage {
 
     void init(size_t bufferSize);
     std::vector<uint8_t> read_data(uint64_t, uint32_t, uint32_t);
-    void write_data(uint64_t, uint32_t, uint32_t);
+    uint32_t read_4_bytes(uint64_t, uint32_t);
+    void write_data(uint64_t addr, uint32_t offset, uint16_t value);
+    void write_data(uint64_t addr, uint32_t offset, uint32_t value);
+    void write_data(uint64_t addr, uint32_t offset, uint64_t value);
 
    private:
     std::vector<uint8_t> data_;

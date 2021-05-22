@@ -170,4 +170,11 @@ struct WfStateVOP3 {
           SRC2(std::move(SRC2)) {}
 };
 
+struct WfStateFLAT {
+    std::vector<uint64_t> VADDR;
+    std::vector<uint32_t> VDATA;
+    size_t VDATA_SIZE_PER_WI = 0;
+    WfStateFLAT(std::vector<uint64_t> VADDR, std::vector<uint32_t> VDATA, size_t VDATA_SIZE_PER_WI)
+        : VADDR(std::move(VADDR)), VDATA(std::move(VDATA)), VDATA_SIZE_PER_WI(VDATA_SIZE_PER_WI) {}
+};
 #endif  // RED_O_LATOR_WF_STATE_H

@@ -4,8 +4,6 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../../doctest.h"
-//#include "../../flow/kernel_config.h"
-//#include "../../instr/instruction.h"
 #include "../../cu/compute_unit.h"
 #include "../../flow/dispatcher.h"
 
@@ -21,7 +19,12 @@ TEST_CASE("c = a + b") {
     auto kernArgAddr = 0;
     // initialize storage
     auto storage = Storage::get_instance();
-    storage->init(128);
+    storage->init(128); //0 - 47 bytes contain 64-bits words: global_offset_0, global_offset_1, global_offset_2, printf_buffer,vqueue_pointer, aqlwrap_pointer
+    storage->write_data(48, 0, uint64_t(72)); //write address of a
+    storage->write_data(48, 8, uint64_t(76)); //write address of b
+    storage->write_data(48, 16, uint64_t(80)); //write address of c
+    storage->write_data(72, 0, uint32_t(3)); // a = 3
+    storage->write_data(76, 0, uint32_t(7)); // b = 10
 
     KernelConfig kernelConfig = KernelConfig();
     kernelConfig.kernArgAddr = kernArgAddr;
@@ -51,11 +54,11 @@ TEST_CASE("c = a + b") {
     kernelCode.add_instr(0x38, "flat_store_dword", {"v[1:2]", "v0"});
     kernelCode.add_instr(0x40, "s_endpgm", {});
 
-    ComputeUnit cu = ComputeUnit();
-
     Dispatcher dispatcher = Dispatcher(kernelConfig, &kernelCode);
     while (dispatcher.has_next_wg()) {
         std::unique_ptr<WorkGroup> workGroup(dispatcher.next_wg());
-        cu.run_work_group(workGroup.get());
+        ComputeUnit::run_work_group(workGroup.get());
     }
+
+    CHECK(storage->read_4_bytes(80, 0) == 10);
 }

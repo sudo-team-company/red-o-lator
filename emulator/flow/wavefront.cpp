@@ -28,7 +28,7 @@ Instruction* Wavefront::get_cur_instr() const {
 
 void Wavefront::to_next_instr() {
     if (programCounter->was_used()) return;
-    auto curInstrKey =  get_cur_instr()->get_key();
+    auto curInstrKey = get_cur_instr()->get_key();
     programCounter->hidden_add(get_instr_width(curInstrKey) / 8);
 }
 
@@ -47,8 +47,8 @@ uint32_t Wavefront::read_vgpr(size_t wiInd, size_t vInd) {
 WfStateSOP1 Wavefront::get_sop1_state(const Instruction& instr) {
     assert(instr.get_operands_count() <= 2 && "Unexpected operands count for SOP1");
 
-    auto state = WfStateSOP1{execReg,       programCounter.get(),  m0Reg,
-                             modeReg.get(), statusReg.get(), sccReg};
+    auto state = WfStateSOP1{execReg,       programCounter.get(), m0Reg,
+                             modeReg.get(), statusReg.get(),      sccReg};
     if (instr.get_operands_count() < 2) {
         return state;
     }
@@ -78,8 +78,8 @@ void Wavefront::update_with_sop1_state(const Instruction& instr,
 WfStateSOP2 Wavefront::get_sop2_state(const Instruction& instruction) {
     assert(instruction.get_operands_count() <= 3 && "Unexpected operands count for SOP2");
 
-    auto state =
-        WfStateSOP2(execReg, programCounter.get(), modeReg.get(), statusReg.get(), sccReg);
+    auto state = WfStateSOP2(execReg, programCounter.get(), modeReg.get(),
+                             statusReg.get(), sccReg);
 
     if (instruction.get_operands_count() < 3) {
         return state;
@@ -139,8 +139,8 @@ void Wavefront::update_with_sopc_state(const WfStateSOPC& state) {
 }
 
 WfStateSOPP Wavefront::get_common_sopp_state(const Instruction& instruction) const {
-    return WfStateSOPP{programCounter.get(),  execReg,       vccReg, m0Reg,
-                       statusReg.get(), modeReg.get(), sccReg};
+    return WfStateSOPP{programCounter.get(), execReg,       vccReg, m0Reg,
+                       statusReg.get(),      modeReg.get(), sccReg};
 }
 
 void Wavefront::update_with_common_sopp_state(const Instruction& instruction,
@@ -226,7 +226,8 @@ WfStateVOP3 Wavefront::get_vop3_state(const Instruction& instruction) {
         }
     }
 
-    return WfStateVOP3(std::move(VDST), std::move(SRC0), std::move(SRC1), std::move(SRC2));
+    return WfStateVOP3(std::move(VDST), std::move(SRC0), std::move(SRC1),
+                       std::move(SRC2));
 }
 
 void Wavefront::update_with_vop3_state(const Instruction& instruction,
@@ -235,6 +236,26 @@ void Wavefront::update_with_vop3_state(const Instruction& instruction,
         write_operand_to_gpr(*instruction[0], state.VDST[i], i);
     }
 }
+
+WfStateFLAT Wavefront::get_flat_state(const Instruction& instruction) {
+    assert(instruction.get_operands_count() == 2 &&
+           "Unexpected args amount for FLAT instruction");
+
+    auto VADDR = std::vector<uint64_t>();
+    auto VDATA = std::vector<uint32_t>();
+    for (int i = 0; i < workItems.size(); ++i) {
+        auto vaddr = read_operand(*instruction[0], i);
+        std::reverse(vaddr.end(), vaddr.begin());
+        VADDR.push_back(to_uin64_t(vaddr));
+        auto vDataPerWI = read_operand(*instruction[1], i);
+        VDATA.insert(VDATA.end(), vDataPerWI.rbegin(), vDataPerWI.rend());
+    }
+    assert(VDATA.size() % workItems.size() == 0);
+    return WfStateFLAT(VADDR, VDATA, VDATA.size() / workItems.size());
+}
+
+void Wavefront::update_with_flat_state(const Instruction& instruction,
+                                       const WfStateFLAT& state) {}
 
 std::vector<uint32_t> Wavefront::read_operand(const Operand& op) {
     return read_operand(op, -1);
@@ -359,7 +380,8 @@ void Wavefront::set_sgpr_pair(size_t sgprInd, uint64_t data) {
     scalarRegFile[sgprInd + 1] = static_cast<uint32_t>(data);
 }
 
-uint64_t Wavefront::read_sgpr_pair(size_t sgprInd){
+uint64_t Wavefront::read_sgpr_pair(size_t sgprInd) {
     assert(sgprInd % 2 == 0 && "SGPR-pair should be aligned");
-    return static_cast<uint64_t>(scalarRegFile[sgprInd]) << 32 | static_cast<uint64_t>(scalarRegFile[sgprInd + 1]);
+    return static_cast<uint64_t>(scalarRegFile[sgprInd]) << 32 |
+           static_cast<uint64_t>(scalarRegFile[sgprInd + 1]);
 }

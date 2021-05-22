@@ -1867,7 +1867,11 @@ enum InstrKey {
     /**
      * Untyped buffer store dword
      */
-    FLAT_STORE_DWORD
+    FLAT_STORE_DWORD,
+    FLAT_STORE_DWORDX2,
+    FLAT_STORE_DWORDX3,
+    FLAT_STORE_DWORDX4,
+    FLAT_STORE_SHORT
 };
 
 enum InstrFormat {

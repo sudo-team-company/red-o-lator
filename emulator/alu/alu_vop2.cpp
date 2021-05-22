@@ -14,10 +14,13 @@ static inline void run_v_sub_u32(WfStateVOP2& state, size_t wiInd) {
 
 void run_vop2(const Instruction& instr, Wavefront* wf) {
     auto state = wf->get_vop2_state(instr);
+    auto instrKey = instr.get_key();
     for (size_t wiInd = 0; wiInd < wf->workItems.size(); ++wiInd) {
         if (!wf->work_item_masked(wiInd)) continue;
 
-        switch (instr.get_key()) {
+        
+
+        switch (instrKey) {
             case V_ADD_U32:
                 run_v_add_u32(state, wiInd);
                 break;

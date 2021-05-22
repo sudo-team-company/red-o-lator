@@ -97,8 +97,7 @@ struct Wavefront {
     void update_with_sopc_state(const WfStateSOPC&);
 
     WfStateSOPP get_common_sopp_state(const Instruction&) const;
-    void update_with_common_sopp_state(const Instruction&,
-                                       const WfStateSOPP&);
+    void update_with_common_sopp_state(const Instruction&, const WfStateSOPP&);
 
     WfStateSMEM get_smem_state(const Instruction&);
     void update_with_smem_state(const Instruction&, const WfStateSMEM&);
@@ -111,6 +110,9 @@ struct Wavefront {
 
     WfStateVOP3 get_vop3_state(const Instruction&);
     void update_with_vop3_state(const Instruction&, const WfStateVOP3&);
+
+    WfStateFLAT get_flat_state(const Instruction&);
+    void update_with_flat_state(const Instruction&, const WfStateFLAT&);
 
     std::vector<uint32_t> read_operand(const Operand&);
     std::vector<uint32_t> read_operand(const Operand&, int);

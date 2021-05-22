@@ -9,7 +9,7 @@
 // SOP1
 TEST_CASE("run_s_abs_i32 - stores absolute signed value of the SSRC0 into SDST.") {
     auto* wavefront = new Wavefront(nullptr, 2, 0);
-    Instruction instruction = Instruction("", "s_abs_i32", {"s0", "s1"});
+    Instruction instruction = Instruction(0, "s_abs_i32", {"s0", "s1"});
 
     SUBCASE("src0 is 0x80000000") {
         wavefront->scalarRegFile[1] = 0x80000000;
@@ -46,7 +46,7 @@ TEST_CASE("run_s_abs_i32 - stores absolute signed value of the SSRC0 into SDST."
 
 TEST_CASE("run_s_bcnt0_i32_b32") {
     auto* wavefront = new Wavefront(nullptr, 5, 0);
-    Instruction instruction = Instruction("", "s_bcnt0_i32_b32", {"s2", "s4"});
+    Instruction instruction = Instruction(0, "s_bcnt0_i32_b32", {"s2", "s4"});
 
     SUBCASE("S_BCNT0_I32_B32(0x00000000) => 32") {
         wavefront->scalarRegFile[4] = 0x00000000;
@@ -71,7 +71,7 @@ TEST_CASE("run_s_bcnt0_i32_b32") {
 
 TEST_CASE("run_s_bcnt0_i32_b64") {
     auto* wavefront = new Wavefront(nullptr, 6, 0);
-    Instruction instruction = Instruction("", "s_bcnt0_i32_b64", {"s2", "s[4:5]"});
+    Instruction instruction = Instruction(0, "s_bcnt0_i32_b64", {"s2", "s[4:5]"});
 
     SUBCASE("S_BCNT0_I32_B64(0x00000000) => 64") {
         wavefront->scalarRegFile[4] = 0x00000000;
@@ -92,7 +92,7 @@ TEST_CASE("run_s_bcnt0_i32_b64") {
 
 TEST_CASE("run_s_bcnt1_i32_b32}") {
     auto* wavefront = new Wavefront(nullptr, 7, 0);
-    Instruction instruction = Instruction("", "s_bcnt1_i32_b32", {"s6", "s1"});
+    Instruction instruction = Instruction(0, "s_bcnt1_i32_b32", {"s6", "s1"});
 
     SUBCASE("S_BCNT1_I32_B32(0x00000000) => 0") {
         wavefront->scalarRegFile[1] = 0x00000000;
@@ -116,7 +116,7 @@ TEST_CASE("run_s_bcnt1_i32_b32}") {
 }
 TEST_CASE("run_s_bcnt1_i32_b64}") {
     auto* wavefront = new Wavefront(nullptr, 4, 0);
-    Instruction instruction = Instruction("", "s_bcnt1_i32_b64", {"s2", "s[2:3]"});
+    Instruction instruction = Instruction(0, "s_bcnt1_i32_b64", {"s2", "s[2:3]"});
     SUBCASE("S_BCNT1_I32_B64(0x00000000) => 0") {
         wavefront->scalarRegFile[2] = 0x00000000;
         wavefront->scalarRegFile[3] = 0x00000000;
@@ -135,7 +135,7 @@ TEST_CASE("run_s_bcnt1_i32_b64}") {
 }
 TEST_CASE("run_s_ff0_i32_b32") {
     auto* wavefront = new Wavefront(nullptr, 1, 0);
-    Instruction instruction = Instruction("", "s_ff0_i32_b32", {"s0", "s0"});
+    Instruction instruction = Instruction(0, "s_ff0_i32_b32", {"s0", "s0"});
 
     SUBCASE("S_FF0_I32_B32(0xaaaaaaaa) => 0") {
         wavefront->scalarRegFile[0] = 0xaaaaaaaa;
@@ -168,7 +168,7 @@ TEST_CASE("run_s_ff0_i32_b32") {
 
 TEST_CASE("run_s_ff0_i32_b64") {
     auto* wavefront = new Wavefront(nullptr, 101, 0);
-    Instruction instruction = Instruction("", "s_ff0_i32_b64", {"s0", "s[99:100]"});
+    Instruction instruction = Instruction(0, "s_ff0_i32_b64", {"s0", "s[99:100]"});
 
     SUBCASE("S_FF0_I32_B64(0xffffffffffffffff) => 0xffffffff") {
         wavefront->scalarRegFile[99] = 0xffffffff;
@@ -181,7 +181,7 @@ TEST_CASE("run_s_ff0_i32_b64") {
 }
 TEST_CASE("run_s_ff1_i32_b32") {
     auto* wavefront = new Wavefront(nullptr, 101, 0);
-    Instruction instruction = Instruction("", "s_ff1_i32_b32", {"s99", "s100"});
+    Instruction instruction = Instruction(0, "s_ff1_i32_b32", {"s99", "s100"});
 
     SUBCASE("S_FF1_I32_B32(0xaaaaaaaa) => 1") {
         wavefront->scalarRegFile[100] = 0xaaaaaaaa;
@@ -207,7 +207,7 @@ TEST_CASE("run_s_ff1_i32_b32") {
 }
 TEST_CASE("run_s_flbit_i32_b32") {
     auto* wavefront = new Wavefront(nullptr, 1, 0);
-    Instruction instruction = Instruction("", "s_flbit_i32_b32", {"s0", "s0"});
+    Instruction instruction = Instruction(0, "s_flbit_i32_b32", {"s0", "s0"});
 
     SUBCASE("S_FLBIT_I32_B32(0x00000000) => 0xffffffff") {
         wavefront->scalarRegFile[0] = 0x00000000;
@@ -246,7 +246,7 @@ TEST_CASE("run_s_flbit_i32_b32") {
 TEST_CASE(
     "run_s_absdiff_i32 - omputes the absolute value of difference between two values.") {
     auto* wavefront = new Wavefront(nullptr, 12, 0);
-    Instruction instruction = Instruction("", "s_absdiff_i32", {"s6", "s10", "s11"});
+    Instruction instruction = Instruction(0, "s_absdiff_i32", {"s6", "s10", "s11"});
 
     SUBCASE("src0 is 0x00000002, src1 is 0x00000005") {
         wavefront->scalarRegFile[10] = 0x00000002;
@@ -284,12 +284,13 @@ static inline void fill_empty_wi(Wavefront* wf, size_t wiAmount) {
 
     for (size_t i = 0; i < wiAmount; ++i) {
         wf->workItems.push_back(nullptr);
+        wf->execReg |= uint64_t(1) << i;
     }
 }
 
 //VOP1
 TEST_CASE("run_v_mov_b32") {
-    Instruction instruction = Instruction("", "v_mov_b32", {"v3", "s1"});
+    Instruction instruction = Instruction(0, "v_mov_b32", {"v3", "s1"});
     auto* wavefront = new Wavefront(nullptr, 2, 4);
     fill_empty_wi(wavefront, 64);
 

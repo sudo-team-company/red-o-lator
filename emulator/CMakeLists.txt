@@ -51,6 +51,8 @@ add_executable(wf_exec_test
         alu/alu_smem.cpp
         alu/alu_vop1.cpp
         alu/alu_vop2.cpp
+        alu/alu_vop3.cpp
+        alu/alu_flat.cpp
         gpu/storage.cpp
         util/util.cpp
         flow/wavefront.cpp

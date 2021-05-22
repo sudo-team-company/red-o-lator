@@ -37,6 +37,7 @@ void run_instr(const Instruction& instr, Wavefront* wf) {
             break;
         case FLAT:
             run_flat(instr, wf);
+            break;
         case VOPC:
         case VINTRP:
         case VOP3P:
