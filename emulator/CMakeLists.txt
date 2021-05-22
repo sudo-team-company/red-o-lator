@@ -17,7 +17,6 @@ add_executable(emulator
         instr/instruction.cpp
         instr/instr_info.cpp
         cu/compute_unit.cpp
-        gpu/command_processor.cpp
         gpu/storage.cpp
         main.cpp
         )
