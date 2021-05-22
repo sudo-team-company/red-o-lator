@@ -11,15 +11,12 @@
 #include "../../common/common/common.hpp"
 #include "../reg/reg_info.h"
 #include "instr_info.h"
-#include <memory>
 
 enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST };
 
 struct Operand {
     OperandType type;
     std::variant<int, uint32_t, float, RegisterType> value;
-    int lgkmcnt = -1;
-    int vmcnt = -1;
     size_t regAmount = 0;
 
     explicit Operand(const std::string&);
