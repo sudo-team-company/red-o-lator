@@ -145,7 +145,7 @@ void MainFrame::setInstructions(const std::vector<Instruction>& instructions) {
     auiManager.Update();
 }
 
-void MainFrame::setExecutionMarker(size_t address) {
+void MainFrame::setExecutionMarker(uint64_t address) {
     textEditor->setExecutionMarker(address);
 }
 
@@ -153,11 +153,11 @@ void MainFrame::removeExecutionMarker() {
     textEditor->clearExecutionMarker();
 }
 
-void MainFrame::onSetBreakpoint(size_t address) const {
+void MainFrame::onSetBreakpoint(uint64_t address) const {
     app->onSetBreakpoint(address);
 }
 
-void MainFrame::onRemoveBreakpoint(size_t address) const {
+void MainFrame::onRemoveBreakpoint(uint64_t address) const {
     app->onRemoveBreakpoint(address);
 }
 
@@ -171,7 +171,7 @@ void MainFrame::onRequestMemory(wxCommandEvent& event) {
     app->onRequestMemory(address);
 }
 
-void MainFrame::setMemoryView(const void* memory, size_t size, size_t address) {
+void MainFrame::setMemoryView(const void* memory, uint64_t size, uint64_t address) {
     memoryPanel->setMemoryView(memory, size, address);
 }
 

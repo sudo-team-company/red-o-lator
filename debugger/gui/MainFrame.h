@@ -61,13 +61,13 @@ class MainFrame : public wxFrame {
                        const std::vector<Parameter>& parameters);
 
     void setInstructions(const std::vector<Instruction>& instructions);
-    void setExecutionMarker(size_t address);
+    void setExecutionMarker(uint64_t address);
     void removeExecutionMarker();
 
-    void onSetBreakpoint(size_t address) const;
-    void onRemoveBreakpoint(size_t address) const;
+    void onSetBreakpoint(uint64_t address) const;
+    void onRemoveBreakpoint(uint64_t address) const;
 
-    void setMemoryView(const void* memory, size_t size, size_t address);
+    void setMemoryView(const void* memory, uint64_t size, uint64_t address);
 
     void setModelChoice(const std::vector<std::string>& models,
                         size_t currentIdx = 0);

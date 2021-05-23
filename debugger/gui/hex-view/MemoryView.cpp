@@ -60,8 +60,8 @@ MemoryView::MemoryView(wxWindow* parent)
 }
 
 void MemoryView::setMemoryView(const void* memory,
-                               size_t size,
-                               size_t address) {
+                               uint64_t size,
+                               uint64_t address) {
     auto startAddress = getStartAddress(address);
     auto endAddress = getEndAddress(address, size);
     auto lineCount = getLineCount(startAddress, endAddress);

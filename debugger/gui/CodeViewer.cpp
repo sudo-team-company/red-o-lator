@@ -33,7 +33,7 @@ void CodeViewer::adjustAddressMargin() {
     SetMarginWidth(MARGIN_ADDRESS, width);
 }
 
-void CodeViewer::setAddress(int line, size_t value) {
+void CodeViewer::setAddress(int line, uint64_t value) {
     MarginSetText(line, wxString::Format("0x%.6llX", value));
     MarginSetStyle(line, MARGIN_ADDRESS_STYLE);
 }
@@ -68,7 +68,7 @@ void CodeViewer::setExecutionMarker(int line) {
     MarkerAdd(line, MARKER_EXECUTION_CURSOR);
 }
 
-void CodeViewer::setExecutionMarker(size_t address) {
+void CodeViewer::setExecutionMarker(uint64_t address) {
     if (addressMap.find(address) != addressMap.end()) {
         setExecutionMarker(addressMap[address]);
     } else {

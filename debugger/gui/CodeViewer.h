@@ -41,9 +41,9 @@ class CodeViewer : public wxStyledTextCtrl {
     void setBreakpointMarker(int line);
     void clearBreakpointMarker(int line);
 
-    std::map<size_t, int> addressMap;
-    std::map<int, size_t> lineMap;
-    std::set<size_t> breakpoints;
+    std::map<uint64_t, int> addressMap;
+    std::map<int, uint64_t> lineMap;
+    std::set<uint64_t> breakpoints;
 
     const MainFrame* frame;
 
@@ -55,11 +55,11 @@ class CodeViewer : public wxStyledTextCtrl {
 
     void adjustAddressMargin();
 
-    void setAddress(int line, size_t value);
+    void setAddress(int line, uint64_t value);
     void setLabel(int line, const wxString& name);
 
     void setInstructions(const std::vector<Instruction>& instructions);
-    void setExecutionMarker(size_t address);
+    void setExecutionMarker(uint64_t address);
 
     void clearExecutionMarker();
 };

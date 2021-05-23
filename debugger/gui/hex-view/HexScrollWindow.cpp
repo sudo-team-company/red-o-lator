@@ -51,7 +51,7 @@ void HexScrollWindow::ScrollWindow(int dx, int dy, const wxRect* rect) {
     columns->Scroll(GetViewStart());
 }
 
-void HexScrollWindow::setHex(const void* memory, size_t size, size_t address) {
+void HexScrollWindow::setHex(const void* memory, uint64_t size, uint64_t address) {
     startAddress = getStartAddress(address);
     endAddress = getEndAddress(address, size);
     originalAddress = address;
@@ -62,7 +62,7 @@ void HexScrollWindow::setHex(const void* memory, size_t size, size_t address) {
     SetVirtualSize(lineWidth, static_cast<int>(lineCount) * lineHeight);
 }
 
-wxString HexScrollWindow::drawLine(const uint8_t* mem, size_t lineAddr) const {
+wxString HexScrollWindow::drawLine(const uint8_t* mem, uint64_t lineAddr) const {
     auto hexArray = wxString();
     auto charArray = wxString();
     for (int i = 0; i < 16; i++) {

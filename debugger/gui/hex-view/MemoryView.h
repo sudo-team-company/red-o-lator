@@ -1,6 +1,7 @@
 #ifndef RED_O_LATOR_MEMORYVIEW_H
 #define RED_O_LATOR_MEMORYVIEW_H
 
+#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include "../wx.h"
@@ -13,7 +14,7 @@ class MemoryView : public wxWindow {
    public:
     explicit MemoryView(wxWindow* parent);
 
-    void setMemoryView(const void* memory, size_t size, size_t address);
+    void setMemoryView(const void* memory, uint64_t size, uint64_t address);
 
     wxTextCtrl* addressInput;
     wxButton* addressButton;
