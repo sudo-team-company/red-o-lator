@@ -100,6 +100,8 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
                                    sizeof(cl_uint)));
 
     mConfigurationPath = configurationFilePath;
+    // TODO: memory leak of arrays
+    mParameters.clear();
     mParameters = parameters;
 }
 
@@ -121,7 +123,7 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         isBasicOpenCLParameter || isAmdParameter;
 
     if (isValidOpenCLParameter) {
-        kLogger.debug("Parameter " + std::to_string(parameter) +
+        kLogger.warn("Parameter " + std::to_string(parameter) +
                       " was not found in config");
         return CLObjectInfoParameterValue(nullptr, 0);
     }
@@ -182,6 +184,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
                                           const std::string& parameterValue) {
     size_t resultSize = 0;
     CLObjectInfoParameterValueType result;
+    bool isArray = false;
     cl_device_info clParameter = 0;
 
     IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
@@ -211,7 +214,8 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
         resultSize = values.size() * sizeof(size_t);
         auto* valuesArray = new size_t[values.size()];
         memcpy(valuesArray, values.data(), resultSize);
-        result = CLObjectInfoParameterValueTypeArray(valuesArray);
+        result = valuesArray;
+        isArray = true;
     })
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_WORK_GROUP_SIZE, size_t)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, cl_uint)
@@ -308,8 +312,8 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
         resultSize = strlen(std::get<std::string>(result).c_str()) + 1;
     }
 
-    return ParsedParameter(clParameter,
-                           CLObjectInfoParameterValue(result, resultSize));
+    return ParsedParameter(
+        clParameter, CLObjectInfoParameterValue(result, resultSize, isArray));
 }
 
 template <typename T>
@@ -449,11 +453,8 @@ cl_device_partition_property parseDevicePartitionProperty(
     } else if (value == "CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN") {
         return CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN;
 
-    } else if (value == "CL_NONE") {
+    } else if (value == "CL_NONE" || value == "0") {
         return CL_NONE;
-
-    } else if (value == "0") {
-        return 0;
     }
 
     throw DeviceConfigurationParseError(
@@ -479,8 +480,8 @@ cl_device_affinity_domain parseDeviceAffinityDomain(const std::string& value) {
     } else if (value == "CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE") {
         return CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE;
 
-    } else if (value == "0") {
-        return 0;
+    } else if (value == "CL_NONE" || value == "0") {
+        return CL_NONE;
     }
 
     throw DeviceConfigurationParseError(
@@ -512,8 +513,8 @@ cl_device_fp_config parseDeviceFpConfig(const std::string& value) {
     } else if (value == "CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT") {
         return CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT;
 
-    } else if (value == "0") {
-        return 0;
+    } else if (value == "CL_NONE" || value == "0") {
+        return CL_NONE;
     }
 
     throw DeviceConfigurationParseError("Unknown cl_device_fp_config value: " +

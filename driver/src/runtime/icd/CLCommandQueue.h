@@ -8,15 +8,13 @@
 #include "runtime/command/Command.h"
 #include "runtime/icd/CLContext.h"
 
-class Command;
-
 struct CLCommandQueue {
    public:
     explicit CLCommandQueue(IcdDispatchTable* dispatchTable,
                             CLContext* context,
                             cl_command_queue_properties properties);
 
-    virtual ~CLCommandQueue();
+    ~CLCommandQueue();
 
     IcdDispatchTable* const dispatchTable;
     CLContext* const context;
@@ -33,4 +31,6 @@ struct CLCommandQueue {
    private:
     std::queue<std::shared_ptr<const Command>> commands =
         std::queue<std::shared_ptr<const Command>>();
+
+    bool flushInProcess = false;
 };

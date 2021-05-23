@@ -1,4 +1,5 @@
 #include "CLCommandQueue.h"
+#include <runtime-commons.h>
 
 CLCommandQueue::CLCommandQueue(IcdDispatchTable* dispatchTable,
                                CLContext* context,
@@ -16,11 +17,19 @@ void CLCommandQueue::enqueue(const std::shared_ptr<const Command>& command) {
 }
 
 void CLCommandQueue::flush() {
+    if (flushInProcess) {
+        return;
+    }
+
+    flushInProcess = true;
+
     while (!commands.empty()) {
         const auto command = commands.front();
-        commands.pop();
         command->execute();
+        commands.pop();
     }
+
+    flushInProcess = false;
 }
 
 size_t CLCommandQueue::size() {

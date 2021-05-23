@@ -68,7 +68,7 @@ set(SOURCES
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        src/runtime/icd/CLMem.cpp)
+        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp)
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
@@ -111,11 +111,15 @@ set(UNIT_TEST_SOURCES
         test/unit/unit-test-common/test-commons.cpp
         test/unit/runtime/runtime-context-test.cpp
         test/unit/runtime/runtime-command-queue-test.cpp
-        test/unit/runtime/runtime-memory-test.cpp test/unit/runtime/runtime-memory-buffer-test.cpp)
+        test/unit/runtime/runtime-memory-test.cpp
+        test/unit/runtime/runtime-memory-buffer-test.cpp
+        )
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)
-target_include_directories(red-o-lator-icd-test-unit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/)
+target_include_directories(red-o-lator-icd-test-unit PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/)
+
 add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${TEST_RESOURCES}

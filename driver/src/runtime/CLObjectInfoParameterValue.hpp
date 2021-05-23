@@ -3,20 +3,17 @@
 #include <string>
 #include <variant>
 
-struct CLObjectInfoParameterValueTypeArray {
-    explicit CLObjectInfoParameterValueTypeArray(void* array) : array(array) {}
-
-    const void* array;
-};
-
-using CLObjectInfoParameterValueType =
-    std::variant<void*, std::string, CLObjectInfoParameterValueTypeArray>;
+using CLObjectInfoParameterValueType = std::variant<void*, std::string>;
 
 struct CLObjectInfoParameterValue {
     CLObjectInfoParameterValue(CLObjectInfoParameterValueType value,
-                               size_t size)
-        : value(std::move(value)), size(size) {}
+                               size_t size, bool isArray = false)
+        : value(std::move(value)), size(size), isArray(isArray) {}
 
     CLObjectInfoParameterValueType value;
     size_t size;
+
+    // TODO: possible memory leak, may be resolved by template array wrapper in
+    //   CLObjectInfoParameterValueType
+    bool isArray = false;
 };

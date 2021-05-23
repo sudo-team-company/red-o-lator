@@ -22,9 +22,11 @@ struct CLKernel {
 
     void setArgument(cl_uint index, size_t size, const void* value);
 
-    KernelArgument getArgument(cl_uint index);
+    [[nodiscard]] KernelArgument getArgument(cl_uint index) const;
 
-    int argumentCount();
+    [[nodiscard]] std::vector<KernelArgument> getArguments() const;
+
+    [[nodiscard]] int argumentCount() const;
 
     IcdDispatchTable* const dispatchTable;
     const std::string name;
@@ -40,7 +42,7 @@ struct CLKernel {
 };
 
 struct CLKernelBuilder {
-    CLKernel* build() const;
+    [[nodiscard]] CLKernel* build() const;
 
     std::string name;
     std::vector<std::string> config{};

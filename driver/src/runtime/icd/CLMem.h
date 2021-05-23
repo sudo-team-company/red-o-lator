@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <stack>
 
 #include "icd.h"
@@ -37,8 +38,9 @@ struct CLMem {
 
     unsigned int referenceCount = 1;
 
-    void registerCallback(CLMemDestructorCallback callback);
+    void registerCallback(
+        const std::shared_ptr<CLMemDestructorCallback>& callback);
 
    private:
-    std::stack<CLMemDestructorCallback> destructorCallbacks;
+    std::stack<std::shared_ptr<CLMemDestructorCallback>> destructorCallbacks{};
 };

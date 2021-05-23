@@ -10,6 +10,8 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace utils {
 static std::vector<std::string> split(const std::string& line,
@@ -180,5 +182,15 @@ static inline bool contains(std::vector<T> vector, T value) {
 template <typename T>
 static inline bool contains(std::set<T> set, T value) {
     return set.find(value) != set.end();
+}
+
+static std::vector<unsigned char> readBinaryFile(const std::string& path) {
+    std::ifstream input(path, std::ios::binary);
+    if (!input.is_open()) {
+        throw std::runtime_error("Failed to open " + path);
+    }
+
+    return std::vector<unsigned char>(std::istreambuf_iterator<char>(input),
+                                      {});
 }
 }  // namespace utils

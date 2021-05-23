@@ -33,7 +33,7 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(clRetainCommandQueue);
     ICD_DISPATCH_TABLE_ENTRY(clReleaseCommandQueue);
     ICD_DISPATCH_TABLE_ENTRY(clGetCommandQueueInfo);
-    ICD_DISPATCH_TABLE_ENTRY(/* clSetCommandQueueProperty */ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/* clSetCommandQueueProperty */ nullptr);
     ICD_DISPATCH_TABLE_ENTRY(clCreateBuffer);
     ICD_DISPATCH_TABLE_ENTRY(clCreateImage2D);
     ICD_DISPATCH_TABLE_ENTRY(clCreateImage3D);
@@ -86,17 +86,17 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueWaitForEvents);
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueBarrier);
     ICD_DISPATCH_TABLE_ENTRY(clGetExtensionFunctionAddress);
-    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLBuffer*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLTexture2D*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLTexture3D*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLRenderbuffer*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clGetGLObjectInfo*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clGetGLTextureInfo*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clEnqueueAcquireGLObjects*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clEnqueueReleaseGLObjects*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLBuffer*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLTexture2D*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLTexture3D*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateFromGLRenderbuffer*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clGetGLObjectInfo*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clGetGLTextureInfo*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clEnqueueAcquireGLObjects*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clEnqueueReleaseGLObjects*/ nullptr);
 
     // cl_khr_gl_sharing
-    ICD_DISPATCH_TABLE_ENTRY(/* clGetGLContextInfoKHR */ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/* clGetGLContextInfoKHR */ nullptr);
 
     // cl_khr_d3d10_sharing (windows-only)
 #if 0 && defined(_WIN32)
@@ -107,12 +107,12 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY ( clEnqueueAcquireD3D10ObjectsKHR );
     ICD_DISPATCH_TABLE_ENTRY ( clEnqueueReleaseD3D10ObjectsKHR );
 #else
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
-    ICD_DISPATCH_TABLE_ENTRY(NULL);
+    ICD_DISPATCH_TABLE_ENTRY(nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(nullptr);
 #endif
 
     // OpenCL 1.1
@@ -126,12 +126,12 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueCopyBufferRect);
 
     /* cl_ext_device_fission */
-    ICD_DISPATCH_TABLE_ENTRY(/*clCreateSubDevicesEXT*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clRetainDeviceEXT*/ NULL);
-    ICD_DISPATCH_TABLE_ENTRY(/*clReleaseDevice*/ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/*clCreateSubDevicesEXT*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clRetainDeviceEXT*/ nullptr);
+    ICD_DISPATCH_TABLE_ENTRY(/*clReleaseDevice*/ nullptr);
 
     /* cl_khr_gl_event */
-    ICD_DISPATCH_TABLE_ENTRY(/* clCreateEventFromGLsyncKHR */ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/* clCreateEventFromGLsyncKHR */ nullptr);
 
     /* OpenCL 1.2 */
     ICD_DISPATCH_TABLE_ENTRY(clCreateSubDevices);
@@ -149,5 +149,5 @@ void initDispatchTable(IcdDispatchTable* dispatchTable) {
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueMarkerWithWaitList);
     ICD_DISPATCH_TABLE_ENTRY(clEnqueueBarrierWithWaitList);
     ICD_DISPATCH_TABLE_ENTRY(clGetExtensionFunctionAddressForPlatform);
-    ICD_DISPATCH_TABLE_ENTRY(/* clCreateFromGLTexture */ NULL);
+    ICD_DISPATCH_TABLE_ENTRY(/* clCreateFromGLTexture */ nullptr);
 }

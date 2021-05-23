@@ -29,7 +29,7 @@ cl_int getParamInfo(
                                            std::to_string(param_name) + ".")
     }
 
-    auto [result, resultSize] = parameterValue.value();
+    auto [result, resultSize, isArray] = parameterValue.value();
 
     if (std::holds_alternative<std::string>(result)) {
         resultSize = strlen(std::get<std::string>(result).c_str()) + 1;
@@ -44,13 +44,9 @@ cl_int getParamInfo(
 
     if (param_value) {
         if (std::holds_alternative<void*>(result)) {
-            memcpy(param_value, &std::get<void*>(result), resultSize);
+            const auto value = std::get<void*>(result);
+            memcpy(param_value, isArray ? value : &value, resultSize);
 
-        } else if (std::holds_alternative<CLObjectInfoParameterValueTypeArray>(
-                       result)) {
-            memcpy(param_value,
-                   std::get<CLObjectInfoParameterValueTypeArray>(result).array,
-                   resultSize);
         } else {
             memcpy(param_value, std::get<std::string>(result).c_str(),
                    resultSize);

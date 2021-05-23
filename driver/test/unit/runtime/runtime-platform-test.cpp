@@ -32,7 +32,7 @@ TEST_SUITE("Platform API") {
 
         SUBCASE("platform should have correct name") {
             CHECK(test::getPlatform()->name ==
-                    "AMD Accelerated Parallel Processing");
+                  "AMD Accelerated Parallel Processing");
         }
 
         SUBCASE("platform should have cl_khr_icd extension") {
@@ -70,5 +70,85 @@ TEST_SUITE("Platform API") {
 
             CHECK(errorCode == CL_INVALID_PLATFORM);
         }
+    }
+}
+
+TEST_SUITE("Program API") {
+    TEST_CASE("clCreateProgramWithBinary") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clRetainProgram") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clReleaseProgram") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clBuildProgram") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clGetProgramInfo") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clCreateProgramWithSource") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clCompileProgram") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clLinkProgram") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clUnloadPlatformCompiler") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clUnloadCompiler") {
+        SUBCASE("") {}
+    }
+}
+
+TEST_SUITE("Kernel API") {
+    TEST_CASE("clCreateKernel") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clCreateKernelsInProgram") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clRetainKernel") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clReleaseKernel") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clSetKernelArg") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clEnqueueNDRangeKernel") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clEnqueueTask") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clGetKernelArgInfo") {
+        SUBCASE("") {}
+    }
+
+    TEST_CASE("clGetKernelInfo") {
+        SUBCASE("") {}
     }
 }

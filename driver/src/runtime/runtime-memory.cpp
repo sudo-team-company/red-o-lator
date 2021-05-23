@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "icd/CLContext.h"
 #include "icd/CLDeviceId.hpp"
 #include "icd/CLMem.h"
@@ -78,7 +79,9 @@ clSetMemObjectDestructorCallback(cl_mem memobj,
         RETURN_ERROR(CL_INVALID_VALUE, "Callback is null.")
     }
 
-    memobj->registerCallback(CLMemDestructorCallback(pfn_notify, user_data));
+    auto callback =
+        std::make_shared<CLMemDestructorCallback>(pfn_notify, user_data);
+    memobj->registerCallback(callback);
 
     return CL_SUCCESS;
 }

@@ -173,15 +173,10 @@ clEnqueueReadBuffer(cl_command_queue command_queue,
                      "clEnqueueReadBuffer on write-only buffer.")
     }
 
-    const auto command = std::make_shared<BufferReadCommand>();
-    command->buffer = buffer;
-    command->size = size;
-    command->offset = offset;
-    command->outputPtr = ptr;
+    const auto command =
+        std::make_shared<BufferReadCommand>(buffer, size, offset, ptr);
 
     command_queue->enqueue(command);
-
-    clRetainMemObject(buffer);
 
     if (blocking_read) {
         clFlush(command_queue);
@@ -207,15 +202,10 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
                      "clEnqueueWriteBuffer on read-only buffer.")
     }
 
-    const auto command = std::make_shared<BufferWriteCommand>();
-    command->buffer = buffer;
-    command->size = size;
-    command->offset = offset;
-    command->dataPtr = ptr;
+    const auto command =
+        std::make_shared<BufferWriteCommand>(buffer, size, offset, ptr);
 
     command_queue->enqueue(command);
-
-    clRetainMemObject(buffer);
 
     if (blocking_write) {
         clFlush(command_queue);
