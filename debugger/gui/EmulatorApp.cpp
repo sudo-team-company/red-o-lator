@@ -79,20 +79,19 @@ void EmulatorApp::startExecution() {
 }
 
 void EmulatorApp::pauseExecution(size_t address,
-                                 int workGroupId,
-                                 int workItemId) {
+                                 int workGroupId) {
     frame->enableTool(ATTACH, false);
     frame->enableTool(PAUSE, false);
     frame->enableTool(RESUME, true);
     frame->enableTool(STEP, true);
     frame->enableTool(STOP, true);
 
+    frame->enableMemoryPanel(true);
     frame->setExecutionMarker(address);
 
     frame->SetStatusText(
         wxString::Format("Paused at address: 0x%.6llX", address), 0);
-    frame->SetStatusText(wxString::Format("Work Group: %i; Work Item: %i",
-                                          workGroupId, workItemId),
+    frame->SetStatusText(wxString::Format("Work Group: %i", workGroupId),
                          1);
 }
 

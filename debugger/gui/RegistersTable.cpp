@@ -13,6 +13,8 @@ RegistersTable::RegistersTable(wxWindow* parent)
     createUIntRegister("vcc");
     createBoolRegister("vccz");
     createBoolRegister("scc");
+    createUIntRegister("exec");
+    createBoolRegister("execz");
 
     Append(new wxPropertyCategory("Scalar Registers"));
 
