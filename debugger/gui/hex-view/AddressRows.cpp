@@ -41,7 +41,7 @@ void AddressRows::OnDraw(wxDC& dc) {
     }
 }
 
-void AddressRows::setState(size_t address, size_t lineCount) {
+void AddressRows::setState(uint64_t address, size_t lineCount) {
     this->lineCount = lineCount;
     this->startAddress = getStartAddress(address);
     SetVirtualSize(lineWidth, static_cast<int>(lineCount) * lineHeight);

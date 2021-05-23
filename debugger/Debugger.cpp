@@ -75,11 +75,11 @@ Debugger::Debugger(EmulatorApp* app) {
 
 Debugger::~Debugger() = default;
 
-void Debugger::onSetBreakpoint(size_t address) {
+void Debugger::onSetBreakpoint(uint64_t address) {
     std::cout << "set breakpoint at " << std::hex << address << std::endl;
 }
 
-void Debugger::onRemoveBreakpoint(size_t address) {
+void Debugger::onRemoveBreakpoint(uint64_t address) {
     std::cout << "remove breakpoint at " << std::hex << address << std::endl;
 }
 
@@ -91,8 +91,8 @@ void Debugger::onSelectKernel(size_t index) {
     std::cout << "select kernel " << index << std::endl;
 }
 
-void Debugger::onRequestMemory(size_t index) {
-    std::cout << "request memory at " << std::hex << index << std::endl;
+void Debugger::onRequestMemory(uint64_t address) {
+    std::cout << "request memory at " << std::hex << address << std::endl;
 
     auto x =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent sit "
@@ -102,7 +102,7 @@ void Debugger::onRequestMemory(size_t index) {
         "sit amet quam auctor vulputate. Nullam vulputate malesuada orci eget "
         "convallis.";
 
-    app->setMemoryView(x, strlen(x), index);
+    app->setMemoryView(x, strlen(x), address);
 }
 
 void Debugger::onAttach() {

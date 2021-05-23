@@ -1,6 +1,7 @@
 #ifndef RED_O_LATOR_HEXSCROLLWINDOW_H
 #define RED_O_LATOR_HEXSCROLLWINDOW_H
 
+#include <cstdint>
 #include "../wx.h"
 #include "AddressRows.h"
 #include "ColumnLabels.h"
@@ -12,24 +13,24 @@ class HexScrollWindow : public wxScrolledWindow {
 
     void ScrollWindow(int dx, int dy, const wxRect* rect) override;
 
-    void setHex(const void* memory, size_t startAddress, size_t endAddress);
+    void setHex(const void* memory, uint64_t size, uint64_t address);
 
    private:
     int lineHeight;
     int lineWidth;
     size_t lineCount;
-    size_t startAddress;
-    size_t endAddress;
-    size_t originalAddress;
+    uint64_t startAddress;
+    uint64_t endAddress;
+    uint64_t originalAddress;
     const uint8_t* memory;
-    size_t memorySize;
+    uint64_t memorySize;
 
     AddressRows* rows;
     ColumnLabels* columns;
 
     void OnDraw(wxDC& dc) override;
 
-    wxString drawLine(const uint8_t* mem, size_t lineAddr) const;
+    wxString drawLine(const uint8_t* mem, uint64_t lineAddr) const;
 };
 
 #endif  // RED_O_LATOR_HEXSCROLLWINDOW_H

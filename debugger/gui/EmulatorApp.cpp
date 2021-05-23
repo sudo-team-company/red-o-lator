@@ -78,7 +78,7 @@ void EmulatorApp::startExecution() {
     frame->SetStatusText("", 1);
 }
 
-void EmulatorApp::pauseExecution(size_t address,
+void EmulatorApp::pauseExecution(uint64_t address,
                                  int workGroupId) {
     frame->enableTool(ATTACH, false);
     frame->enableTool(PAUSE, false);
@@ -132,21 +132,21 @@ void EmulatorApp::setInstructions(
     frame->setInstructions(instructions);
 }
 
-void EmulatorApp::onSetBreakpoint(size_t address) const {
+void EmulatorApp::onSetBreakpoint(uint64_t address) const {
     debugger->onSetBreakpoint(address);
 }
 
-void EmulatorApp::onRemoveBreakpoint(size_t address) const {
+void EmulatorApp::onRemoveBreakpoint(uint64_t address) const {
     debugger->onRemoveBreakpoint(address);
 }
 
-void EmulatorApp::onRequestMemory(size_t address) const {
+void EmulatorApp::onRequestMemory(uint64_t address) const {
     debugger->onRequestMemory(address);
 }
 
 void EmulatorApp::setMemoryView(const void* memory,
-                                size_t size,
-                                size_t address) {
+                                uint64_t size,
+                                uint64_t address) {
     frame->setMemoryView(memory, size, address);
 }
 

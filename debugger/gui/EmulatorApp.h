@@ -1,6 +1,7 @@
 #ifndef RED_O_LATOR_EMULATORAPP_H
 #define RED_O_LATOR_EMULATORAPP_H
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
@@ -29,7 +30,7 @@ class EmulatorApp : public wxApp {
 
    public:
     void startExecution();
-    void pauseExecution(size_t address, int workGroupId);
+    void pauseExecution(uint64_t address, int workGroupId);
     void stopExecution();
 
     void setKernelList(const std::vector<std::string>& kernels,
@@ -40,14 +41,14 @@ class EmulatorApp : public wxApp {
 
     void setInstructions(const std::vector<Instruction>& instructions);
 
-    void onSetBreakpoint(size_t address) const;
-    void onRemoveBreakpoint(size_t address) const;
-    void onRequestMemory(size_t address) const;
+    void onSetBreakpoint(uint64_t address) const;
+    void onRemoveBreakpoint(uint64_t address) const;
+    void onRequestMemory(uint64_t address) const;
 
-    void setMemoryView(const void* memory, size_t size, size_t address);
+    void setMemoryView(const void* memory, uint64_t size, uint64_t address);
 
     void setModelChoice(const std::vector<std::string>& models,
-                      size_t currentIdx = 0);
+                        size_t currentIdx = 0);
 };
 
 #endif  // RED_O_LATOR_EMULATORAPP_H

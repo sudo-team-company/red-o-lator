@@ -5,7 +5,13 @@ if (WIN32)
     endif ()
 endif ()
 
-find_package(wxWidgets REQUIRED COMPONENTS core base stc scintilla aui propgrid)
+if (WIN32)
+    set(WX_COMPONENTS core base stc scintilla aui propgrid)
+else ()
+    set(WX_COMPONENTS core base stc aui propgrid)
+endif ()
+
+find_package(wxWidgets COMPONENTS ${WX_COMPONENTS} REQUIRED)
 
 include(${wxWidgets_USE_FILE})
 
