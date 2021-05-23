@@ -63,12 +63,13 @@ Debugger::Debugger(EmulatorApp* app) {
         Instruction{0xd0, "s_endpgm"},
     });
 
-    app->pauseExecution(0x70, 1, 32);
+    app->startExecution();
+    app->pauseExecution(0x70, 1);
 
 
     app->setModelChoice(
         {"Radeon RX Vega 56 (Vega10 XL)", "Radeon RX 590 (Polaris30 XT)",
-         "Radeon RX 480 (Ellesmere XT)", "Radeon R9 295X2 (Vesuvius)"},
+         "Radeon 530", "Radeon RX 480 (Ellesmere XT)", "Radeon R9 295X2 (Vesuvius)"},
         2);
 }
 
@@ -111,7 +112,7 @@ void Debugger::onAttach() {
 
 void Debugger::onPause() {
     std::cout << "pause" << std::endl;
-    app->pauseExecution(0x80, 3, 2);
+    app->pauseExecution(0x80, 3);
 }
 
 void Debugger::onResume() {
@@ -121,7 +122,7 @@ void Debugger::onResume() {
 
 void Debugger::onStep() {
     std::cout << "step" << std::endl;
-    app->pauseExecution(0x84, 0, 17);
+    app->pauseExecution(0x84, 0);
 }
 
 void Debugger::onStop() {

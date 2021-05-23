@@ -29,7 +29,7 @@ class EmulatorApp : public wxApp {
 
    public:
     void startExecution();
-    void pauseExecution(size_t address, int workGroupId, int workItemId);
+    void pauseExecution(size_t address, int workGroupId);
     void stopExecution();
 
     void setKernelList(const std::vector<std::string>& kernels,
