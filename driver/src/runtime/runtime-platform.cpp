@@ -94,9 +94,10 @@ clGetPlatformInfo(cl_platform_id platform,
 
 CL_API_ENTRY void* CL_API_CALL
 clGetExtensionFunctionAddress(const char* func_name) {
-    if (strcmp(func_name, "clIcdGetPlatformIDsKHR") == 0) {
+    const auto funcName = std::string(func_name);
+    if (funcName == "clIcdGetPlatformIDsKHR") {
         return (void*) clIcdGetPlatformIDsKHR;
-    } else if (strcmp(func_name, "clGetPlatformInfo") == 0) {
+    } else if (funcName == "clGetPlatformInfo") {
         return (void*) clGetPlatformInfo;
     } else {
         return nullptr;

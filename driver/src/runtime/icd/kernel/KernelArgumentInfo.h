@@ -36,7 +36,8 @@ struct StructureKernelArgumentInfo : public KernelArgumentInfo {
 };
 
 struct ImageKernelArgumentInfo : public KernelArgumentInfo {
-    cl_kernel_arg_access_qualifier accessQualifier = CL_KERNEL_ARG_ACCESS_NONE;
+    cl_kernel_arg_access_qualifier accessQualifier =
+        CL_KERNEL_ARG_ACCESS_READ_WRITE;
     cl_uint resId = 0;
 
     static const std::set<std::string> typeNameVariants;
@@ -54,8 +55,9 @@ struct EventKernelArgumentInfo : public KernelArgumentInfo {
 
 struct PointerKernelArgumentInfo : public KernelArgumentInfo {
     cl_kernel_arg_address_qualifier addressQualifier =
-        CL_KERNEL_ARG_ADDRESS_PRIVATE;
-    cl_kernel_arg_access_qualifier accessQualifier = CL_KERNEL_ARG_ACCESS_NONE;
+        CL_KERNEL_ARG_ADDRESS_GLOBAL;
+    cl_kernel_arg_access_qualifier accessQualifier =
+        CL_KERNEL_ARG_ACCESS_READ_WRITE;
     cl_kernel_arg_type_qualifier argTypeQualifier = CL_KERNEL_ARG_TYPE_NONE;
     size_t structSize = 0;
     size_t constSize = 0;

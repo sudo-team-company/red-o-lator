@@ -1,16 +1,10 @@
-#include <algorithm>
-#include <fstream>
+#include <string>
 #include <iostream>
 #include <vector>
 
-#include <common/test/doctest.h>
 #include <CL/opencl.h>
-
-std::vector<unsigned char> readBinaryFile(const std::string& path) {
-    std::ifstream input(path, std::ios::binary);
-    return std::vector<unsigned char>(std::istreambuf_iterator<char>(input),
-                                      {});
-}
+#include <common/test/doctest.h>
+#include <common/common.hpp>
 
 TEST_CASE("a_plus_b") {
     cl_int error;
@@ -31,19 +25,18 @@ TEST_CASE("a_plus_b") {
         const auto currentPlatform = platformList[i];
         char platformName[128];
         error = clGetPlatformInfo(currentPlatform, CL_PLATFORM_NAME, 128,
-                                      &platformName, nullptr);
+                                  &platformName, nullptr);
         CHECK(error == CL_SUCCESS);
     }
 
     cl_uint num_devices;
     cl_device_id device;
-    error = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device,
-                               &num_devices);
+    error =
+        clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, &num_devices);
     CHECK(error == CL_SUCCESS);
 
     char deviceName[128];
-    error =
-        clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, nullptr);
+    error = clGetDeviceInfo(device, CL_DEVICE_NAME, 128, deviceName, nullptr);
     CHECK(error == CL_SUCCESS);
 
     char deviceVersion[50];
@@ -55,27 +48,12 @@ TEST_CASE("a_plus_b") {
         clCreateContext(nullptr, 1, &device, nullptr, nullptr, &error);
     CHECK(error == CL_SUCCESS);
 
-    cl_command_queue commandQueue =
+    cl_command_queue queue =
         clCreateCommandQueue(context, device, 0, &error);
     CHECK(error == CL_SUCCESS);
 
-    const size_t n = 1000;
-    const size_t arraySize = n * sizeof(cl_uint);
-
-    cl_mem mem1 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize, nullptr,
-                                 &error);
-    CHECK(error == CL_SUCCESS);
-
-    cl_mem mem2 = clCreateBuffer(context, CL_MEM_READ_ONLY, arraySize, nullptr,
-                                 &error);
-    CHECK(error == CL_SUCCESS);
-
-    cl_mem mem3 = clCreateBuffer(context, CL_MEM_WRITE_ONLY, arraySize, nullptr,
-                                 &error);
-    CHECK(error == CL_SUCCESS);
-
     const std::string binaryPath = "test/resources/kernels/a_plus_b.bin";
-    const auto binary = readBinaryFile(binaryPath);
+    const auto binary = utils::readBinaryFile(binaryPath);
 
     CHECK_FALSE(binary.empty());
 
@@ -93,18 +71,76 @@ TEST_CASE("a_plus_b") {
     cl_kernel kernel = clCreateKernel(program, kernelName.c_str(), &error);
     CHECK(error == CL_SUCCESS);
 
-    //    clEnqueueWriteBuffer(queue, mem1, false, 0, array_mem_sz, a, 0, 0, 0);
-    //    clEnqueueWriteBuffer(queue, mem2, false, 0, array_mem_sz, b, 0, 0, 0);
+    const size_t arraySize = 3;
+    const size_t arraySizeBytes = arraySize * sizeof(cl_uint);
 
-    clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
-    clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
-    clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
+    std::vector<cl_uint> data1{};
+    data1.assign(arraySize, 1);
+    cl_mem mem1 =
+        clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                       arraySizeBytes, data1.data(), &error);
+    CHECK(error == CL_SUCCESS);
 
-        size_t globalWorkOffset = 0;
-        size_t globalWorkSize = 0;
-        size_t localWorkSize = 0;
-        error = clEnqueueNDRangeKernel(commandQueue, kernel, 1,
-                                           &globalWorkOffset, &globalWorkSize,
-                                           &localWorkSize, 0, nullptr,
-                                           nullptr);
+    std::vector<cl_uint> data2{};
+    data2.assign(arraySize, 2);
+    cl_mem mem2 =
+        clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                       arraySizeBytes, data2.data(), &error);
+    CHECK(error == CL_SUCCESS);
+
+    cl_mem mem3 = clCreateBuffer(context, CL_MEM_WRITE_ONLY, arraySizeBytes,
+                                 nullptr, &error);
+    CHECK(error == CL_SUCCESS);
+
+    error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem1);
+    CHECK(error == CL_SUCCESS);
+
+    error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem2);
+    CHECK(error == CL_SUCCESS);
+
+    error = clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem3);
+    CHECK(error == CL_SUCCESS);
+
+    size_t globalWorkSize[1];
+    globalWorkSize[0] = arraySizeBytes;
+
+    size_t localWorkSize[1];
+    localWorkSize[0] = 0;
+
+    error =
+        clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, globalWorkSize,
+                               localWorkSize, 0, nullptr, nullptr);
+    CHECK(error == CL_SUCCESS);
+
+    error = clFlush(queue);
+    CHECK(error == CL_SUCCESS);
+
+    std::vector<cl_uint> bufferData(arraySize);
+    error = clEnqueueReadBuffer(queue, mem3, true, 0, arraySizeBytes,
+                                bufferData.data(), 0, nullptr, nullptr);
+    CHECK(error == CL_SUCCESS);
+    CHECK(utils::joinToString<cl_uint>(bufferData, " ", [](auto value) {
+              return std::to_string(value);
+          }) == "0 0 0");
+
+    error = clReleaseKernel(kernel);
+    CHECK(error == CL_SUCCESS);
+
+    error = clReleaseMemObject(mem3);
+    CHECK(error == CL_SUCCESS);
+
+    error = clReleaseMemObject(mem2);
+    CHECK(error == CL_SUCCESS);
+
+    error = clReleaseMemObject(mem1);
+    CHECK(error == CL_SUCCESS);
+
+    error = clReleaseProgram(program);
+    CHECK(error == CL_SUCCESS);
+
+    error = clReleaseCommandQueue(queue);
+    CHECK(error == CL_SUCCESS);
+
+    error = clReleaseContext(context);
+    CHECK(error == CL_SUCCESS);
 }

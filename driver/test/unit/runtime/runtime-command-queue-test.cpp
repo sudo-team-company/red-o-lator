@@ -143,7 +143,7 @@ TEST_SUITE("Command queue API") {
             const auto error = clReleaseCommandQueue(queue);
 
             CHECK(error == CL_SUCCESS);
-            CHECK(context->referenceCount == contextRefCount);
+            CHECK(context->referenceCount == contextRefCount - 1);
         }
     }
 

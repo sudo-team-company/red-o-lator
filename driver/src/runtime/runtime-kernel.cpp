@@ -1,7 +1,10 @@
 #include <common/common.hpp>
 #include <iostream>
-#include "icd/CLProgram.hpp"
+
 #include "runtime-commons.h"
+#include "icd/CLCommandQueue.h"
+#include "icd/CLProgram.hpp"
+#include "command/Command.h"
 
 CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
                                                   const char* kernel_name,
@@ -81,6 +84,53 @@ CL_API_ENTRY cl_int CL_API_CALL clSetKernelArg(cl_kernel kernel,
     kernel->setArgument(arg_index, arg_size, arg_value);
 
     return CL_SUCCESS;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL
+clEnqueueNDRangeKernel(cl_command_queue command_queue,
+                       cl_kernel kernel,
+                       cl_uint work_dim,
+                       const size_t* global_work_offset,
+                       const size_t* global_work_size,
+                       const size_t* local_work_size,
+                       cl_uint num_events_in_wait_list,
+                       const cl_event* event_wait_list,
+                       cl_event* event) {
+    const auto command = std::make_shared<KernelExecutionCommand>(
+        kernel, work_dim, global_work_offset, global_work_size,
+        local_work_size);
+
+    command_queue->enqueue(command);
+
+    return CL_SUCCESS;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL clEnqueueTask(cl_command_queue command_queue,
+                                              cl_kernel kernel,
+                                              cl_uint num_events_in_wait_list,
+                                              const cl_event* event_wait_list,
+                                              cl_event* event) {
+    size_t workSize[1];
+    workSize[0] = 1;
+    return clEnqueueNDRangeKernel(command_queue, kernel, 1, nullptr, workSize,
+                                  workSize, num_events_in_wait_list,
+                                  event_wait_list, event);
+}
+
+CL_API_ENTRY cl_int CL_API_CALL
+clEnqueueNativeKernel(cl_command_queue command_queue,
+                      void (*user_func)(void*),
+                      void* args,
+                      size_t cb_args,
+                      cl_uint num_mem_objects,
+                      const cl_mem* mem_list,
+                      const void** args_mem_loc,
+                      cl_uint num_events_in_wait_list,
+                      const cl_event* event_wait_list,
+                      cl_event* event) {
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueNativeKernel"
+              << std::endl;
+    return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clGetKernelInfo(cl_kernel kernel,

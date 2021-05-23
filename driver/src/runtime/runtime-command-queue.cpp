@@ -69,9 +69,11 @@ clReleaseCommandQueue(cl_command_queue command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
     }
 
+    clFlush(command_queue);
+
     command_queue->referenceCount--;
 
-    if (command_queue->referenceCount == 0 && command_queue->size() == 0) {
+    if (command_queue->referenceCount == 0) {
         delete command_queue;
     }
 
