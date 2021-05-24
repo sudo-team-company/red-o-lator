@@ -1,6 +1,6 @@
 #include <runtime-commons.h>
 #include <cassert>
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 #include <iostream>
 #include <string>
 

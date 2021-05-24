@@ -4,7 +4,7 @@
 
 #include <CL/opencl.h>
 #include <common/test/doctest.h>
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 
 TEST_CASE("a_plus_b") {
     cl_int error;

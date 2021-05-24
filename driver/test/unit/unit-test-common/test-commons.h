@@ -24,4 +24,6 @@ std::pair<cl_mem, cl_int> createBufferSafe(cl_mem_flags flags = 0,
 cl_mem createBuffer(cl_mem_flags flags = 0,
                     size_t size = 128,
                     void* hostPtr = nullptr);
+
+void fillVector(int n, std::vector<cl_uint>& out);
 }  // namespace test

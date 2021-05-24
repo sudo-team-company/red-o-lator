@@ -6,7 +6,7 @@
 #include <unordered_set>
 
 #include "DeviceConfigurationParser.h"
-#include "common/common.hpp"
+#include "common/utils/common.hpp"
 #include "runtime/icd/CLPlatformId.hpp"
 #include "runtime/runtime-commons.h"
 

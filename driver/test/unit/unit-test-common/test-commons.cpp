@@ -40,8 +40,8 @@ cl_command_queue getCommandQueue() {
     const auto queue =
         clCreateCommandQueue(context, context->device, 0, &error);
 
-    CHECK(error == CL_SUCCESS);
-    CHECK(queue != nullptr);
+    REQUIRE(error == CL_SUCCESS);
+    REQUIRE(queue != nullptr);
 
     return queue;
 }
@@ -55,7 +55,7 @@ std::pair<cl_mem, cl_int> createBufferSafe(cl_mem_flags flags,
     cl_mem buffer = clCreateBuffer(context, flags, size, hostPtr, &errorCode);
 
     if (errorCode != CL_SUCCESS) {
-        CHECK(context->referenceCount == initRefCount);
+        REQUIRE(context->referenceCount == initRefCount);
     }
 
     return std::make_pair(buffer, errorCode);
@@ -64,9 +64,15 @@ std::pair<cl_mem, cl_int> createBufferSafe(cl_mem_flags flags,
 cl_mem createBuffer(cl_mem_flags flags, size_t size, void* hostPtr) {
     const auto [buffer, error] = createBufferSafe(flags, size, hostPtr);
 
-    CHECK(error == CL_SUCCESS);
-    CHECK(buffer != nullptr);
+    REQUIRE(error == CL_SUCCESS);
+    REQUIRE(buffer != nullptr);
 
     return buffer;
+}
+
+void fillVector(int n, std::vector<cl_uint>& out) {
+    for (int i = 0; i < n; ++i) {
+        out.push_back(i);
+    }
 }
 }  // namespace test

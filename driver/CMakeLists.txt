@@ -113,7 +113,7 @@ set(UNIT_TEST_SOURCES
         test/unit/runtime/runtime-command-queue-test.cpp
         test/unit/runtime/runtime-memory-test.cpp
         test/unit/runtime/runtime-memory-buffer-test.cpp
-        )
+        test/unit/runtime/runtime-program-test.cpp test/unit/runtime/runtime-kernel-test.cpp)
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)

@@ -1,4 +1,4 @@
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 #include <iostream>
 
 #include "runtime-commons.h"
@@ -80,8 +80,11 @@ CL_API_ENTRY cl_int CL_API_CALL clSetKernelArg(cl_kernel kernel,
         RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.")
     }
 
-    // TODO: parameters validation
-    kernel->setArgument(arg_index, arg_size, arg_value);
+    try {
+        kernel->setArgument(arg_index, arg_size, arg_value);
+    } catch (const KernelArgumentOutOfBoundsError& e) {
+        RETURN_ERROR(CL_INVALID_ARG_INDEX, e.what())
+    }
 
     return CL_SUCCESS;
 }
