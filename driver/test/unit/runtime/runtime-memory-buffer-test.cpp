@@ -1,6 +1,7 @@
 #include <common/test/doctest.h>
 
 #include <algorithm>
+#include <common/utils/common.hpp>
 #include <cstring>
 #include <vector>
 
@@ -175,6 +176,102 @@ TEST_SUITE("Memory buffer API") {
                 checkMutuallyExclusiveness(
                     {CL_MEM_USE_HOST_PTR, CL_MEM_COPY_HOST_PTR}, true);
             }
+
+            SUBCASE(
+                "CL_MEM_COPY_HOST_PTR: memory from host_ptr is copied to "
+                "buffer") {
+                const auto size = 10;
+                const auto sizeBytes = 10 * sizeof(cl_uint);
+
+                std::vector<cl_uint> data{};
+                test::fillVector(size, data);
+
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer(CL_MEM_COPY_HOST_PTR,
+                                                       sizeBytes, data.data());
+
+                auto out = std::vector<cl_uint>(size);
+                const auto error =
+                    clEnqueueReadBuffer(queue, buffer, true, 0, sizeBytes,
+                                        out.data(), 0, nullptr, nullptr);
+
+                CHECK(error == CL_SUCCESS);
+                CHECK(utils::joinToString<cl_uint>(out, " ") ==
+                      utils::joinToString<cl_uint>(data, " "));
+            }
+
+            SUBCASE(
+                "CL_MEM_COPY_HOST_PTR: writing to hostPtr does not change "
+                "buffer") {
+                const auto size = 10;
+                const auto sizeBytes = size * sizeof(cl_uint);
+
+                std::vector<cl_uint> data{};
+                test::fillVector(size, data);
+
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer(CL_MEM_COPY_HOST_PTR,
+                                                       sizeBytes, data.data());
+
+                const auto expected = utils::joinToString<cl_uint>(data, " ");
+
+                data[0] = 20;
+
+                auto out = std::vector<cl_uint>(size);
+                const auto error =
+                    clEnqueueReadBuffer(queue, buffer, true, 0, sizeBytes,
+                                        out.data(), 0, nullptr, nullptr);
+
+                CHECK(error == CL_SUCCESS);
+                CHECK(utils::joinToString<cl_uint>(out, " ") == expected);
+            }
+
+            SUBCASE(
+                "CL_MEM_USE_HOST_PTR: writing to hostPtr from host changes "
+                "buffer") {
+                const auto size = 10;
+                const auto sizeBytes = size * sizeof(cl_uint);
+
+                std::vector<cl_uint> data{};
+                test::fillVector(size, data);
+
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer(CL_MEM_USE_HOST_PTR,
+                                                       sizeBytes, data.data());
+
+                data[0] = 20;
+
+                auto out = std::vector<cl_uint>(size);
+                const auto error =
+                    clEnqueueReadBuffer(queue, buffer, true, 0, sizeBytes,
+                                        out.data(), 0, nullptr, nullptr);
+
+                CHECK(error == CL_SUCCESS);
+                CHECK(utils::joinToString<cl_uint>(out, " ") ==
+                      utils::joinToString<cl_uint>(data, " "));
+            }
+
+            SUBCASE(
+                "CL_MEM_USE_HOST_PTR: writing to buffer from host changes "
+                "hostPtr") {
+                const auto size = 10;
+                const auto sizeBytes = size * sizeof(cl_uint);
+
+                std::vector<cl_uint> data{};
+                test::fillVector(size, data);
+
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer(CL_MEM_USE_HOST_PTR,
+                                                       sizeBytes, data.data());
+
+                std::vector<cl_uint> toWrite{20};
+                const auto error = clEnqueueWriteBuffer(
+                    queue, buffer, true, 0, sizeof(cl_uint), toWrite.data(), 0,
+                    nullptr, nullptr);
+
+                CHECK(error == CL_SUCCESS);
+                CHECK(data[0] == 20);
+            }
         }
     }
 
@@ -198,49 +295,207 @@ TEST_SUITE("Memory buffer API") {
             }));
         }
 
-        SUBCASE("should read immediately if blocking_read is true") {}
+        SUBCASE("should flush queue only if blocking_read is true") {
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer();
 
-        SUBCASE(
-            "should read after blocking operation if blocking_read is false") {}
+            cl_int error = 0;
+            std::byte data[1];
+            error = clEnqueueReadBuffer(queue, buffer, false, 0, 1, data, 0,
+                                        nullptr, nullptr);
 
-        SUBCASE("should read memory block with offset") {}
+            CHECK(error == CL_SUCCESS);
+            CHECK(queue->size() == 1);
+
+            error = clEnqueueReadBuffer(queue, buffer, true, 0, 1, data, 0,
+                                        nullptr, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(queue->size() == 0);
+        }
+
+        SUBCASE("should read memory block with offset") {
+            const auto totalSize = 10;
+            const auto totalSizeBytes = totalSize * sizeof(cl_uint);
+
+            std::vector<cl_uint> data{};
+            test::fillVector(totalSize, data);
+
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer(CL_MEM_COPY_HOST_PTR,
+                                                   totalSizeBytes, data.data());
+
+            const auto offset = 3;
+            const auto offsetBytes = offset * sizeof(cl_uint);
+            const auto offsetSize = 3;
+            const auto offsetSizeBytes = offsetSize * sizeof(cl_uint);
+
+            std::vector<cl_uint> out(offsetSize);
+            const auto error = clEnqueueReadBuffer(
+                queue, buffer, true, offsetBytes, offsetSizeBytes, out.data(),
+                0, nullptr, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(utils::joinToString<cl_uint>(out, " ") == "3 4 5");
+        }
     }
 
     TEST_CASE("clEnqueueWriteBuffer") {
-        SUBCASE("should write immediately if blocking_write is true") {}
+        SUBCASE("should flush queue only if blocking_read is true") {
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer();
 
-        SUBCASE(
-            "should write after blocking operation if blocking_write is "
-            "false") {}
+            cl_int error = 0;
+            std::byte data[1];
+            error = clEnqueueWriteBuffer(queue, buffer, false, 0, 1, data, 0,
+                                         nullptr, nullptr);
 
-        SUBCASE("should write to memory block with offset") {}
+            CHECK(error == CL_SUCCESS);
+            CHECK(queue->size() == 1);
+
+            error = clEnqueueWriteBuffer(queue, buffer, true, 0, 1, data, 0,
+                                         nullptr, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(queue->size() == 0);
+        }
+
+        SUBCASE("should write to memory block with offset") {
+            const auto totalSize = 6;
+            const auto totalSizeBytes = totalSize * sizeof(cl_uint);
+
+            std::vector<cl_uint> data{};
+            test::fillVector(totalSize, data);
+
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer(CL_MEM_USE_HOST_PTR,
+                                                   totalSizeBytes, data.data());
+
+            const auto offset = 3;
+            const auto offsetBytes = offset * sizeof(cl_uint);
+            const auto offsetSize = 3;
+            const auto offsetSizeBytes = offsetSize * sizeof(cl_uint);
+
+            std::vector<cl_uint> toWrite(offsetSize);
+            toWrite.assign(offsetSize, 20);
+            const auto error = clEnqueueWriteBuffer(
+                queue, buffer, true, offsetBytes, offsetSizeBytes,
+                toWrite.data(), 0, nullptr, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(utils::joinToString<cl_uint>(data, " ") == "0 1 2 20 20 20");
+        }
     }
 
     TEST_CASE("clEnqueue{Read/Write}Buffer") {
-        SUBCASE("should fail if ptr or size is not set") {}
+        SUBCASE("should fail if ptr or size is not set") {
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer();
+
+            cl_int error;
+
+            cl_uint data[1];
+            error = clEnqueueReadBuffer(queue, buffer, true, 0, 0, data, 0,
+                                        nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+
+            error = clEnqueueWriteBuffer(queue, buffer, true, 0, 0, data, 0,
+                                         nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+
+            error = clEnqueueReadBuffer(queue, buffer, true, 0, 10, nullptr, 0,
+                                        nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+
+            error = clEnqueueReadBuffer(queue, buffer, true, 0, 10, nullptr, 0,
+                                        nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+        }
 
         SUBCASE(
             "should fail if requested size if more than buffer size with "
-            "repect to offset") {}
+            "reвpect to offset") {
+            const auto size = 16;
+            const auto sizeBytes = 16 * sizeof(cl_uint);
+            auto data = new cl_uint[size];
+
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer(0, sizeBytes);
+
+            cl_int error;
+
+            error = clEnqueueReadBuffer(queue, buffer, true, 0, sizeBytes + 4,
+                                        data, 0, nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+
+            error = clEnqueueWriteBuffer(queue, buffer, true, 0, sizeBytes + 4,
+                                         data, 0, nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+
+            error = clEnqueueReadBuffer(queue, buffer, true, 4, sizeBytes, data,
+                                        0, nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+
+            error = clEnqueueWriteBuffer(queue, buffer, true, 4, sizeBytes,
+                                         data, 0, nullptr, nullptr);
+            CHECK(error == CL_INVALID_VALUE);
+        }
 
         SUBCASE("host access") {
-            SUBCASE("host can't read from write-only memory") {}
+            SUBCASE("host can't read from write-only memory") {
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer(CL_MEM_HOST_WRITE_ONLY);
 
-            SUBCASE("host can't write to read-only memory") {}
+                cl_uint data[1];
+                const auto error = clEnqueueReadBuffer(
+                    queue, buffer, true, 0, 1, data, 0, nullptr, nullptr);
+                CHECK(error == CL_INVALID_OPERATION);
+            }
 
-            SUBCASE("host can't read or write to no-access memory") {}
+            SUBCASE("host can't write to read-only memory") {
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer(CL_MEM_HOST_READ_ONLY);
 
-            SUBCASE("host can read and write to no-host-flags memory") {}
-        }
+                cl_uint data[1];
+                const auto error = clEnqueueWriteBuffer(
+                    queue, buffer, true, 0, 1, data, 0, nullptr, nullptr);
+                CHECK(error == CL_INVALID_OPERATION);
+            }
 
-        SUBCASE("CL_MEM_USE_HOST_PTR") {
-            SUBCASE("writing to hostPtr from host changes buffer") {}
-        }
+            SUBCASE("host can't read or write to no-access memory") {
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer(CL_MEM_HOST_NO_ACCESS);
 
-        SUBCASE("CL_MEM_COPY_HOST_PTR") {
-            SUBCASE("memory from host_ptr is copied to buffer") {}
+                cl_int error;
+                cl_uint data[1];
 
-            SUBCASE("writing to hostPtr does not change buffer") {}
+                error = clEnqueueReadBuffer(queue, buffer, true, 0, 1, data, 0,
+                                            nullptr, nullptr);
+                CHECK(error == CL_INVALID_OPERATION);
+
+                error = clEnqueueWriteBuffer(queue, buffer, true, 0, 1, data, 0,
+                                             nullptr, nullptr);
+                CHECK(error == CL_INVALID_OPERATION);
+            }
+
+            SUBCASE("host can read and write to no-host-flags memory") {
+                const auto queue = test::getCommandQueue();
+                const auto buffer = test::createBuffer();
+
+                cl_int error;
+
+                const auto size = 1;
+                const auto sizeBytes = size * sizeof(cl_uint);
+                auto data = new cl_uint[size];
+
+                error = clEnqueueReadBuffer(queue, buffer, true, 0, sizeBytes,
+                                            data, 0, nullptr, nullptr);
+                CHECK(error == CL_SUCCESS);
+
+                error = clEnqueueWriteBuffer(queue, buffer, true, 0, sizeBytes,
+                                             data, 0, nullptr, nullptr);
+                CHECK(error == CL_SUCCESS);
+            }
         }
     }
 }

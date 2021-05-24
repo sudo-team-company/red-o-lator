@@ -1,6 +1,6 @@
 #include <CL/opencl.h>
-#include <common/Logger.h>
-#include <common/common.hpp>
+#include <common/logger/Logger.h>
+#include <common/utils/common.hpp>
 #include <cstddef>
 #include <fstream>
 #include <iostream>

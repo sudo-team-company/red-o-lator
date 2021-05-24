@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <program/KernelArgumentInfoParser.h>
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 
 #include "icd/CLProgram.hpp"
 #include "runtime-commons.h"
