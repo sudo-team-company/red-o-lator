@@ -2,9 +2,6 @@
 
 #include "icd/icd.h"
 
-
-
-
 CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueMarkerWithWaitList(cl_command_queue command_queue,
                             cl_uint num_events_in_wait_list,

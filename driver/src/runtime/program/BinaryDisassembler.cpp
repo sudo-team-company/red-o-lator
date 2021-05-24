@@ -5,9 +5,9 @@
 #include "BinaryDisassembler.h"
 
 std::unique_ptr<BinaryDisassemblingResult> BinaryDisassembler::disassemble(
-    size_t binarySize, const unsigned char* binary) const {
-    const auto amdInput = CLRX::AmdCL2MainGPUBinary64(
-        binarySize, const_cast<unsigned char*>(binary));
+    size_t binarySize, const std::byte* binary) const {
+    const auto amdInput =
+        CLRX::AmdCL2MainGPUBinary64(binarySize, (unsigned char*) binary);
     std::ostringstream disasmOss;
 
     //    CLRX::DISASM_ALL & ~(CLRX::DISASM_CODEPOS | CLRX::DISASM_HEXCODE);

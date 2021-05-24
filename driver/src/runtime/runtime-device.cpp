@@ -10,7 +10,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                                                cl_device_id* devices,
                                                cl_uint* num_devices) {
     if (!platform || platform != kPlatform) {
-        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.")
+        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.");
     }
 
     if (devices && num_entries == 0) {
@@ -69,7 +69,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
                                                 void* param_value,
                                                 size_t* param_value_size_ret) {
     if (device != kDevice) {
-        RETURN_ERROR(CL_INVALID_DEVICE, "Device is null or not valid.")
+        RETURN_ERROR(CL_INVALID_DEVICE, "Device is null or not valid.");
     }
 
     // TODO(clGetDeviceInfo, future): parameters validation according to

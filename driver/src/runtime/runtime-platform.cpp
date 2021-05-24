@@ -11,12 +11,12 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
                                                  cl_uint* num_platforms) {
     if (!platforms && !num_platforms) {
         RETURN_ERROR(CL_INVALID_VALUE,
-                     "platforms is null and num_platforms is null.")
+                     "platforms is null and num_platforms is null.");
     }
 
     if (platforms && num_entries == 0) {
         RETURN_ERROR(CL_INVALID_VALUE,
-                     "platforms is not null and num_entries == 0.")
+                     "platforms is not null and num_entries == 0.");
     }
 
     if (!kPlatform) {
@@ -48,7 +48,7 @@ clGetPlatformInfo(cl_platform_id platform,
                   void* param_value,
                   size_t* param_value_size_ret) {
     if (platform != kPlatform) {
-        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.")
+        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.");
     }
 
     return getParamInfo(

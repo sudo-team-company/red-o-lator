@@ -21,7 +21,7 @@ extern CLDeviceId* kDevice;
     do {                                                              \
         kLogger.error(std::string(message) + " Code: " + #errorCode); \
         return errorCode;                                             \
-    } while (0);
+    } while (0)
 
 #define SET_ERROR_AND_RETURN(errorCode, message)                      \
     do {                                                              \
@@ -30,14 +30,14 @@ extern CLDeviceId* kDevice;
             *errcode_ret = errorCode;                                 \
         }                                                             \
         return nullptr;                                               \
-    } while (0);
+    } while (0)
 
 #define SET_SUCCESS()                  \
     do {                               \
         if (errcode_ret) {             \
             *errcode_ret = CL_SUCCESS; \
         }                              \
-    } while (0);
+    } while (0)
 
 extern cl_int getParamInfo(
     cl_uint param_name,

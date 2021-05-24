@@ -9,7 +9,7 @@
 struct BinaryDisassemblingResult {
     std::string gpuName;
     std::string compileOptions;
-    std::vector<std::string> parameters;
+    std::vector<std::string> parameters{};
     std::vector<CLKernel*> kernels = std::vector<CLKernel*>();
 };
 
@@ -38,7 +38,6 @@ class BinaryAsmParser {
                                     const std::string& parameterValue);
 
     void parseKernelArgument(const std::string& argumentConfigLine);
-
 
     void parseKernelInstruction(const std::string& line,
                                 const std::string& address,

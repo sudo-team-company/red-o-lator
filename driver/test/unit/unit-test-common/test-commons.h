@@ -25,5 +25,7 @@ cl_mem createBuffer(cl_mem_flags flags = 0,
                     size_t size = 128,
                     void* hostPtr = nullptr);
 
+cl_program getProgram(const std::string& binaryPath);
+
 void fillVector(int n, std::vector<cl_uint>& out);
 }  // namespace test

@@ -10,11 +10,11 @@ CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
                                                   const char* kernel_name,
                                                   cl_int* errcode_ret) {
     if (!program) {
-        SET_ERROR_AND_RETURN(CL_INVALID_PROGRAM, "Program is null.")
+        SET_ERROR_AND_RETURN(CL_INVALID_PROGRAM, "Program is null.");
     }
 
     if (!kernel_name) {
-        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "Kernel name is null.")
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "Kernel name is null.");
     }
 
     for (auto* kernel : program->disassembledBinary->kernels) {
@@ -23,7 +23,7 @@ CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
             kernel->referenceCount++;
             clRetainProgram(program);
 
-            SET_SUCCESS()
+            SET_SUCCESS();
 
             return kernel;
         }
@@ -31,7 +31,7 @@ CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
 
     SET_ERROR_AND_RETURN(
         CL_INVALID_KERNEL_NAME,
-        "Kernel with name " + std::string(kernel_name) + " not found.")
+        "Kernel with name " + std::string(kernel_name) + " not found.");
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
@@ -40,7 +40,7 @@ clCreateKernelsInProgram(cl_program program,
                          cl_kernel* kernels,
                          cl_uint* num_kernels_ret) {
     if (!program) {
-        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
     std::cerr << "Unimplemented OpenCL API call: clCreateKernelsInProgram"
@@ -50,7 +50,7 @@ clCreateKernelsInProgram(cl_program program,
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainKernel(cl_kernel kernel) {
     if (!kernel) {
-        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.")
+        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
     }
 
     kernel->referenceCount++;
@@ -60,7 +60,7 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainKernel(cl_kernel kernel) {
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseKernel(cl_kernel kernel) {
     if (!kernel) {
-        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.")
+        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
     }
 
     kernel->referenceCount--;
@@ -77,13 +77,13 @@ CL_API_ENTRY cl_int CL_API_CALL clSetKernelArg(cl_kernel kernel,
                                                size_t arg_size,
                                                const void* arg_value) {
     if (!kernel) {
-        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.")
+        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
     }
 
     try {
         kernel->setArgument(arg_index, arg_size, arg_value);
     } catch (const KernelArgumentOutOfBoundsError& e) {
-        RETURN_ERROR(CL_INVALID_ARG_INDEX, e.what())
+        RETURN_ERROR(CL_INVALID_ARG_INDEX, e.what());
     }
 
     return CL_SUCCESS;
@@ -202,14 +202,14 @@ clGetKernelArgInfo(cl_kernel kernel,
                    size_t* param_value_size_ret) {
     if (!kernel || !kernel->program) {
         RETURN_ERROR(CL_INVALID_KERNEL,
-                     "Kernel is null or its program is null.")
+                     "Kernel is null or its program is null.");
     }
 
     if (arg_indx > kernel->argumentCount()) {
         RETURN_ERROR(CL_INVALID_ARG_INDEX,
                      "Index " + std::to_string(arg_indx) +
                          " is more than argument count which is " +
-                         std::to_string(kernel->argumentCount()))
+                         std::to_string(kernel->argumentCount()));
     }
 
     return getParamInfo(

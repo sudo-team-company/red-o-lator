@@ -1,3 +1,4 @@
+#include <common/utils/file-utlis.hpp>
 #include <vector>
 
 #include "test-commons.h"
@@ -68,6 +69,27 @@ cl_mem createBuffer(cl_mem_flags flags, size_t size, void* hostPtr) {
     REQUIRE(buffer != nullptr);
 
     return buffer;
+}
+
+cl_program getProgram(const std::string& binaryPath) {
+    const auto context = test::getContext();
+    const cl_device_id device[1] = {context->device};
+
+    const auto binary = utils::readBinaryFile(binaryPath);
+    const size_t binarySize[1] = {binary.size()};
+    const unsigned char* binaryData[1] = {binary.data()};
+
+    cl_int binaryStatus;
+    cl_int error;
+
+    const auto program = clCreateProgramWithBinary(
+        context, 1, device, binarySize, binaryData, &binaryStatus, &error);
+
+    CHECK(error == CL_SUCCESS);
+    CHECK(binaryStatus == CL_SUCCESS);
+    CHECK(program != nullptr);
+
+    return program;
 }
 
 void fillVector(int n, std::vector<cl_uint>& out) {

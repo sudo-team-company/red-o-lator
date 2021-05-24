@@ -10,37 +10,37 @@ clCreateCommandQueue(cl_context context,
                      cl_command_queue_properties properties,
                      cl_int* errcode_ret) {
     if (!context) {
-        SET_ERROR_AND_RETURN(CL_INVALID_CONTEXT, "Context is null.")
+        SET_ERROR_AND_RETURN(CL_INVALID_CONTEXT, "Context is null.");
     }
 
     if (device != kDevice) {
-        SET_ERROR_AND_RETURN(CL_INVALID_DEVICE, "Device is null or not valid.")
+        SET_ERROR_AND_RETURN(CL_INVALID_DEVICE, "Device is null or not valid.");
     }
 
     if (properties & CL_QUEUE_PROFILING_ENABLE) {
         // TODO(clCreateCommandQueue): profiling support
         SET_ERROR_AND_RETURN(CL_INVALID_QUEUE_PROPERTIES,
-                             "Profiling is not supported yet.")
+                             "Profiling is not supported yet.");
     }
 
     if (properties & CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE) {
         // TODO(clCreateCommandQueue): out-of-order exec support
         SET_ERROR_AND_RETURN(
             CL_INVALID_QUEUE_PROPERTIES,
-            "Out-of-order execution mode is not supported yet.")
+            "Out-of-order execution mode is not supported yet.");
     }
 
     const auto commandQueue =
         new CLCommandQueue(kDispatchTable, context, properties);
 
-    SET_SUCCESS()
+    SET_SUCCESS();
 
     return commandQueue;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clFinish(cl_command_queue command_queue) {
     if (!command_queue) {
-        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
 
     command_queue->flush();
@@ -55,7 +55,7 @@ CL_API_ENTRY cl_int CL_API_CALL clFlush(cl_command_queue command_queue) {
 CL_API_ENTRY cl_int CL_API_CALL
 clRetainCommandQueue(cl_command_queue command_queue) {
     if (!command_queue) {
-        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
 
     command_queue->referenceCount++;
@@ -66,7 +66,7 @@ clRetainCommandQueue(cl_command_queue command_queue) {
 CL_API_ENTRY cl_int CL_API_CALL
 clReleaseCommandQueue(cl_command_queue command_queue) {
     if (!command_queue) {
-        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
 
     clFlush(command_queue);
@@ -87,7 +87,7 @@ clGetCommandQueueInfo(cl_command_queue command_queue,
                       void* param_value,
                       size_t* param_value_size_ret) {
     if (!command_queue) {
-        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
 
     return getParamInfo(
