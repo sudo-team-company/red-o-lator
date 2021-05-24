@@ -7,7 +7,7 @@
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
     if (!memobj) {
-        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.")
+        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.");
     }
 
     memobj->referenceCount++;
@@ -17,7 +17,7 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseMemObject(cl_mem memobj) {
     if (!memobj) {
-        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.")
+        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.");
     }
 
     memobj->referenceCount--;
@@ -72,11 +72,11 @@ clSetMemObjectDestructorCallback(cl_mem memobj,
                                  CLMemDestructorCallbackFunction pfn_notify,
                                  void* user_data) {
     if (!memobj) {
-        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.")
+        RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.");
     }
 
     if (!pfn_notify) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Callback is null.")
+        RETURN_ERROR(CL_INVALID_VALUE, "Callback is null.");
     }
 
     auto callback =

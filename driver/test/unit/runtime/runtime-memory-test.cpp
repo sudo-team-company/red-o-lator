@@ -1,6 +1,7 @@
 #include <common/test/doctest.h>
 
 #include <runtime/runtime-commons.h>
+#include <common/utils/vector-utils.hpp>
 #include <cstring>
 #include <vector>
 
@@ -88,7 +89,7 @@ TEST_SUITE("Memory API") {
 
             clReleaseMemObject(buffer);
 
-            CHECK(callbackOrder == std::vector<std::string>{"3", "2", "1"});
+            CHECK(utils::joinToString(callbackOrder, " ") == "3 2 1");
         }
     }
 }

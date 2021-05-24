@@ -5,13 +5,23 @@
 
 struct CLProgram {
     explicit CLProgram(IcdDispatchTable* dispatchTable, CLContext* context)
-        : dispatchTable(dispatchTable), context(context) {}
+        : dispatchTable(dispatchTable), context(context) {
+        clRetainContext(context);
+    }
+
+    ~CLProgram() {
+        for (auto kernel : disassembledBinary->kernels) {
+            clReleaseKernel(kernel);
+        }
+        delete[] binary;
+        clReleaseContext(context);
+    }
 
     IcdDispatchTable* const dispatchTable;
     CLContext* context;
 
     size_t binarySize = 0;
-    const unsigned char* binary = nullptr;
+    const std::byte* binary = nullptr;
 
     cl_build_status buildStatus = CL_BUILD_NONE;
     std::string buildLog;
