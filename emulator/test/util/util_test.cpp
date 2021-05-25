@@ -4,7 +4,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../../util/util.h"
-#include "../../doctest.h"
+#include "../doctest.h"
 
 TEST_CASE("bit_counts - count bits") {
     CHECK(bit_count(uint32_t(0xffffffff)) == 32);

@@ -15,6 +15,7 @@ struct KernelConfig {
     uint64_t kernSetupAddr = 0;
     uint32_t pgmrsrc1;
     uint32_t pgmrsrc2;
+    uint32_t floatmode;
     int ndRangeSizeX;
     int ndRangeSizeY;
     int ndRangeSizeZ;
@@ -23,14 +24,11 @@ struct KernelConfig {
     int wgSizeZ;
     int sgprsnum = DEFAULT_SGPRS_AMOUNT;
     int vgprsnum;
+    uint8_t priority;
     bool dx10clamp = false;
     bool ieeemode = false;
     bool useargs = false;
     bool usesetup = false;
-
-    // todo
-    uint32_t floatmode;
-    uint8_t priority;
 
     uint8_t user_sgpr() {
         return uint8_t((pgmrsrc2 >> 1) & 0x1f);

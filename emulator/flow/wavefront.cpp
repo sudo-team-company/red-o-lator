@@ -10,9 +10,9 @@ void WorkGroup::set_ids(int idX, int idY, int idZ) {
     IDZ = idZ;
 }
 void WorkGroup::set_actual_size(int x, int y, int z) {
-    actualSizeX_ = x;
-    actualSizeY_ = y;
-    actualSizeZ_ = z;
+    actualSizeX = x;
+    actualSizeY = y;
+    actualSizeZ = z;
 }
 bool WorkGroup::all_wf_completed() {
     for (auto& wavefront : wavefronts) {
@@ -26,7 +26,7 @@ Instruction* Wavefront::get_cur_instr() const {
     return workGroup->kernelCode->get_instr(this->programCounter->get_value());
 }
 
-void Wavefront::to_next_instr() {
+void Wavefront::to_next_instr() const {
     if (programCounter->was_used()) return;
     auto curInstrKey = get_cur_instr()->get_key();
     programCounter->hidden_add(get_instr_width(curInstrKey) / 8);

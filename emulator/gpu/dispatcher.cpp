@@ -6,8 +6,8 @@
 Dispatcher::Dispatcher(KernelConfig config, KernelCode* code)
     : kernelConfig(config), code(code) {
     size_t wgAmountX = (config.ndRangeSizeX - 1) / config.wgSizeX + 1;
-    size_t wgAmountZ = (config.ndRangeSizeY - 1) / config.wgSizeY + 1;
-    size_t wgAmountY = (config.ndRangeSizeZ - 1) / config.wgSizeZ + 1;
+    size_t wgAmountY = (config.ndRangeSizeY - 1) / config.wgSizeY + 1;
+    size_t wgAmountZ = (config.ndRangeSizeZ - 1) / config.wgSizeZ + 1;
     wgAmount = wgAmountX * wgAmountY * wgAmountZ;
 }
 
@@ -16,28 +16,40 @@ bool Dispatcher::has_next_wg() const {
 }
 
 WorkGroup* Dispatcher::next_wg() {
-    int xSize = kernelConfig.ndRangeSizeX - curIdX * kernelConfig.wgSizeX;
-    int ySize = kernelConfig.ndRangeSizeY - curIdY * kernelConfig.wgSizeY;
-    int zSize = kernelConfig.ndRangeSizeZ - curIdZ * kernelConfig.wgSizeZ;
+    int leftWISizeX = kernelConfig.ndRangeSizeX - curIdX * kernelConfig.wgSizeX;
+    int leftWISizeY = kernelConfig.ndRangeSizeY - curIdY * kernelConfig.wgSizeY;
+    int leftWISizeZ = kernelConfig.ndRangeSizeZ - curIdZ * kernelConfig.wgSizeZ;
 
-    if (xSize <= 0 || ySize <= 0 || zSize <= 0) return nullptr;
+    if (leftWISizeX <= 0 || leftWISizeY <= 0 || leftWISizeZ <= 0) return nullptr;
 
     auto workGroup = new WorkGroup{kernelConfig.ndRangeSizeX, kernelConfig.ndRangeSizeY,
                                    kernelConfig.ndRangeSizeZ};
     workGroup->set_ids(curIdX, curIdY, curIdZ);
-    workGroup->set_actual_size(std::min(kernelConfig.wgSizeX, xSize),
-                               std::min(kernelConfig.wgSizeY, ySize),
-                               std::min(kernelConfig.wgSizeZ, zSize));
+    workGroup->set_actual_size(std::min(kernelConfig.wgSizeX, leftWISizeX),
+                               std::min(kernelConfig.wgSizeY, leftWISizeY),
+                               std::min(kernelConfig.wgSizeZ, leftWISizeZ));
     workGroup->kernelCode = code;
     set_workitems(workGroup);
     set_wavefronts(workGroup);
-    incr_ids();
+
+    curIdX++;
+    if (leftWISizeX - workGroup->actualSizeX == 0) {
+        curIdY++;
+        curIdX = 0;
+        if (leftWISizeY - workGroup->actualSizeY == 0) {
+            curIdZ++;
+            curIdY = 0;
+        }
+    }
+
+    dispatchedWg++;
+
     return workGroup;
 }
 void Dispatcher::set_workitems(WorkGroup* wg) {
-    for (int x = 0; x < wg->actualSizeX_; x++) {
-        for (int y = 0; y < wg->actualSizeY_; y++) {
-            for (int z = 0; z < wg->actualSizeZ_; z++) {
+    for (int x = 0; x < wg->actualSizeX; x++) {
+        for (int y = 0; y < wg->actualSizeY; y++) {
+            for (int z = 0; z < wg->actualSizeZ; z++) {
                 wg->workItems.push_back(std::make_unique<WorkItem>(wg, x, y, z));
             }
         }
@@ -107,12 +119,7 @@ void Dispatcher::init_wf_regs(Wavefront* wf) {
     }
 }
 
-void Dispatcher::incr_ids() {
-    curIdX++;
-    curIdY++;
-    curIdZ++;
-    dispatchedWg++;
-}
+
 void Dispatcher::init_mode_reg(Wavefront* wf) const {
     auto* modeReg = wf->modeReg.get();
     modeReg->ieee(kernelConfig.ieeemode);

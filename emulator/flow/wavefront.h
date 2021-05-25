@@ -21,15 +21,12 @@ struct Wavefront;
 struct WorkItem;
 
 struct WorkGroup {
+    KernelCode* kernelCode;
     int IDX, IDY, IDZ;
     int sizeX, sizeY, sizeZ;
-
-   public:
-    KernelCode* kernelCode;
+    int actualSizeX, actualSizeY, actualSizeZ;
     std::vector<std::unique_ptr<WorkItem>> workItems;
     std::vector<std::unique_ptr<Wavefront>> wavefronts;
-
-    int actualSizeX_, actualSizeY_, actualSizeZ_;
 
     WorkGroup(int sizeX, int sizeY, int sizeZ)
         : sizeX(sizeX), sizeY(sizeY), sizeZ(sizeZ) {}
@@ -41,16 +38,16 @@ struct WorkGroup {
 
 struct Wavefront {
     WorkGroup* workGroup = nullptr;
-    std::vector<uint32_t> scalarRegFile;
-    std::vector<uint32_t> vectorRegFile;
     uint64_t execReg;
     uint64_t vccReg;
-    std::unique_ptr<ProgramCounter> programCounter;
-    std::unique_ptr<StatusReg> statusReg;
-    std::unique_ptr<ModeReg> modeReg;
     uint32_t m0Reg;
     int sgprsnum;
     int vgprsnum;
+    std::vector<uint32_t> scalarRegFile;
+    std::vector<uint32_t> vectorRegFile;
+    std::unique_ptr<ProgramCounter> programCounter;
+    std::unique_ptr<StatusReg> statusReg;
+    std::unique_ptr<ModeReg> modeReg;
     bool sccReg;
 
     std::vector<WorkItem*> workItems;
@@ -75,7 +72,7 @@ struct Wavefront {
     }
 
     Instruction* get_cur_instr() const;
-    void to_next_instr();
+    void to_next_instr() const;
 
     void set_sgpr_pair(size_t,uint64_t);
     uint64_t read_sgpr_pair(size_t);
