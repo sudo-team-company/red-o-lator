@@ -15,7 +15,6 @@ CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
     }
 
     for (auto* kernel : program->disassembledBinary->kernels) {
-        kLogger.debug(kernel->name);
         if (kernel->name == kernel_name) {
             kernel->program = program;
             kernel->referenceCount++;
@@ -64,7 +63,6 @@ CL_API_ENTRY cl_int CL_API_CALL clReleaseKernel(cl_kernel kernel) {
     kernel->referenceCount--;
 
     if (kernel->referenceCount == 0) {
-        clReleaseProgram(kernel->program);
         delete kernel;
     }
 

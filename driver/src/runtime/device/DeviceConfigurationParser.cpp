@@ -39,7 +39,7 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
 
     if (!configurationFile.is_open()) {
         throw DeviceConfigurationParseError("Failed to open " +
-                                                configurationFilePath);
+                                            configurationFilePath);
     }
 
     std::unordered_map<cl_device_info, CLObjectInfoParameterValue> parameters;
@@ -109,9 +109,17 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         return mParameters.at(parameter);
     }
 
-    const auto isValidOpenCLParameter =
+    const auto isBasicOpenCLParameter =
         parameter >= CL_DEVICE_TYPE &&
         parameter <= CL_DEVICE_PRINTF_BUFFER_SIZE;
+
+    const auto isAmdParameter =
+        parameter >= CL_DEVICE_PROFILING_TIMER_OFFSET_AMD &&
+        parameter <= CL_DEVICE_LOCAL_MEM_BANKS_AMD;
+
+    const auto isValidOpenCLParameter =
+        isBasicOpenCLParameter || isAmdParameter;
+
     if (isValidOpenCLParameter) {
         kLogger.debug("Parameter " + std::to_string(parameter) +
                       " was not found in config");
@@ -162,11 +170,11 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
         result = parameterValue == "\"\"" ? "" : parameterValue; \
     }
 
-#define IGNORE_PARAMETER(param)                                    \
-    if (parameterName == #param) {                                 \
-        kLogger.warn(std::string("Ignoring parameter ") + #param); \
-        clParameter = param;                                       \
-        result = nullptr;                                          \
+#define IGNORE_PARAMETER(param)                                           \
+    if (parameterName == #param) {                                        \
+        kLogger.warn(std::string("Ignoring config parameter ") + #param); \
+        clParameter = param;                                              \
+        result = nullptr;                                                 \
     }
 
 DeviceConfigurationParser::ParsedParameter
@@ -291,7 +299,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, size_t)
 
     if (!clParameter) {
-        kLogger.debug("Unknown parameter: " + parameterName);
+        kLogger.warn("Unknown config parameter: " + parameterName);
     }
 
     if (std::holds_alternative<std::string>(result)) {
@@ -307,8 +315,7 @@ T parseNumber(const std::string& value) {
     try {
         return static_cast<T>(std::stoul(value));
     } catch (std::invalid_argument& e) {
-        throw DeviceConfigurationParseError("Failed to parse number: " +
-                                                value);
+        throw DeviceConfigurationParseError("Failed to parse number: " + value);
     }
 }
 
@@ -347,8 +354,7 @@ cl_bool parseClBool(const std::string& value) {
         return CL_FALSE;
     }
 
-    throw DeviceConfigurationParseError("Failed to parse cl_bool: " +
-                                            value);
+    throw DeviceConfigurationParseError("Failed to parse cl_bool: " + value);
 }
 
 cl_device_type parseDeviceType(const std::string& value) {
@@ -369,7 +375,7 @@ cl_device_type parseDeviceType(const std::string& value) {
     }
 
     throw DeviceConfigurationParseError("Unknown cl_device_type value: " +
-                                            value);
+                                        value);
 }
 
 cl_device_local_mem_type parseDeviceLocalMemType(const std::string& value) {
@@ -508,6 +514,6 @@ cl_device_fp_config parseDeviceFpConfig(const std::string& value) {
         return 0;
     }
 
-    throw DeviceConfigurationParseError(
-        "Unknown cl_device_fp_config value: " + value);
+    throw DeviceConfigurationParseError("Unknown cl_device_fp_config value: " +
+                                        value);
 }

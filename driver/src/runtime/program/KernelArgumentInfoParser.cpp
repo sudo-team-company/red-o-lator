@@ -170,6 +170,29 @@ void KernelArgumentInfoParser::parse(
     }
 }
 
+bool parsePointerAccessParam(
+    const std::string& param,
+    const std::shared_ptr<PointerKernelArgumentInfo>& outInfo) {
+    if (param.empty()) {
+        return false;
+    }
+
+    if (param == "const") {
+        outInfo->argTypeQualifier = CL_KERNEL_ARG_TYPE_CONST;
+        return true;
+
+    } else if (param == "restrict") {
+        outInfo->argTypeQualifier = CL_KERNEL_ARG_TYPE_RESTRICT;
+        return true;
+
+    } else if (param == "volatile") {
+        outInfo->argTypeQualifier = CL_KERNEL_ARG_TYPE_VOLATILE;
+        return true;
+    }
+
+    return false;
+}
+
 void KernelArgumentInfoParser::parse(
     const std::shared_ptr<EventKernelArgumentInfo>& outInfo) {
     throw KernelArgumentInfoParseError("Event parsing is not supported yet");
@@ -184,6 +207,15 @@ void KernelArgumentInfoParser::parse(
             continue;
         }
 
+        const auto maybeSplit = utils::split(param, ' ');
+        if (maybeSplit.size() > 1) {
+            for (auto& accessParam : maybeSplit) {
+                parsePointerAccessParam(accessParam, outInfo);
+            }
+
+            return;
+        }
+
         if (param == "local") {
             outInfo->addressQualifier = CL_KERNEL_ARG_ADDRESS_LOCAL;
 
@@ -192,15 +224,6 @@ void KernelArgumentInfoParser::parse(
 
         } else if (param == "global") {
             outInfo->addressQualifier = CL_KERNEL_ARG_ADDRESS_GLOBAL;
-
-        } else if (param == "const") {
-            outInfo->argTypeQualifier = CL_KERNEL_ARG_TYPE_CONST;
-
-        } else if (param == "restrict") {
-            outInfo->argTypeQualifier = CL_KERNEL_ARG_TYPE_RESTRICT;
-
-        } else if (param == "volatile") {
-            outInfo->argTypeQualifier = CL_KERNEL_ARG_TYPE_VOLATILE;
 
         } else if (param == "read_only" || param == "rdonly") {
             outInfo->accessQualifier = CL_KERNEL_ARG_ACCESS_READ_ONLY;
@@ -218,7 +241,7 @@ void KernelArgumentInfoParser::parse(
         } else if (std::isdigit(param[0])) {
             outInfo->structSize = std::stoi(param);
 
-        } else {
+        } else if (!parsePointerAccessParam(param, outInfo)) {
             throwParseError("pointer", param);
         }
     }
