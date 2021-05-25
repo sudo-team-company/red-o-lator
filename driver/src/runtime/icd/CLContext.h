@@ -14,7 +14,7 @@ struct CLContext {
         : dispatchTable(dispatchTable), device(device) {}
 
     IcdDispatchTable* const dispatchTable;
-    CLDeviceId* device;
+    CLDeviceId* const device;
 
     std::optional<CLContextCallback> callback = std::nullopt;
     void* callbackUserData = nullptr;

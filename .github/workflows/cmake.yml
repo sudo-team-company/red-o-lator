@@ -7,6 +7,8 @@ on:
 env:
   BUILD_TYPE: Release
   PKG_CONFIG_PATH: ${{github.workspace}}/CLRX/lib/pkgconfig
+  RED_O_LATOR_DEVICE_CONFIG_PATH: ${{github.workspace}}/driver/resources/rx-570.ini
+  THREAD_COUNT: 9
 
 jobs:
   build:
@@ -23,14 +25,14 @@ jobs:
         run: git clone https://github.com/KhronosGroup/OpenCL-Headers
 
       - name: Clone ICD loader
-        run: git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader
+        run: git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader --depth 1
 
       - name: Configure ICD Loader
         run: cp -r ${{github.workspace}}/OpenCL-Headers/CL ${{github.workspace}}/OpenCL-ICD-Loader/inc &&
           cmake -H${{github.workspace}}/OpenCL-ICD-Loader -B ${{github.workspace}}/OpenCL-ICD-Loader/build
 
       - name: Build ICD Loader
-        run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build --config Debug -j 16
+        run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build --config Debug -j ${{env.THREAD_COUNT}}
 
       - name: Install ICD Loader
         run: cmake --install ${{github.workspace}}/OpenCL-ICD-Loader/build
@@ -38,7 +40,7 @@ jobs:
              --config Debug
 
       - name: Git clone CLRX
-        run: git clone https://github.com/CLRX/CLRX-mirror
+        run: git clone https://github.com/CLRX/CLRX-mirror --depth 1
 
       - name: Configure CLRX
         run: cmake -H${{github.workspace}}/CLRX-mirror -B ${{github.workspace}}/CLRX-mirror/build
@@ -49,7 +51,7 @@ jobs:
              -DBUILD_STATIC_EXE=OFF
 
       - name: Build CLRX
-        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Debug -j 16
+        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Debug -j ${{env.THREAD_COUNT}}
 
       - name: Install CLRX
         run: cmake --install ${{github.workspace}}/CLRX-mirror/build/ --config Debug --prefix ${{github.workspace}}/CLRX
@@ -61,4 +63,21 @@ jobs:
               -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
 
       - name: Build red-o-lator
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j 16
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j ${{env.THREAD_COUNT}}
+
+      - name: Install ICD to the Windows system
+        if: runner.os == 'Windows'
+        run: cd ${{github.workspace}}/driver/install &&
+             python register-icd-win.py ${{github.workspace}}/build/lib/${{env.BUILD_TYPE}}/red-o-lator-icd.lib &&
+             cd ${{github.workspace}}
+
+      - name: Install ICD to the Unix system
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: sudo mkdir -p /etc/OpenCL/vendors &&
+             echo ${{github.workspace}}/build/lib/libred-o-lator-icd.so | sudo tee /etc/OpenCL/vendors/red-o-lator.icd
+
+#      - name: Test red-o-lator
+#        run: ctest --test-dir ${{github.workspace}}/build
+#              -C ${{env.BUILD_TYPE}}
+#              -VV --output-on-failure
+#              --debug

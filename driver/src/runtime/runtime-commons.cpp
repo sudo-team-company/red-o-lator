@@ -25,18 +25,21 @@ cl_int getParamInfo(
     auto parameterValue = parameterValueGetter();
 
     if (!parameterValue.has_value()) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Unknown info parameter")
+        RETURN_ERROR(CL_INVALID_VALUE, "Unknown device info parameter " +
+                                           std::to_string(param_name) + ".")
     }
 
     auto [result, resultSize] = parameterValue.value();
 
     if (std::holds_alternative<std::string>(result)) {
-        resultSize = std::get<std::string>(result).size() + 1;
+        resultSize = strlen(std::get<std::string>(result).c_str()) + 1;
     }
 
     if (param_value_size && param_value_size < resultSize) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter: " +
-                                           std::to_string(param_name))
+        RETURN_ERROR(CL_INVALID_VALUE,
+                     "Not enough size to fit parameter: need " +
+                         std::to_string(resultSize) + ", got " +
+                         std::to_string(param_value_size) + ".")
     }
 
     if (param_value) {
@@ -55,8 +58,8 @@ cl_int getParamInfo(
     return CL_SUCCESS;
 }
 
-bool utils::isMutuallyExclusive(cl_bitfield flags,
-                                std::initializer_list<cl_int> checkFlags) {
+bool utils::hasMutuallyExclusiveFlags(
+    cl_bitfield flags, std::initializer_list<cl_int> checkFlags) {
     bool foundFlag = false;
 
     for (auto flag : checkFlags) {
@@ -64,9 +67,9 @@ bool utils::isMutuallyExclusive(cl_bitfield flags,
         if (flagIsSet && !foundFlag) {
             foundFlag = true;
         } else if (flagIsSet) {
-            return false;
+            return true;
         }
     }
 
-    return true;
+    return false;
 }

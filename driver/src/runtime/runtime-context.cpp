@@ -2,9 +2,9 @@
 #include <cstring>
 #include <unordered_map>
 
-#include "runtime-commons.h"
-#include "icd/CLDeviceId.hpp"
 #include "icd/CLContext.h"
+#include "icd/CLDeviceId.hpp"
+#include "runtime-commons.h"
 
 cl_context createContext(const cl_context_properties* properties,
                          cl_device_id device,
@@ -63,9 +63,11 @@ clCreateContextFromType(const cl_context_properties* properties,
                         CLContextCallback pfn_notify,
                         void* user_data,
                         cl_int* errcode_ret) {
-    if ((device_type ^ kDevice->deviceType) != 0) {
-        SET_ERROR_AND_RETURN(CL_DEVICE_NOT_FOUND,
-                             "No devices with all specified flags found.");
+    if (!kDevice->matchesType(device_type)) {
+        if (errcode_ret) {
+            *errcode_ret = CL_DEVICE_NOT_FOUND;
+            return nullptr;
+        }
     }
 
     return createContext(properties, kDevice, pfn_notify, user_data,
@@ -105,49 +107,41 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
         RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.")
     }
 
-    void* result;
-    size_t resultSize;
+    return getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
 
-    switch (param_name) {
-        case CL_CONTEXT_REFERENCE_COUNT: {
-            resultSize = sizeof(cl_uint);
-            result = reinterpret_cast<void*>(context->referenceCount);
-            break;
-        }
+            switch (param_name) {
+                case CL_CONTEXT_REFERENCE_COUNT: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(context->referenceCount);
+                    break;
+                }
 
-        case CL_CONTEXT_NUM_DEVICES: {
-            resultSize = sizeof(cl_uint);
-            result = reinterpret_cast<void*>(1);
-            break;
-        }
+                case CL_CONTEXT_NUM_DEVICES: {
+                    resultSize = sizeof(cl_uint);
+                    result = reinterpret_cast<void*>(1);
+                    break;
+                }
 
-        case CL_CONTEXT_DEVICES: {
-            resultSize = sizeof(cl_device_info);
-            result = kDevice;
-            break;
-        }
+                case CL_CONTEXT_DEVICES: {
+                    resultSize = sizeof(cl_device_id);
+                    result = kDevice;
+                    break;
+                }
 
-        case CL_CONTEXT_PROPERTIES: {
-            // TODO(clGetContextInfo): parse props
-            resultSize = sizeof(cl_context_properties);
-            result = nullptr;
-            break;
-        }
+                case CL_CONTEXT_PROPERTIES: {
+                    // TODO(clGetContextInfo): parse props
+                    resultSize = sizeof(cl_context_properties);
+                    result = nullptr;
+                    break;
+                }
 
-        default: return CL_INVALID_VALUE;
-    }
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
+            }
 
-    if (param_value_size && param_value_size < resultSize) {
-        RETURN_ERROR(CL_INVALID_VALUE, "Not enough size to fit parameter.");
-    }
-
-    if (param_value) {
-        memcpy(param_value, &result, resultSize);
-    }
-
-    if (param_value_size_ret) {
-        *param_value_size_ret = resultSize;
-    }
-
-    return CL_SUCCESS;
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize));
+        });
 }

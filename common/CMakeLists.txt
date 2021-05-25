@@ -1,5 +1,8 @@
 set(COMMON_SOURCES
-        common/common.hpp common/Logger.cpp common/Logger.h
+        common/common.hpp
+        common/Logger.cpp
+        common/Logger.h
+        common/test/doctest.h
         )
 
 add_library(red-o-lator-common SHARED ${COMMON_SOURCES})

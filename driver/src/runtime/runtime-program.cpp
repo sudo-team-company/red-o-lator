@@ -57,11 +57,19 @@ clCreateProgramWithBuiltInKernels(cl_context context,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainProgram(cl_program program) {
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+    }
+
     program->referenceCount++;
     return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseProgram(cl_program program) {
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+    }
+
     program->referenceCount--;
 
     if (program->referenceCount == 0) {
@@ -82,12 +90,19 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
+    program->buildStatus = CL_BUILD_IN_PROGRESS;
+
     const auto disassembler = BinaryDisassembler();
     try {
         program->disassembledBinary =
             disassembler.disassemble(program->binarySize, program->binary);
+        program->buildStatus = CL_BUILD_SUCCESS;
+        program->buildLog = "Success disassembling binary";
+
     } catch (const KernelArgumentInfoParseError& e) {
         kLogger.error(e.what());
+        program->buildStatus = CL_BUILD_ERROR;
+        program->buildLog = e.what();
         return CL_INVALID_BINARY;
     }
 
@@ -103,7 +118,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
     }
 
-    getParamInfo(
+    return getParamInfo(
         param_name, param_value_size, param_value, param_value_size_ret, [&]() {
             CLObjectInfoParameterValueType result;
             size_t resultSize;
@@ -180,7 +195,7 @@ clGetProgramBuildInfo(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
     }
 
-    getParamInfo(
+    return getParamInfo(
         param_name, param_value_size, param_value, param_value_size_ret, [&]() {
             CLObjectInfoParameterValueType result;
             size_t resultSize;
@@ -188,7 +203,7 @@ clGetProgramBuildInfo(cl_program program,
             switch (param_name) {
                 case CL_PROGRAM_BUILD_STATUS: {
                     resultSize = sizeof(cl_build_status);
-                    result = reinterpret_cast<void*>(CL_BUILD_SUCCESS);
+                    result = reinterpret_cast<void*>(program->buildStatus);
                     break;
                 }
 
@@ -198,9 +213,7 @@ clGetProgramBuildInfo(cl_program program,
                 }
 
                 case CL_PROGRAM_BUILD_LOG: {
-                    result =
-                        "Binary build is not supported, assuming binary was "
-                        "already built for AMD platform.";
+                    result = program->buildLog;
                     break;
                 }
 

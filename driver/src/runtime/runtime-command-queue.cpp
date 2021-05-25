@@ -1,7 +1,8 @@
+#include <common/common.hpp>
 #include <iostream>
 
-#include "runtime-commons.h"
 #include "icd/CLCommandQueue.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_command_queue CL_API_CALL
 clCreateCommandQueue(cl_context context,
@@ -29,9 +30,10 @@ clCreateCommandQueue(cl_context context,
             "Out-of-order execution mode is not supported yet.")
     }
 
-    const auto commandQueue = new CLCommandQueue(kDispatchTable);
+    const auto commandQueue =
+        new CLCommandQueue(kDispatchTable, context, properties);
 
-    SET_SUCCESS();
+    SET_SUCCESS()
 
     return commandQueue;
 }
@@ -69,7 +71,7 @@ clReleaseCommandQueue(cl_command_queue command_queue) {
 
     command_queue->referenceCount--;
 
-    if (command_queue->referenceCount == 0) {
+    if (command_queue->referenceCount == 0 && command_queue->size() == 0) {
         delete command_queue;
     }
 
@@ -82,13 +84,46 @@ clGetCommandQueueInfo(cl_command_queue command_queue,
                       size_t param_value_size,
                       void* param_value,
                       size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clGetCommandQueueInfo"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
-}
+    if (!command_queue) {
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.")
+    }
 
-CL_API_ENTRY cl_int CL_API_CALL clSetCommandQueueProperty() {
-    std::cerr << "Unimplemented OpenCL API call: clSetCommandQueueProperty"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    return getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
+            switch (param_name) {
+                case CL_QUEUE_CONTEXT: {
+                    resultSize = sizeof(cl_context);
+                    result = reinterpret_cast<void*>(command_queue->context);
+                    break;
+                }
+
+                case CL_QUEUE_DEVICE: {
+                    resultSize = sizeof(cl_device_id);
+                    result =
+                        reinterpret_cast<void*>(command_queue->context->device);
+                    break;
+                }
+
+                case CL_QUEUE_REFERENCE_COUNT: {
+                    resultSize = sizeof(cl_uint);
+                    result =
+                        reinterpret_cast<void*>(command_queue->referenceCount);
+                    break;
+                }
+
+                case CL_QUEUE_PROPERTIES: {
+                    resultSize = sizeof(cl_command_queue_properties);
+                    result =
+                        reinterpret_cast<void*>(command_queue->properties);
+                    break;
+                }
+
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
+            }
+
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize));
+        });
 }
