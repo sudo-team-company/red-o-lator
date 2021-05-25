@@ -34,6 +34,16 @@ cl_device_partition_property parseDevicePartitionProperty(
 cl_device_affinity_domain parseDeviceAffinityDomain(const std::string& value);
 cl_device_fp_config parseDeviceFpConfig(const std::string& value);
 
+void hardcodeParameter(
+    std::unordered_map<cl_device_info, CLObjectInfoParameterValue>&
+        outParameters,
+    cl_device_info name,
+    CLObjectInfoParameterValueType value,
+    size_t size) {
+    utils::insertOrUpdate<cl_device_info>(
+        outParameters, name, CLObjectInfoParameterValue(value, size));
+}
+
 void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     std::ifstream configurationFile(configurationFilePath);
 
@@ -57,47 +67,44 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
         parameters.emplace(parsedParameter.name, parsedParameter.value);
     }
 
-    utils::insertOrUpdate<cl_device_info>(
-        parameters, CL_DEVICE_PLATFORM,
-        CLObjectInfoParameterValue(kPlatform, sizeof(cl_platform_id)));
+    hardcodeParameter(parameters, CL_DEVICE_PLATFORM, kPlatform,
+                      sizeof(cl_platform_id));
 
-    utils::insertOrUpdate<cl_device_info>(
-        parameters, CL_DEVICE_PARENT_DEVICE,
-        CLObjectInfoParameterValue(nullptr, sizeof(cl_device_id)));
+    hardcodeParameter(parameters, CL_DEVICE_PARENT_DEVICE, nullptr,
+                      sizeof(cl_device_id));
 
-    utils::insertOrUpdate<cl_device_info>(
-        parameters, CL_DEVICE_OPENCL_C_VERSION,
-        CLObjectInfoParameterValue(kPlatform->openClVersion,
-                                   kPlatform->openClVersion.size() + 1));
+    hardcodeParameter(parameters, CL_DEVICE_OPENCL_C_VERSION,
+                      kPlatform->openClVersion,
+                      kPlatform->openClVersion.size());
 
-    utils::insertOrUpdate<cl_device_info>(
-        parameters, CL_DRIVER_VERSION,
-        CLObjectInfoParameterValue(kPlatform->driverVersion,
-                                   kPlatform->driverVersion.size() + 1));
+    hardcodeParameter(parameters, CL_DRIVER_VERSION, kPlatform->driverVersion,
+                      kPlatform->driverVersion.size() + 1);
 
     const auto deviceVersion = std::string(kPlatform->openClVersion) +
                                " AMD (" + kPlatform->driverVersion + ")";
-    utils::insertOrUpdate<cl_device_info>(
-        parameters, CL_DEVICE_VERSION,
-        CLObjectInfoParameterValue(deviceVersion.c_str(),
-                                   strlen(deviceVersion.c_str()) + 1));
+    hardcodeParameter(parameters, CL_DEVICE_VERSION, deviceVersion,
+                      deviceVersion.size() + 1);
 
-    utils::insertOrUpdate<cl_bool>(
-        parameters, CL_DEVICE_AVAILABLE,
-        CLObjectInfoParameterValue((void*) true, sizeof(cl_bool)));
+    hardcodeParameter(parameters, CL_DEVICE_AVAILABLE, (void*) true,
+                      sizeof(cl_bool));
 
-    utils::insertOrUpdate<cl_bool>(
-        parameters, CL_DEVICE_LINKER_AVAILABLE,
-        CLObjectInfoParameterValue((void*) false, sizeof(cl_bool)));
+    hardcodeParameter(parameters, CL_DEVICE_LINKER_AVAILABLE, (void*) false,
+                      sizeof(cl_bool));
 
-    utils::insertOrUpdate<cl_bool>(
-        parameters, CL_DEVICE_COMPILER_AVAILABLE,
-        CLObjectInfoParameterValue((void*) false, sizeof(cl_bool)));
+    hardcodeParameter(parameters, CL_DEVICE_COMPILER_AVAILABLE, (void*) false,
+                      sizeof(cl_bool));
 
-    utils::insertOrUpdate<cl_uint>(
-        parameters, CL_DEVICE_PARTITION_MAX_SUB_DEVICES,
-        CLObjectInfoParameterValue(reinterpret_cast<void*>(0),
-                                   sizeof(cl_uint)));
+    hardcodeParameter(parameters, CL_DEVICE_PARTITION_MAX_SUB_DEVICES,
+                      reinterpret_cast<void*>(0), sizeof(cl_uint));
+
+    hardcodeParameter(parameters, CL_DEVICE_IMAGE_SUPPORT, (void*) false,
+                      sizeof(cl_bool));
+
+    hardcodeParameter(parameters, CL_DEVICE_HOST_UNIFIED_MEMORY, (void*) true,
+                      sizeof(cl_bool));
+
+    hardcodeParameter(parameters, CL_DEVICE_ERROR_CORRECTION_SUPPORT,
+                      (void*) false, sizeof(cl_bool));
 
     mConfigurationPath = configurationFilePath;
     // TODO: memory leak of arrays
@@ -124,7 +131,7 @@ DeviceConfigurationParser::getParameter(cl_device_info parameter) const {
 
     if (isValidOpenCLParameter) {
         kLogger.warn("Parameter " + std::to_string(parameter) +
-                      " was not found in config");
+                     " was not found in config");
         return CLObjectInfoParameterValue(nullptr, 0);
     }
 
@@ -195,6 +202,9 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     IGNORE_PARAMETER(CL_DEVICE_AVAILABLE)
     IGNORE_PARAMETER(CL_DEVICE_LINKER_AVAILABLE)
     IGNORE_PARAMETER(CL_DEVICE_COMPILER_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_IMAGE_SUPPORT)
+    IGNORE_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
+    IGNORE_PARAMETER(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
 
     PARSE_PARAMETER(CL_DEVICE_TYPE, cl_device_type, parseDeviceType)
     PARSE_STRING_PARAMETER(CL_DEVICE_NAME)
@@ -235,7 +245,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_CLOCK_FREQUENCY, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_ADDRESS_BITS, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_MEM_ALLOC_SIZE, cl_ulong)
-    PARSE_BOOL_PARAMETER(CL_DEVICE_IMAGE_SUPPORT)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_READ_IMAGE_ARGS, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_WRITE_IMAGE_ARGS, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_IMAGE2D_MAX_WIDTH, size_t)
@@ -262,8 +271,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_PARAMETER(CL_DEVICE_LOCAL_MEM_TYPE, cl_device_local_mem_type,
                     parseDeviceLocalMemType)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_SIZE, cl_ulong)
-    PARSE_BOOL_PARAMETER(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
-    PARSE_BOOL_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PROFILING_TIMER_RESOLUTION, size_t)
     PARSE_PARAMETER(CL_DEVICE_ENDIAN_LITTLE, cl_bool, parseClBool)
     PARSE_BITFIELD_PARAMETER(CL_DEVICE_EXECUTION_CAPABILITIES,

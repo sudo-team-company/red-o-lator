@@ -1,10 +1,10 @@
 #include <common/utils/common.hpp>
 #include <iostream>
 
-#include "runtime-commons.h"
+#include "command/Command.h"
 #include "icd/CLCommandQueue.h"
 #include "icd/CLProgram.hpp"
-#include "command/Command.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
                                                   const char* kernel_name,
@@ -20,7 +20,7 @@ CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
     for (auto* kernel : program->disassembledBinary->kernels) {
         if (kernel->name == kernel_name) {
             kernel->program = program;
-            kernel->referenceCount++;
+            clRetainKernel(kernel);
             clRetainProgram(program);
 
             SET_SUCCESS();
@@ -43,9 +43,46 @@ clCreateKernelsInProgram(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
-    std::cerr << "Unimplemented OpenCL API call: clCreateKernelsInProgram"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    const auto disassembledKernels = program->disassembledBinary->kernels;
+
+    if (kernels && num_kernels < disassembledKernels.size()) {
+        RETURN_ERROR(
+            CL_INVALID_VALUE,
+            "num_kernels is less than total number of kernels which is " +
+                std::to_string(disassembledKernels.size()) + ".");
+    }
+
+    if (kernels) {
+        for (int i = 0; i < disassembledKernels.size(); ++i) {
+            kernels[i] = disassembledKernels[i];
+            kernels[i]->program = program;
+            clRetainProgram(program);
+            clRetainKernel(kernels[i]);
+        }
+    }
+
+    if (num_kernels_ret) {
+        *num_kernels_ret = disassembledKernels.size();
+    }
+
+    return CL_SUCCESS;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL clSetKernelArg(cl_kernel kernel,
+                                               cl_uint arg_index,
+                                               size_t arg_size,
+                                               const void* arg_value) {
+    if (!kernel) {
+        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
+    }
+
+    try {
+        kernel->setArgument(arg_index, arg_size, arg_value);
+    } catch (const KernelArgumentOutOfBoundsError& e) {
+        RETURN_ERROR(CL_INVALID_ARG_INDEX, e.what());
+    }
+
+    return CL_SUCCESS;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainKernel(cl_kernel kernel) {
@@ -72,23 +109,6 @@ CL_API_ENTRY cl_int CL_API_CALL clReleaseKernel(cl_kernel kernel) {
     return CL_SUCCESS;
 }
 
-CL_API_ENTRY cl_int CL_API_CALL clSetKernelArg(cl_kernel kernel,
-                                               cl_uint arg_index,
-                                               size_t arg_size,
-                                               const void* arg_value) {
-    if (!kernel) {
-        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
-    }
-
-    try {
-        kernel->setArgument(arg_index, arg_size, arg_value);
-    } catch (const KernelArgumentOutOfBoundsError& e) {
-        RETURN_ERROR(CL_INVALID_ARG_INDEX, e.what());
-    }
-
-    return CL_SUCCESS;
-}
-
 CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueNDRangeKernel(cl_command_queue command_queue,
                        cl_kernel kernel,
@@ -99,6 +119,71 @@ clEnqueueNDRangeKernel(cl_command_queue command_queue,
                        cl_uint num_events_in_wait_list,
                        const cl_event* event_wait_list,
                        cl_event* event) {
+    if (!command_queue) {
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
+    }
+
+    if (!kernel) {
+        RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
+    }
+
+    if (work_dim < 1 || work_dim > 3) {
+        RETURN_ERROR(CL_INVALID_WORK_DIMENSION,
+                     "Work dimension should be in range from 1 to 3, got " +
+                         std::to_string(work_dim) + ".");
+    }
+
+    if (!global_work_size) {
+        RETURN_ERROR(CL_INVALID_GLOBAL_WORK_SIZE, "Global work size is null.");
+    }
+
+    cl_uint workGroupSize = 1;
+    const auto maxWorkGroupSize =
+        kDeviceConfigurationParser.requireParameter<const size_t>(
+            CL_DEVICE_MAX_WORK_GROUP_SIZE);
+    const auto maxWorkItemSizes =
+        kDeviceConfigurationParser.requireParameter<const size_t*>(
+            CL_DEVICE_MAX_WORK_ITEM_SIZES);
+    for (cl_uint i = 0; i < work_dim; ++i) {
+        if (!global_work_size[i]) {
+            RETURN_ERROR(CL_INVALID_GLOBAL_WORK_SIZE,
+                         "Global work size is 0 for dimension " +
+                             std::to_string(i) + ".");
+        }
+
+        if (local_work_size) {
+            workGroupSize *= local_work_size[i];
+            if (local_work_size[i] > maxWorkItemSizes[i]) {
+                RETURN_ERROR(
+                    CL_INVALID_WORK_ITEM_SIZE,
+                    "Specified number of work items at the dimension " +
+                        std::to_string(i) + "which is " +
+                        std::to_string(local_work_size[i]) +
+                        " is greater than max allowed of " +
+                        std::to_string(maxWorkItemSizes[i]));
+            }
+        }
+    }
+
+    if (local_work_size && workGroupSize > maxWorkGroupSize) {
+        RETURN_ERROR(CL_INVALID_WORK_GROUP_SIZE,
+                     "Total work group size is greater than maximum supported "
+                     "by device: " +
+                         std::to_string(workGroupSize) + "/" +
+                         std::to_string(maxWorkGroupSize));
+    }
+
+    std::function<bool(const KernelArgument&)> argNotSetPredicate =
+        [](const KernelArgument& kernel) {
+            return !kernel.value.has_value();
+        };
+
+    if (std::any_of(kernel->getArguments().begin(),
+                    kernel->getArguments().end(), argNotSetPredicate)) {
+        RETURN_ERROR(CL_INVALID_KERNEL_ARGS,
+                     "Not all kernel arguments are set.");
+    }
+
     const auto command = std::make_shared<KernelExecutionCommand>(
         kernel, work_dim, global_work_offset, global_work_size,
         local_work_size);

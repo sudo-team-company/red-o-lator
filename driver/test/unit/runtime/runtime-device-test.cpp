@@ -142,6 +142,21 @@ TEST_SUITE("Device API") {
                 checkDeviceParameter<cl_uint>(
                     CL_DEVICE_PARTITION_MAX_SUB_DEVICES, 0);
             }
+
+            SUBCASE("image is not supported") {
+                checkDeviceParameter<cl_uint>(
+                    CL_DEVICE_IMAGE_SUPPORT, CL_FALSE);
+            }
+
+            SUBCASE("host and device memory is unified") {
+                checkDeviceParameter<cl_uint>(
+                    CL_DEVICE_HOST_UNIFIED_MEMORY, CL_TRUE);
+            }
+
+            SUBCASE("error resolution is not supported") {
+                checkDeviceParameter<cl_uint>(
+                    CL_DEVICE_ERROR_CORRECTION_SUPPORT, CL_FALSE);
+            }
         }
 
         SUBCASE("should get array of items correctly") {

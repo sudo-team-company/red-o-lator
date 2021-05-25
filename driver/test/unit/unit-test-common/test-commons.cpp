@@ -92,6 +92,19 @@ cl_program getProgram(const std::string& binaryPath) {
     return program;
 }
 
+cl_kernel getKernel(const std::string& binaryPath,
+                    const std::string& kernelName) {
+    auto program = test::getProgram(binaryPath);
+
+    cl_int error;
+    const auto kernel = clCreateKernel(program, kernelName.c_str(), &error);
+
+    CHECK(error == CL_SUCCESS);
+    CHECK(kernel != nullptr);
+
+    return kernel;
+}
+
 void fillVector(int n, std::vector<cl_uint>& out) {
     for (int i = 0; i < n; ++i) {
         out.push_back(i);
