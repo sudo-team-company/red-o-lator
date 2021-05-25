@@ -27,5 +27,8 @@ cl_mem createBuffer(cl_mem_flags flags = 0,
 
 cl_program getProgram(const std::string& binaryPath);
 
+cl_kernel getKernel(const std::string& binaryPath,
+                    const std::string& kernelName);
+
 void fillVector(int n, std::vector<cl_uint>& out);
 }  // namespace test

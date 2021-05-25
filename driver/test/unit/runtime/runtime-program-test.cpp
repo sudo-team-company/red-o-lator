@@ -120,11 +120,31 @@ TEST_SUITE("Program API") {
     }
 
     TEST_CASE("clGetProgramInfo") {
-        SUBCASE("") {}
+        SUBCASE("get reference count") {
+            const auto program = test::getProgram(binaryPath);
+
+            cl_uint out;
+            const auto error =
+                clGetProgramInfo(program, CL_PROGRAM_REFERENCE_COUNT,
+                                 sizeof(cl_uint), &out, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(out == program->referenceCount);
+        }
     }
 
     TEST_CASE("clGetProgramBuildInfo") {
-        SUBCASE("") {}
+        SUBCASE("get build status") {
+            const auto program = test::getProgram(binaryPath);
+
+            cl_build_status out;
+            const auto error = clGetProgramBuildInfo(
+                program, program->context->device, CL_PROGRAM_BUILD_STATUS,
+                sizeof(cl_build_status), &out, nullptr);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(out == program->buildStatus);
+        }
     }
 
     TEST_CASE("clCreateProgramWithSource") {

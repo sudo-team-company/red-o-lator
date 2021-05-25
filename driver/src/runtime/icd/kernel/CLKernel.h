@@ -24,7 +24,7 @@ struct CLKernel {
 
     [[nodiscard]] KernelArgument getArgument(cl_uint index) const;
 
-    [[nodiscard]] std::vector<KernelArgument> getArguments() const;
+    [[nodiscard]] const std::vector<KernelArgument>& getArguments() const;
 
     [[nodiscard]] int argumentCount() const;
 
