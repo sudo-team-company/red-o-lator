@@ -25,17 +25,6 @@ TEST_SUITE("Command queue API") {
             CHECK(queue == nullptr);
         }
 
-        SUBCASE("out-of-order execution is not supported") {
-            const auto context = test::getContext();
-            cl_int error;
-            const auto queue = clCreateCommandQueue(
-                context, context->device,
-                CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &error);
-
-            CHECK(error == CL_INVALID_QUEUE_PROPERTIES);
-            CHECK(queue == nullptr);
-        }
-
         SUBCASE("reference count should be 1 after creation") {
             CHECK(test::getCommandQueue()->referenceCount == 1);
         }
@@ -74,8 +63,8 @@ TEST_SUITE("Command queue API") {
     TEST_CASE("clFinish") {
         SUBCASE("should flush queue") {
             const auto queue = test::getCommandQueue();
-            queue->enqueue(std::make_shared<test::DummyCommand>());
-            queue->enqueue(std::make_shared<test::DummyCommand>());
+            queue->enqueue(test::getDummyCommand());
+            queue->enqueue(test::getDummyCommand());
 
             CHECK(queue->size() == 2);
 
@@ -138,7 +127,7 @@ TEST_SUITE("Command queue API") {
             auto context = queue->context;
             const auto contextRefCount = context->referenceCount;
 
-            queue->enqueue(std::make_shared<test::DummyCommand>());
+            queue->enqueue(test::getDummyCommand());
 
             const auto error = clReleaseCommandQueue(queue);
 
@@ -205,9 +194,9 @@ TEST_SUITE("CLCommandQueue") {
 
             CHECK(queue->size() == 0);
 
-            queue->enqueue(std::make_shared<test::DummyCommand>());
-            queue->enqueue(std::make_shared<test::DummyCommand>());
-            queue->enqueue(std::make_shared<test::DummyCommand>());
+            queue->enqueue(test::getDummyCommand());
+            queue->enqueue(test::getDummyCommand());
+            queue->enqueue(test::getDummyCommand());
 
             CHECK(queue->size() == 3);
         }
@@ -216,9 +205,9 @@ TEST_SUITE("CLCommandQueue") {
     TEST_CASE("flush") {
         SUBCASE("should clear command queue") {
             auto queue = test::getCommandQueue();
-            queue->enqueue(std::make_shared<test::DummyCommand>());
-            queue->enqueue(std::make_shared<test::DummyCommand>());
-            queue->enqueue(std::make_shared<test::DummyCommand>());
+            queue->enqueue(test::getDummyCommand());
+            queue->enqueue(test::getDummyCommand());
+            queue->enqueue(test::getDummyCommand());
 
             CHECK(queue->size() == 3);
 

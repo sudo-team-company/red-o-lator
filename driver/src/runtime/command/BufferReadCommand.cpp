@@ -14,6 +14,6 @@ BufferReadCommand::~BufferReadCommand() {
     clReleaseMemObject(buffer);
 }
 
-void BufferReadCommand::execute() const {
+void BufferReadCommand::executeImpl() const {
     memcpy(outputPtr, buffer->address + offset, size);
 }

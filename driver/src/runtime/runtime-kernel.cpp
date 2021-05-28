@@ -186,11 +186,12 @@ clEnqueueNDRangeKernel(cl_command_queue command_queue,
                      "Not all kernel arguments are set.");
     }
 
-    const auto command = std::make_shared<KernelExecutionCommand>(
-        kernel, work_dim, global_work_offset, global_work_size,
-        local_work_size);
-
-    command_queue->enqueue(command);
+    enqueueCommand(command_queue, num_events_in_wait_list, event_wait_list,
+                   event, [&]() {
+                       return std::make_shared<KernelExecutionCommand>(
+                           kernel, work_dim, global_work_offset,
+                           global_work_size, local_work_size);
+                   });
 
     return CL_SUCCESS;
 }

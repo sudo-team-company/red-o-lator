@@ -12,8 +12,8 @@ CLCommandQueue::~CLCommandQueue() {
     clReleaseContext(context);
 }
 
-void CLCommandQueue::enqueue(const std::shared_ptr<const Command>& command) {
-    commands.emplace(command);
+void CLCommandQueue::enqueue(const std::shared_ptr<Command>& command) {
+    commands.push_back(command);
 }
 
 void CLCommandQueue::flush() {
@@ -23,10 +23,19 @@ void CLCommandQueue::flush() {
 
     flushInProcess = true;
 
+
     while (!commands.empty()) {
-        const auto command = commands.front();
-        command->execute();
-        commands.pop();
+        std::shared_ptr<Command> command;
+
+        if (isOutOfOrder()) {
+            command = commands.back();
+            commands.pop_back();
+        } else {
+            command = commands.front();
+            commands.pop_front();
+        }
+
+        command->execute(isOutOfOrder());
     }
 
     flushInProcess = false;
@@ -34,4 +43,8 @@ void CLCommandQueue::flush() {
 
 size_t CLCommandQueue::size() {
     return commands.size();
+}
+
+bool CLCommandQueue::isOutOfOrder() {
+    return properties & CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
 }

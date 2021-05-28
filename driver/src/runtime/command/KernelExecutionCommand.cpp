@@ -19,7 +19,6 @@ KernelExecutionCommand::KernelExecutionCommand(CLKernel* kernel,
 KernelExecutionCommand::~KernelExecutionCommand() {
     clReleaseKernel(kernel);
 }
-
-void KernelExecutionCommand::execute() const {
+void KernelExecutionCommand::executeImpl() const {
     executeCommand(*this);
 }

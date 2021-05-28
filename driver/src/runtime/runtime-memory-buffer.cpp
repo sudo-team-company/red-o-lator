@@ -1,9 +1,9 @@
-#include <command/Command.h>
 #include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <memory>
 
+#include "command/Command.h"
 #include "icd/CLCommandQueue.h"
 #include "icd/CLContext.h"
 #include "icd/CLDeviceId.hpp"
@@ -142,7 +142,7 @@ clCreateSubBuffer(cl_mem buffer,
 #define CHECK_BUFFER_PARAMETERS()                                        \
     do {                                                                 \
         if (!ptr || !size) {                                             \
-            RETURN_ERROR(CL_INVALID_VALUE, "ptr or size is null.");       \
+            RETURN_ERROR(CL_INVALID_VALUE, "ptr or size is null.");      \
         }                                                                \
                                                                          \
         if (offset + size > buffer->size) {                              \
@@ -152,7 +152,7 @@ clCreateSubBuffer(cl_mem buffer,
                              std::to_string(offset) + " bytes (total " + \
                              std::to_string(size + offset) +             \
                              " bytes) is more than buffer size of " +    \
-                             std::to_string(buffer->size) + " bytes.");   \
+                             std::to_string(buffer->size) + " bytes.");  \
         }                                                                \
     } while (0)
 
@@ -173,10 +173,11 @@ clEnqueueReadBuffer(cl_command_queue command_queue,
                      "clEnqueueReadBuffer on write-only buffer.");
     }
 
-    const auto command =
-        std::make_shared<BufferReadCommand>(buffer, size, offset, ptr);
-
-    command_queue->enqueue(command);
+    enqueueCommand(command_queue, num_events_in_wait_list, event_wait_list,
+                   event, [&]() {
+                       return std::make_shared<BufferReadCommand>(buffer, size,
+                                                                  offset, ptr);
+                   });
 
     if (blocking_read) {
         clFlush(command_queue);
@@ -202,10 +203,11 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
                      "clEnqueueWriteBuffer on read-only buffer.");
     }
 
-    const auto command =
-        std::make_shared<BufferWriteCommand>(buffer, size, offset, ptr);
-
-    command_queue->enqueue(command);
+    enqueueCommand(command_queue, num_events_in_wait_list, event_wait_list,
+                   event, [&]() {
+                       return std::make_shared<BufferWriteCommand>(buffer, size,
+                                                                   offset, ptr);
+                   });
 
     if (blocking_write) {
         clFlush(command_queue);

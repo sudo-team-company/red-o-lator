@@ -1,6 +1,5 @@
 #include <common/test/doctest.h>
 
-#include <runtime/runtime-commons.h>
 #include <common/utils/vector-utils.hpp>
 #include <vector>
 
