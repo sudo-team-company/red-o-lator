@@ -5,10 +5,12 @@ on:
   pull_request:
 
 env:
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
   PKG_CONFIG_PATH: ${{github.workspace}}/CLRX/lib/pkgconfig
   RED_O_LATOR_DEVICE_CONFIG_PATH: ${{github.workspace}}/driver/resources/rx-570.ini
   THREAD_COUNT: 9
+  WXWIN: ${{github.workspace}}/wxWidgets
+  WX_CONFIG: ${{github.workspace}}/wxWidgets-repo/wxbuild/wx-config
 
 jobs:
   build:
@@ -21,6 +23,24 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install GTK 3 on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install libgtk-3-dev
+
+      - name: Clone wxWidgets
+        run: git clone -b v3.1.5 --recursive https://github.com/wxWidgets/wxWidgets.git wxWidgets-repo
+
+      - name: Configure wxWidgets
+        run: cmake -H${{github.workspace}}/wxWidgets-repo -B${{github.workspace}}/wxWidgets-repo/wxbuild
+          -DwxBUILD_SHARED=OFF
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build wxWidgets
+        run: cmake --build ${{github.workspace}}/wxWidgets-repo/wxbuild -j 16
+
+      - name: Install wxWidgets
+        run: cmake --install ${{github.workspace}}/wxWidgets-repo/wxbuild --config ${{env.BUILD_TYPE}} --prefix ${{github.workspace}}/wxWidgets
+
       - name: Clone OpenCL-Headers
         run: git clone https://github.com/KhronosGroup/OpenCL-Headers
 
@@ -30,40 +50,41 @@ jobs:
       - name: Configure ICD Loader
         run: cp -r ${{github.workspace}}/OpenCL-Headers/CL ${{github.workspace}}/OpenCL-ICD-Loader/inc &&
           cmake -H${{github.workspace}}/OpenCL-ICD-Loader -B ${{github.workspace}}/OpenCL-ICD-Loader/build
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
       - name: Build ICD Loader
-        run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build --config Debug -j ${{env.THREAD_COUNT}}
+        run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build -j ${{env.THREAD_COUNT}}
 
       - name: Install ICD Loader
         run: cmake --install ${{github.workspace}}/OpenCL-ICD-Loader/build
-             --prefix ${{github.workspace}}/OpenCL-ICD-Loader
-             --config Debug
+          --prefix ${{github.workspace}}/OpenCL-ICD-Loader
+          --config ${{env.BUILD_TYPE}}
 
       - name: Git clone CLRX
         run: git clone https://github.com/CLRX/CLRX-mirror --depth 1
 
       - name: Configure CLRX
         run: cmake -H${{github.workspace}}/CLRX-mirror -B ${{github.workspace}}/CLRX-mirror/build
-             -DCMAKE_BUILD_TYPE=Debug
-             -DCMAKE_INSTALL_PREFIX=CLRX
-             -DLIB_INSTALL_DIR=lib
-             -DNO_CLWRAPPER=ON
-             -DBUILD_STATIC_EXE=OFF
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -DCMAKE_INSTALL_PREFIX=CLRX
+          -DLIB_INSTALL_DIR=lib
+          -DNO_CLWRAPPER=ON
+          -DBUILD_STATIC_EXE=OFF
 
       - name: Build CLRX
-        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ --config Debug -j ${{env.THREAD_COUNT}}
+        run: cmake --build ${{github.workspace}}/CLRX-mirror/build/ -j ${{env.THREAD_COUNT}}
 
       - name: Install CLRX
-        run: cmake --install ${{github.workspace}}/CLRX-mirror/build/ --config Debug --prefix ${{github.workspace}}/CLRX
+        run: cmake --install ${{github.workspace}}/CLRX-mirror/build/ --config ${{env.BUILD_TYPE}} --prefix ${{github.workspace}}/CLRX
 
       - name: Configure red-o-lator
         run: cmake -H${{github.workspace}} -B ${{github.workspace}}/build
-              -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-              -DCMAKE_LIBRARY_PATH=${{github.workspace}}/OpenCL-ICD-Loader/lib
-              -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -DCMAKE_LIBRARY_PATH=${{github.workspace}}/OpenCL-ICD-Loader/lib
+          -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
 
       - name: Build red-o-lator
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j ${{env.THREAD_COUNT}}
+        run: cmake --build ${{github.workspace}}/build -j ${{env.THREAD_COUNT}}
 
       - name: Install ICD to the Windows system
         if: runner.os == 'Windows'

@@ -1,5 +1,7 @@
-#include <iostream>
+#include "gui/EmulatorApp.h"
 
-int main() {
-  std::cout << "Hello from debugger";
+wxIMPLEMENT_APP_NO_MAIN(EmulatorApp);
+
+int main(int argc, char* argv[]) {
+    wxEntry(argc, argv);
 }
