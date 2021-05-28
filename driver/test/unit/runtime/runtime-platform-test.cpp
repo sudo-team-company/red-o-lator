@@ -1,7 +1,6 @@
 #include <common/test/doctest.h>
 
 #include <runtime/runtime-commons.h>
-#include <cstring>
 #include <vector>
 
 #include "runtime/icd/icd.h"
@@ -32,7 +31,7 @@ TEST_SUITE("Platform API") {
 
         SUBCASE("platform should have correct name") {
             CHECK(test::getPlatform()->name ==
-                    "AMD Accelerated Parallel Processing");
+                  "AMD Accelerated Parallel Processing");
         }
 
         SUBCASE("platform should have cl_khr_icd extension") {

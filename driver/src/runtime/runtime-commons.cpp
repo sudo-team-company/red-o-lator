@@ -26,10 +26,10 @@ cl_int getParamInfo(
 
     if (!parameterValue.has_value()) {
         RETURN_ERROR(CL_INVALID_VALUE, "Unknown device info parameter " +
-                                           std::to_string(param_name) + ".")
+                                           std::to_string(param_name) + ".");
     }
 
-    auto [result, resultSize] = parameterValue.value();
+    auto [result, resultSize, isArray] = parameterValue.value();
 
     if (std::holds_alternative<std::string>(result)) {
         resultSize = strlen(std::get<std::string>(result).c_str()) + 1;
@@ -39,12 +39,14 @@ cl_int getParamInfo(
         RETURN_ERROR(CL_INVALID_VALUE,
                      "Not enough size to fit parameter: need " +
                          std::to_string(resultSize) + ", got " +
-                         std::to_string(param_value_size) + ".")
+                         std::to_string(param_value_size) + ".");
     }
 
     if (param_value) {
         if (std::holds_alternative<void*>(result)) {
-            memcpy(param_value, &std::get<void*>(result), resultSize);
+            const auto value = std::get<void*>(result);
+            memcpy(param_value, isArray ? value : &value, resultSize);
+
         } else {
             memcpy(param_value, std::get<std::string>(result).c_str(),
                    resultSize);

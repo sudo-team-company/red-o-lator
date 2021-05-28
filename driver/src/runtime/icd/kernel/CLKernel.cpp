@@ -1,4 +1,4 @@
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 #include <cstddef>
 #include <string>
 #include <utility>
@@ -28,26 +28,41 @@ void CLKernel::setArgument(cl_uint index, size_t size, const void* value) {
         throw KernelArgumentOutOfBoundsError(
             "Attempt to set argument at index " + std::to_string(index) +
             " of kernel with " + std::to_string(arguments.size()) +
-            "arguments");
+            " arguments");
     }
 
-    const auto copy = new std::byte[size];
-    memcpy(copy, value, size);
+    const auto argInfo = arguments[index].info;
 
-    arguments[index].value = KernelArgumentValue(index, size, copy);
+    KernelArgumentValueType data;
+    if (!value) {
+        data = nullptr;
+    } else if (std::dynamic_pointer_cast<PointerKernelArgumentInfo>(argInfo)) {
+        data = *const_cast<cl_mem*>(static_cast<const cl_mem*>(value));
+    } else {
+        auto* temp = new std::byte[size];
+        memcpy(temp, value, size);
+        data = temp;
+    }
+
+    arguments[index].value = KernelArgumentValue(index, size, data);
 }
 
-KernelArgument CLKernel::getArgument(cl_uint index) {
+KernelArgument CLKernel::getArgument(cl_uint index) const {
     if (index >= arguments.size()) {
         throw KernelArgumentOutOfBoundsError(
             "Attempt to get argument at index " + std::to_string(index) +
             " of kernel with " + std::to_string(arguments.size()) +
-            "arguments");
+            " arguments");
     }
 
     return arguments[index];
 }
-int CLKernel::argumentCount() {
+
+const std::vector<KernelArgument>& CLKernel::getArguments() const {
+    return arguments;
+}
+
+int CLKernel::argumentCount() const {
     return arguments.size();
 }
 

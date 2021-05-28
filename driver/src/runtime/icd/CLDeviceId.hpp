@@ -2,6 +2,8 @@
 
 #include "icd.h"
 
+// TODO: encapsulate parser in device
+
 struct CLDeviceId {
     CLDeviceId(IcdDispatchTable* const dispatchTable,
                cl_device_type deviceType,
@@ -15,11 +17,11 @@ struct CLDeviceId {
           localMemorySize(localMemorySize) {}
 
     IcdDispatchTable* const dispatchTable;
-    cl_device_type deviceType;
+    const cl_device_type deviceType;
 
-    size_t globalMemorySize = 0;
-    size_t constantMemorySize = 0;
-    size_t localMemorySize = 0;
+    const size_t globalMemorySize;
+    const size_t constantMemorySize;
+    const size_t localMemorySize;
 
     size_t usedGlobalMemory = 0;
     size_t usedLocalMemory = 0;

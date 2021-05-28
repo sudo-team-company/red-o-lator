@@ -8,5 +8,5 @@
 class BinaryDisassembler {
    public:
     std::unique_ptr<BinaryDisassemblingResult> disassemble(
-        size_t binarySize, const unsigned char* binary) const;
+        size_t binarySize, const std::byte* binary) const;
 };

@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <program/KernelArgumentInfoParser.h>
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 
 #include "icd/CLProgram.hpp"
 #include "runtime-commons.h"
@@ -13,8 +13,21 @@ clCreateProgramWithSource(cl_context context,
                           const size_t* lengths,
                           cl_int* errcode_ret) {
     SET_ERROR_AND_RETURN(CL_INVALID_OPERATION,
-                         "Only creating programs from binary is supported");
+                         "Only creating programs from binary is supported.");
 }
+
+#define SET_BINARY_STATUS(value)      \
+    do {                              \
+        if (binary_status) {          \
+            binary_status[0] = value; \
+        }                             \
+    } while (0)
+
+#define SET_BINARY_STATUS_AND_RETURN(value, message) \
+    do {                                             \
+        SET_BINARY_STATUS(value);                    \
+        SET_ERROR_AND_RETURN(value, message);        \
+    } while (0)
 
 CL_API_ENTRY cl_program CL_API_CALL
 clCreateProgramWithBinary(cl_context context,
@@ -25,21 +38,36 @@ clCreateProgramWithBinary(cl_context context,
                           cl_int* binary_status,
                           cl_int* errcode_ret) {
     if (!device_list || !num_devices) {
-        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
-                             "device_list is null or num_devices == 0.")
+        SET_BINARY_STATUS_AND_RETURN(
+            CL_INVALID_VALUE, "device_list is null or num_devices == 0.");
     }
 
     if (!lengths || !binaries) {
-        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
-                             "Source lengths or binaries is null.")
+        SET_BINARY_STATUS_AND_RETURN(CL_INVALID_VALUE,
+                                     "Source lengths or binaries is null.");
     }
 
     const auto program = new CLProgram(kDispatchTable, context);
 
     program->binarySize = lengths[0];
-    program->binary = binaries[0];
 
-    SET_SUCCESS()
+    const auto buffer = new std::byte[program->binarySize];
+    memcpy(buffer, binaries[0], program->binarySize);
+    program->binary = buffer;
+
+    const auto disassembler = BinaryDisassembler();
+    try {
+        program->disassembledBinary =
+            disassembler.disassemble(program->binarySize, program->binary);
+        program->buildLog = "Success disassembling binary";
+
+    } catch (const std::runtime_error& e) {
+        program->buildLog = e.what();
+        SET_BINARY_STATUS_AND_RETURN(CL_INVALID_BINARY, e.what());
+    }
+
+    SET_BINARY_STATUS(CL_SUCCESS);
+    SET_SUCCESS();
 
     return program;
 }
@@ -56,29 +84,6 @@ clCreateProgramWithBuiltInKernels(cl_context context,
     return nullptr;
 }
 
-CL_API_ENTRY cl_int CL_API_CALL clRetainProgram(cl_program program) {
-    if (!program) {
-        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
-    }
-
-    program->referenceCount++;
-    return CL_SUCCESS;
-}
-
-CL_API_ENTRY cl_int CL_API_CALL clReleaseProgram(cl_program program) {
-    if (!program) {
-        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
-    }
-
-    program->referenceCount--;
-
-    if (program->referenceCount == 0) {
-        delete program;
-    }
-
-    return CL_SUCCESS;
-}
-
 CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
                                                cl_uint num_devices,
                                                const cl_device_id* device_list,
@@ -90,20 +95,29 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
-    program->buildStatus = CL_BUILD_IN_PROGRESS;
+    program->buildStatus = CL_BUILD_SUCCESS;
 
-    const auto disassembler = BinaryDisassembler();
-    try {
-        program->disassembledBinary =
-            disassembler.disassemble(program->binarySize, program->binary);
-        program->buildStatus = CL_BUILD_SUCCESS;
-        program->buildLog = "Success disassembling binary";
+    return CL_SUCCESS;
+}
 
-    } catch (const KernelArgumentInfoParseError& e) {
-        kLogger.error(e.what());
-        program->buildStatus = CL_BUILD_ERROR;
-        program->buildLog = e.what();
-        return CL_INVALID_BINARY;
+CL_API_ENTRY cl_int CL_API_CALL clRetainProgram(cl_program program) {
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
+    }
+
+    program->referenceCount++;
+    return CL_SUCCESS;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL clReleaseProgram(cl_program program) {
+    if (!program) {
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
+    }
+
+    program->referenceCount--;
+
+    if (program->referenceCount == 0) {
+        delete program;
     }
 
     return CL_SUCCESS;
@@ -115,7 +129,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
                                                  void* param_value,
                                                  size_t* param_value_size_ret) {
     if (!program) {
-        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
     return getParamInfo(
@@ -161,7 +175,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
 
                 case CL_PROGRAM_BINARIES: {
                     resultSize = program->binarySize;
-                    result = const_cast<unsigned char*>(program->binary);
+                    result = (unsigned char*) program->binary;
+                    // TODO: test it
                     break;
                 }
 
@@ -192,7 +207,7 @@ clGetProgramBuildInfo(cl_program program,
                       void* param_value,
                       size_t* param_value_size_ret) {
     if (!program) {
-        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.")
+        RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
     return getParamInfo(
@@ -241,8 +256,8 @@ clCompileProgram(cl_program program,
                  const char** header_include_names,
                  void (*pfn_notify)(cl_program, void*),
                  void* user_data) {
-    std::cerr << "Unimplemented OpenCL API call: clCompileProgram" << std::endl;
-    return CL_INVALID_PLATFORM;
+    RETURN_ERROR(CL_INVALID_OPERATION,
+                 "clCompileProgram: Compiler is not available.");
 }
 
 CL_API_ENTRY cl_program CL_API_CALL
@@ -255,13 +270,17 @@ clLinkProgram(cl_context context,
               void (*pfn_notify)(cl_program, void*),
               void* user_data,
               cl_int* errcode_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clLinkProgram" << std::endl;
-    return nullptr;
+    SET_ERROR_AND_RETURN(CL_INVALID_OPERATION,
+                         "clLinkProgram: Linker is not available.");
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
 clUnloadPlatformCompiler(cl_platform_id platform) {
-    std::cerr << "Unimplemented OpenCL API call: clUnloadPlatformCompiler"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    RETURN_ERROR(CL_INVALID_OPERATION,
+                 "clUnloadPlatformCompiler: Compiler is not available.");
+}
+
+CL_API_ENTRY cl_int CL_API_CALL clUnloadCompiler() {
+    RETURN_ERROR(CL_INVALID_OPERATION,
+                 "clUnloadCompiler: Compiler is not available.");
 }

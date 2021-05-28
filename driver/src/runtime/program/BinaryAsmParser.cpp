@@ -1,6 +1,6 @@
 #include <runtime-commons.h>
 #include <cassert>
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 #include <iostream>
 #include <string>
 
@@ -68,19 +68,19 @@ void BinaryAsmParser::parseSingleInstruction(const std::string& instruction) {
     switch (parsingState) {
         case BinaryParameters: {
             assert(currentKernelBuilder == nullptr);
-            parsingResult.parameters.push_back(instruction);
+            parseBinaryParameter(instruction, instruction, "");
             break;
         }
 
         case KernelConfig: {
             assert(currentKernelBuilder != nullptr);
-            currentKernelBuilder->config.push_back(instruction);
+            parseKernelConfigParameter(instruction, instruction, "");
+            break;
         }
 
         case KernelInstructions: {
             assert(currentKernelBuilder != nullptr);
-            // TODO: this is label
-            currentKernelBuilder->instructions.push_back(instruction);
+            parseKernelInstruction(instruction, "", instruction, "");
             break;
         }
     }
@@ -132,6 +132,12 @@ void BinaryAsmParser::parseKernelInstruction(const std::string& line,
                                              const std::string& address,
                                              const std::string& instruction,
                                              const std::string& values) {
+    if (instruction[0] == '.') {
+        // TODO: this is label
+        currentKernelBuilder->instructions.push_back(line);
+        return;
+    }
+
     assert(utils::startsWith(address, "/*"));
     assert(utils::endsWith(address, "*/"));
     const auto addressValue = address.substr(2, address.size() - 4);
@@ -141,6 +147,7 @@ void BinaryAsmParser::parseKernelInstruction(const std::string& line,
 void BinaryAsmParser::parseBinaryParameter(const std::string& line,
                                            const std::string& parameterName,
                                            const std::string& parameterValue) {
+
     if (parameterName == ".gpu") {
         parsingResult.gpuName = parameterValue;
 

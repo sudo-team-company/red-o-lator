@@ -1,5 +1,5 @@
 #include <common/test/doctest.h>
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 #include <string>
 
 #include "runtime/runtime-commons.h"

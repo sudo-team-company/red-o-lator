@@ -1,21 +1,22 @@
-#include <common/common.hpp>
+#include <common/utils/common.hpp>
 #include <cstring>
+#include <iostream>
 #include <optional>
 
-#include "runtime-commons.h"
 #include "icd/icd.h"
+#include "runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
                                                  cl_platform_id* platforms,
                                                  cl_uint* num_platforms) {
     if (!platforms && !num_platforms) {
         RETURN_ERROR(CL_INVALID_VALUE,
-                     "platforms is null and num_platforms is null.")
+                     "platforms is null and num_platforms is null.");
     }
 
     if (platforms && num_entries == 0) {
         RETURN_ERROR(CL_INVALID_VALUE,
-                     "platforms is not null and num_entries == 0.")
+                     "platforms is not null and num_entries == 0.");
     }
 
     if (!kPlatform) {
@@ -47,7 +48,7 @@ clGetPlatformInfo(cl_platform_id platform,
                   void* param_value,
                   size_t* param_value_size_ret) {
     if (platform != kPlatform) {
-        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.")
+        RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.");
     }
 
     return getParamInfo(
@@ -93,9 +94,10 @@ clGetPlatformInfo(cl_platform_id platform,
 
 CL_API_ENTRY void* CL_API_CALL
 clGetExtensionFunctionAddress(const char* func_name) {
-    if (strcmp(func_name, "clIcdGetPlatformIDsKHR") == 0) {
+    const auto funcName = std::string(func_name);
+    if (funcName == "clIcdGetPlatformIDsKHR") {
         return (void*) clIcdGetPlatformIDsKHR;
-    } else if (strcmp(func_name, "clGetPlatformInfo") == 0) {
+    } else if (funcName == "clGetPlatformInfo") {
         return (void*) clGetPlatformInfo;
     } else {
         return nullptr;
@@ -105,4 +107,10 @@ clGetExtensionFunctionAddress(const char* func_name) {
 CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
     cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms) {
     return clGetPlatformIDs(num_entries, platforms, num_platforms);
+}
+
+
+CL_API_ENTRY void* CL_API_CALL clGetExtensionFunctionAddressForPlatform(
+    cl_platform_id platform, const char* func_name) {
+    return clGetExtensionFunctionAddress(func_name);
 }

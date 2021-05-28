@@ -10,7 +10,7 @@
 #include "KernelArgument.hpp"
 #include "runtime/icd/icd.h"
 
-class CLKernel {
+struct CLKernel {
    public:
     CLKernel(IcdDispatchTable* dispatchTable,
              std::string name,
@@ -22,9 +22,11 @@ class CLKernel {
 
     void setArgument(cl_uint index, size_t size, const void* value);
 
-    KernelArgument getArgument(cl_uint index);
+    [[nodiscard]] KernelArgument getArgument(cl_uint index) const;
 
-    int argumentCount();
+    [[nodiscard]] const std::vector<KernelArgument>& getArguments() const;
+
+    [[nodiscard]] int argumentCount() const;
 
     IcdDispatchTable* const dispatchTable;
     const std::string name;
@@ -40,7 +42,7 @@ class CLKernel {
 };
 
 struct CLKernelBuilder {
-    CLKernel* build() const;
+    [[nodiscard]] CLKernel* build() const;
 
     std::string name;
     std::vector<std::string> config{};

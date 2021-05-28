@@ -35,7 +35,7 @@ set(SOURCES
         src/runtime/icd/CLContext.h
         src/runtime/icd/CLDeviceId.hpp
         src/runtime/icd/CLEvent.hpp
-        src/runtime/icd/CLMem.hpp
+        src/runtime/icd/CLMem.h
         src/runtime/icd/CLPlatformId.hpp
         src/runtime/icd/CLProgram.hpp
         src/runtime/icd/CLSampler.hpp
@@ -65,16 +65,17 @@ set(SOURCES
         src/runtime/runtime-memory-buffer.cpp
         src/runtime/runtime-memory-image.cpp
         src/runtime/runtime-memory.cpp
-        src/runtime/runtime-other.cpp
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        )
+        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp)
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
 add_library(red-o-lator-icd SHARED ${SOURCES})
-target_link_libraries(red-o-lator-icd INTERFACE OpenCL::OpenCL)
+target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
+        OpenCL::OpenCL
+        )
 target_link_libraries(red-o-lator-icd PRIVATE
         red-o-lator-common
         PkgConfig::LIB_CLRX_AMD_ASM
@@ -110,11 +111,15 @@ set(UNIT_TEST_SOURCES
         test/unit/unit-test-common/test-commons.cpp
         test/unit/runtime/runtime-context-test.cpp
         test/unit/runtime/runtime-command-queue-test.cpp
-        )
+        test/unit/runtime/runtime-memory-test.cpp
+        test/unit/runtime/runtime-memory-buffer-test.cpp
+        test/unit/runtime/runtime-program-test.cpp test/unit/runtime/runtime-kernel-test.cpp)
 
 add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)
-target_include_directories(red-o-lator-icd-test-unit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/)
+target_include_directories(red-o-lator-icd-test-unit PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/)
+
 add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${TEST_RESOURCES}
@@ -130,7 +135,7 @@ add_test(NAME red-o-lator-icd-test-unit COMMAND red-o-lator-icd-test-unit
 set(E2E_TEST_SOURCES
         test/e2e/runner.cpp
         test/e2e/runtime/runtime-e2e-test.cpp
-        test/e2e/runtime/test-commons.hpp)
+        )
 
 add_executable(red-o-lator-icd-test-e2e ${E2E_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-e2e PRIVATE OpenCL::OpenCL red-o-lator-common)
