@@ -3,12 +3,14 @@
 #include <common/logger/Logger.h>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <variant>
 
-#include "icd/CLPlatformId.hpp"
 #include "CLObjectInfoParameterValue.hpp"
 #include "device/DeviceConfigurationParser.h"
+#include "icd/CLPlatformId.hpp"
+#include "icd/CLCommandQueue.h"
 #include "icd/IcdDispatchTable.h"
 
 extern Logger kLogger;
@@ -47,7 +49,13 @@ extern cl_int getParamInfo(
     const std::function<std::optional<CLObjectInfoParameterValue>()>&
         parameterValueGetter);
 
+extern void enqueueCommand(cl_command_queue queue,
+                      cl_uint waitListEventsCount,
+                      const cl_event* waitList,
+                      cl_event* eventOut,
+                      const std::function<std::shared_ptr<Command>()>& commandGetter);
+
 namespace utils {
 extern bool hasMutuallyExclusiveFlags(cl_bitfield flags,
-                                std::initializer_list<cl_int> checkFlags);
+                                      std::initializer_list<cl_int> checkFlags);
 }  // namespace utils

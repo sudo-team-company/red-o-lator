@@ -14,6 +14,7 @@ BufferWriteCommand::~BufferWriteCommand() {
     clReleaseMemObject(buffer);
 }
 
-void BufferWriteCommand::execute() const {
+void BufferWriteCommand::executeImpl() const {
     memcpy(buffer->address + offset, dataPtr, size);
+
 }

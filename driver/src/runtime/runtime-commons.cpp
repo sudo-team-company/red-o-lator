@@ -60,6 +60,30 @@ cl_int getParamInfo(
     return CL_SUCCESS;
 }
 
+void enqueueCommand(
+    cl_command_queue queue,
+    cl_uint waitListEventsCount,
+    const cl_event* waitList,
+    cl_event* eventOut,
+    const std::function<std::shared_ptr<Command>()>& commandGetter) {
+    // clang formatting is meh, so here is a comment separating args from body
+
+    const auto command = commandGetter();
+
+    const auto event = new CLEvent(kDispatchTable, command);
+    command->event = event;
+
+    for (size_t i = 0; i < waitListEventsCount; ++i) {
+        command->waitList.push(waitList[i]);
+    }
+
+    queue->enqueue(command);
+
+    if (eventOut) {
+        *eventOut = event;
+    }
+}
+
 bool utils::hasMutuallyExclusiveFlags(
     cl_bitfield flags, std::initializer_list<cl_int> checkFlags) {
     bool foundFlag = false;

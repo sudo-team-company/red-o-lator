@@ -22,15 +22,17 @@ struct CLCommandQueue {
 
     unsigned int referenceCount = 1;
 
-    void enqueue(const std::shared_ptr<const Command>& command);
+    void enqueue(const std::shared_ptr<Command>& command);
 
     void flush();
 
     size_t size();
 
+    bool isOutOfOrder();
+
    private:
-    std::queue<std::shared_ptr<const Command>> commands =
-        std::queue<std::shared_ptr<const Command>>();
+    std::deque<std::shared_ptr<Command>> commands =
+        std::deque<std::shared_ptr<Command>>();
 
     bool flushInProcess = false;
 };

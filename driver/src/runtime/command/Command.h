@@ -1,12 +1,21 @@
 #pragma once
 
 #include <memory>
+#include <stack>
+
+#include "runtime/icd/CLEvent.h"
 #include "runtime/icd/CLMem.h"
 
 class Command {
    public:
-    virtual ~Command() = default;
-    virtual void execute() const = 0;
+    virtual ~Command();
+    virtual void execute(bool outOfOrder);
+
+    CLEvent* event = nullptr;
+    std::stack<CLEvent*> waitList{};
+
+   protected:
+    virtual void executeImpl() const = 0;
 };
 
 struct BufferReadCommand : public Command {
@@ -17,12 +26,13 @@ struct BufferReadCommand : public Command {
 
     ~BufferReadCommand() override;
 
-    void execute() const override;
-
     CLMem* const buffer;
     const size_t size;
     const size_t offset;
     void* const outputPtr;
+
+   protected:
+    void executeImpl() const override;
 };
 
 struct BufferWriteCommand : public Command {
@@ -33,12 +43,13 @@ struct BufferWriteCommand : public Command {
 
     ~BufferWriteCommand() override;
 
-    void execute() const override;
-
     CLMem* const buffer;
     const size_t size;
     const size_t offset;
     const void* const dataPtr;
+
+   protected:
+    void executeImpl() const override;
 };
 
 struct KernelExecutionCommand : public Command {
@@ -50,11 +61,12 @@ struct KernelExecutionCommand : public Command {
 
     ~KernelExecutionCommand() override;
 
-    void execute() const override;
-
     CLKernel* const kernel;
     const cl_uint workDim;
     const size_t* const globalWorkOffset;
     const size_t* const globalWorkSize;
     const size_t* const localWorkSize;
+
+   protected:
+    void executeImpl() const override;
 };

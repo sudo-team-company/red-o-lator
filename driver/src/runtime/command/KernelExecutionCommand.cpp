@@ -1,4 +1,3 @@
-#include <runtime-commons.h>
 #include <cstring>
 #include "Command.h"
 #include "runtime/icd/kernel/CLKernel.h"
@@ -19,8 +18,7 @@ KernelExecutionCommand::KernelExecutionCommand(CLKernel* kernel,
 KernelExecutionCommand::~KernelExecutionCommand() {
     clReleaseKernel(kernel);
 }
-
-void KernelExecutionCommand::execute() const {
+void KernelExecutionCommand::executeImpl() const {
     for (const auto& arg : kernel->getArguments()) {
         if (std::holds_alternative<CLMem*>(arg.value.value().value)) {
             const auto argInfo =

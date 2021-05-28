@@ -106,6 +106,11 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     hardcodeParameter(parameters, CL_DEVICE_ERROR_CORRECTION_SUPPORT,
                       (void*) false, sizeof(cl_bool));
 
+    hardcodeParameter(
+        parameters, CL_DEVICE_QUEUE_PROPERTIES,
+        reinterpret_cast<void*>(CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE),
+        sizeof(cl_command_queue_properties));
+
     mConfigurationPath = configurationFilePath;
     // TODO: memory leak of arrays
     mParameters.clear();
@@ -194,18 +199,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     bool isArray = false;
     cl_device_info clParameter = 0;
 
-    IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
-    IGNORE_PARAMETER(CL_DEVICE_PARENT_DEVICE)
-    IGNORE_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
-    IGNORE_PARAMETER(CL_DRIVER_VERSION)
-    IGNORE_PARAMETER(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
-    IGNORE_PARAMETER(CL_DEVICE_AVAILABLE)
-    IGNORE_PARAMETER(CL_DEVICE_LINKER_AVAILABLE)
-    IGNORE_PARAMETER(CL_DEVICE_COMPILER_AVAILABLE)
-    IGNORE_PARAMETER(CL_DEVICE_IMAGE_SUPPORT)
-    IGNORE_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
-    IGNORE_PARAMETER(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
-
     PARSE_PARAMETER(CL_DEVICE_TYPE, cl_device_type, parseDeviceType)
     PARSE_STRING_PARAMETER(CL_DEVICE_NAME)
     PARSE_NUMBER_PARAMETER(
@@ -276,9 +269,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_BITFIELD_PARAMETER(CL_DEVICE_EXECUTION_CAPABILITIES,
                              cl_device_exec_capabilities,
                              parseDeviceExecCapabilities)
-    PARSE_BITFIELD_PARAMETER(CL_DEVICE_QUEUE_PROPERTIES,
-                             cl_command_queue_properties,
-                             parseCommandQueueProperties)
     PARSE_PARAMETER_WITH_BODY(CL_DEVICE_BUILT_IN_KERNELS, [&]() {
         result = parameterValue == "0" ? "" : parameterValue.c_str();
     })
@@ -310,6 +300,19 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_SIZE_PER_COMPUTE_UNIT_AMD,
                            size_t)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, size_t)
+
+    IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
+    IGNORE_PARAMETER(CL_DEVICE_PARENT_DEVICE)
+    IGNORE_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
+    IGNORE_PARAMETER(CL_DRIVER_VERSION)
+    IGNORE_PARAMETER(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
+    IGNORE_PARAMETER(CL_DEVICE_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_LINKER_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_COMPILER_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_IMAGE_SUPPORT)
+    IGNORE_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
+    IGNORE_PARAMETER(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
+    IGNORE_PARAMETER(CL_DEVICE_QUEUE_PROPERTIES)
 
     if (!clParameter) {
         kLogger.warn("Unknown config parameter: " + parameterName);

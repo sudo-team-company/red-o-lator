@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "test-commons.h"
+#include <runtime/runtime-commons.h>
 
 namespace test {
 cl_platform_id getPlatform() {
@@ -45,6 +46,13 @@ cl_command_queue getCommandQueue() {
     REQUIRE(queue != nullptr);
 
     return queue;
+}
+
+std::shared_ptr<Command> getDummyCommand() {
+    const auto command = std::make_shared<DummyCommand>();
+    const auto event = new CLEvent(kDispatchTable, command);
+    command->event = event;
+    return command;
 }
 
 std::pair<cl_mem, cl_int> createBufferSafe(cl_mem_flags flags,

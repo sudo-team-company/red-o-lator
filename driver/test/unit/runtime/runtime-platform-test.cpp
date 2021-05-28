@@ -1,6 +1,5 @@
 #include <common/test/doctest.h>
 
-#include <runtime/runtime-commons.h>
 #include <vector>
 
 #include "runtime/icd/icd.h"

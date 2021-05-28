@@ -23,13 +23,6 @@ clCreateCommandQueue(cl_context context,
                              "Profiling is not supported yet.");
     }
 
-    if (properties & CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE) {
-        // TODO(clCreateCommandQueue): out-of-order exec support
-        SET_ERROR_AND_RETURN(
-            CL_INVALID_QUEUE_PROPERTIES,
-            "Out-of-order execution mode is not supported yet.");
-    }
-
     const auto commandQueue =
         new CLCommandQueue(kDispatchTable, context, properties);
 

@@ -34,7 +34,7 @@ set(SOURCES
         src/runtime/icd/CLCommandQueue.h
         src/runtime/icd/CLContext.h
         src/runtime/icd/CLDeviceId.hpp
-        src/runtime/icd/CLEvent.hpp
+        src/runtime/icd/CLEvent.h
         src/runtime/icd/CLMem.h
         src/runtime/icd/CLPlatformId.hpp
         src/runtime/icd/CLProgram.hpp
@@ -68,7 +68,7 @@ set(SOURCES
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp)
+        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp src/runtime/command/Command.cpp src/runtime/icd/CLEvent.cpp)
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
