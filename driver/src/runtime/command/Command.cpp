@@ -1,32 +1,72 @@
 #include <cassert>
+#include <common/utils/time-utils.hpp>
 
 #include "Command.h"
+#include "runtime/icd/CLCommandQueue.h"
 
-Command::~Command() {
-    delete event;
+Command::Command(CLCommandQueue* commandQueue) : commandQueue(commandQueue) {
+    clRetainCommandQueue(commandQueue);
 }
 
-void Command::execute(bool outOfOrder) {
-    assert(event != nullptr);
+Command::~Command() {
+    assert(waitList.empty());
 
-    if (!event->isQueued()) {
+    if (mEvent) {
+        clReleaseEvent(mEvent);
+    }
+
+    clReleaseCommandQueue(commandQueue);
+}
+
+void Command::execute() {
+    assert(mEvent != nullptr);
+
+    if (!mEvent->isQueued()) {
         assert(waitList.empty());
         return;
     }
 
-    if (outOfOrder) {
+    if (commandQueue->isOutOfOrder()) {
         while (!waitList.empty()) {
             const auto waitEvent = waitList.top();
             waitList.pop();
 
-            if (waitEvent->isQueued()) {
-                waitEvent->command->execute(outOfOrder);
+            if (waitEvent->isUserEvent && !waitEvent->isCompleted()) {
+                // TODO: what is proper behavior?
+                continue;
             }
+
+            if (waitEvent->isQueued()) {
+                waitEvent->command->execute();
+            }
+
+            clReleaseEvent(waitEvent);
         }
     }
 
-    event->commandExecutionStatus = CL_RUNNING;
+    mEvent->setSubmitted();
+    mEvent->setRunning();
+
     executeImpl();
-    event->commandExecutionStatus = CL_COMPLETE;
+
+    mEvent->setCompleted();
 }
 
+CLEvent* Command::requireEvent() {
+    assert(mEvent != nullptr);
+    return mEvent;
+}
+
+void Command::setEvent(CLEvent* event) {
+    this->mEvent = event;
+    clRetainEvent(event);
+}
+
+void Command::addEventsToWaitList(cl_uint count,
+                                  const cl_event* originWaitList) {
+    for (size_t i = 0; i < count; ++i) {
+        const auto event = originWaitList[i];
+        waitList.push(event);
+        clRetainEvent(event);
+    }
+}

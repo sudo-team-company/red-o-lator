@@ -3,12 +3,14 @@
 #include "runtime/icd/kernel/CLKernel.h"
 #include "emulator/command_executor.h"
 
-KernelExecutionCommand::KernelExecutionCommand(CLKernel* kernel,
+KernelExecutionCommand::KernelExecutionCommand(CLCommandQueue* commandQueue,
+                                               CLKernel* kernel,
                                                cl_uint workDim,
                                                const size_t* globalWorkOffset,
                                                const size_t* globalWorkSize,
                                                const size_t* localWorkSize)
-    : kernel(kernel),
+    : Command(commandQueue),
+      kernel(kernel),
       workDim(workDim),
       globalWorkOffset(globalWorkOffset),
       globalWorkSize(globalWorkSize),
@@ -19,6 +21,11 @@ KernelExecutionCommand::KernelExecutionCommand(CLKernel* kernel,
 KernelExecutionCommand::~KernelExecutionCommand() {
     clReleaseKernel(kernel);
 }
+
+cl_command_type KernelExecutionCommand::getCommandType() {
+    return CL_COMMAND_NDRANGE_KERNEL;
+}
+
 void KernelExecutionCommand::executeImpl() const {
     executeCommand(*this);
 }

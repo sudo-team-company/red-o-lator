@@ -175,8 +175,8 @@ clEnqueueReadBuffer(cl_command_queue command_queue,
 
     enqueueCommand(command_queue, num_events_in_wait_list, event_wait_list,
                    event, [&]() {
-                       return std::make_shared<BufferReadCommand>(buffer, size,
-                                                                  offset, ptr);
+                       return new BufferReadCommand(command_queue, buffer, size,
+                                                    offset, ptr);
                    });
 
     if (blocking_read) {
@@ -205,8 +205,8 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
 
     enqueueCommand(command_queue, num_events_in_wait_list, event_wait_list,
                    event, [&]() {
-                       return std::make_shared<BufferWriteCommand>(buffer, size,
-                                                                   offset, ptr);
+                       return new BufferWriteCommand(command_queue, buffer,
+                                                     size, offset, ptr);
                    });
 
     if (blocking_write) {

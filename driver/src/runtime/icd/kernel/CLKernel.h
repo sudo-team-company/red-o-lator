@@ -38,6 +38,8 @@ struct CLKernel {
     unsigned int referenceCount = 0;
 
    private:
+    void releaseArgument(KernelArgument& argument);
+
     std::vector<KernelArgument> arguments;
 };
 

@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "test-commons.h"
+
 #include <runtime/runtime-commons.h>
 
 namespace test {
@@ -48,10 +49,10 @@ cl_command_queue getCommandQueue() {
     return queue;
 }
 
-std::shared_ptr<Command> getDummyCommand() {
-    const auto command = std::make_shared<DummyCommand>();
-    const auto event = new CLEvent(kDispatchTable, command);
-    command->event = event;
+Command* getDummyCommand(cl_command_queue queue) {
+    const auto command = new DummyCommand(queue);
+    const auto event = new CLEvent(kDispatchTable, queue->context, kClock, command);
+    command->setEvent(event);
     return command;
 }
 

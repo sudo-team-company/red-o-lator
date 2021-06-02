@@ -8,6 +8,8 @@ IcdDispatchTable* kDispatchTable =  // NOLINT(cert-err58-cpp)
 DeviceConfigurationParser kDeviceConfigurationParser =
     DeviceConfigurationParser();
 
+utils::Clock* kClock = new utils::SystemClock();  // NOLINT(cert-err58-cpp)
+
 CLPlatformId* kPlatform = nullptr;
 CLDeviceId* kDevice = nullptr;
 
@@ -60,22 +62,19 @@ cl_int getParamInfo(
     return CL_SUCCESS;
 }
 
-void enqueueCommand(
-    cl_command_queue queue,
-    cl_uint waitListEventsCount,
-    const cl_event* waitList,
-    cl_event* eventOut,
-    const std::function<std::shared_ptr<Command>()>& commandGetter) {
+void enqueueCommand(cl_command_queue queue,
+                    cl_uint waitListEventsCount,
+                    const cl_event* waitList,
+                    cl_event* eventOut,
+                    const std::function<Command*()>& commandGetter) {
     // clang formatting is meh, so here is a comment separating args from body
 
     const auto command = commandGetter();
 
-    const auto event = new CLEvent(kDispatchTable, command);
-    command->event = event;
-
-    for (size_t i = 0; i < waitListEventsCount; ++i) {
-        command->waitList.push(waitList[i]);
-    }
+    const auto event =
+        new CLEvent(kDispatchTable, queue->context, kClock, command);
+    command->setEvent(event);
+    command->addEventsToWaitList(waitListEventsCount, waitList);
 
     queue->enqueue(command);
 

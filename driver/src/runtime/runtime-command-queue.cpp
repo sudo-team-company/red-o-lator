@@ -17,12 +17,6 @@ clCreateCommandQueue(cl_context context,
         SET_ERROR_AND_RETURN(CL_INVALID_DEVICE, "Device is null or not valid.");
     }
 
-    if (properties & CL_QUEUE_PROFILING_ENABLE) {
-        // TODO(clCreateCommandQueue): profiling support
-        SET_ERROR_AND_RETURN(CL_INVALID_QUEUE_PROPERTIES,
-                             "Profiling is not supported yet.");
-    }
-
     const auto commandQueue =
         new CLCommandQueue(kDispatchTable, context, properties);
 

@@ -6,16 +6,15 @@ CLMem::CLMem(IcdDispatchTable* dispatchTable, CLContext* context)
 }
 
 CLMem::~CLMem() {
-    while (!destructorCallbacks.empty()) {
-        const auto callback = destructorCallbacks.top();
-        callback->function(this, callback->userData);
-        destructorCallbacks.pop();
+    while (!mDestructorCallbacks.empty()) {
+        const auto callback = mDestructorCallbacks.top();
+        callback.function(this, callback.userData);
+        mDestructorCallbacks.pop();
     }
 
     clReleaseContext(context);
 }
 
-void CLMem::registerCallback(
-    const std::shared_ptr<CLMemDestructorCallback>& callback) {
-    destructorCallbacks.push(callback);
+void CLMem::registerCallback(const CLMemDestructorCallback& callback) {
+    mDestructorCallbacks.push(callback);
 }

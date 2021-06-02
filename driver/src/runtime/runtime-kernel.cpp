@@ -188,8 +188,8 @@ clEnqueueNDRangeKernel(cl_command_queue command_queue,
 
     enqueueCommand(command_queue, num_events_in_wait_list, event_wait_list,
                    event, [&]() {
-                       return std::make_shared<KernelExecutionCommand>(
-                           kernel, work_dim, global_work_offset,
+                       return new KernelExecutionCommand(
+                           command_queue, kernel, work_dim, global_work_offset,
                            global_work_size, local_work_size);
                    });
 

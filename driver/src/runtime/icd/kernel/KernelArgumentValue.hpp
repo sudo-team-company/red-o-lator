@@ -4,7 +4,7 @@
 #include <variant>
 #include <runtime/icd/CLMem.h>
 
-using KernelArgumentValueType = std::variant<void*, CLMem*, nullptr_t>;
+using KernelArgumentValueType = std::variant<std::byte*, CLMem*, nullptr_t>;
 
 struct KernelArgumentValue {
     KernelArgumentValue(cl_uint index,
