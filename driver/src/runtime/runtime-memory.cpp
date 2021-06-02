@@ -79,8 +79,7 @@ clSetMemObjectDestructorCallback(cl_mem memobj,
         RETURN_ERROR(CL_INVALID_VALUE, "Callback is null.");
     }
 
-    auto callback =
-        std::make_shared<CLMemDestructorCallback>(pfn_notify, user_data);
+    auto callback = CLMemDestructorCallback(pfn_notify, user_data);
     memobj->registerCallback(callback);
 
     return CL_SUCCESS;

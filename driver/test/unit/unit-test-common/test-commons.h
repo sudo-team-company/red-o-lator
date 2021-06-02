@@ -9,15 +9,23 @@
 
 namespace test {
 struct DummyCommand : public Command {
+    explicit DummyCommand(cl_command_queue commandQueue)
+        : Command(commandQueue) {}
+
    protected:
-    void executeImpl() const override {};
+    void executeImpl() const override{};
+
+   public:
+    cl_command_type getCommandType() override {
+        return CL_COMMAND_USER;
+    }
 };
 
 cl_platform_id getPlatform();
 cl_device_id getDevice();
 cl_context getContext();
 cl_command_queue getCommandQueue();
-std::shared_ptr<Command> getDummyCommand();
+Command* getDummyCommand(cl_command_queue queue);
 
 std::pair<cl_mem, cl_int> createBufferSafe(cl_mem_flags flags = 0,
                                            size_t size = 128,
