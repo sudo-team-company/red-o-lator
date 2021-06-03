@@ -1829,6 +1829,47 @@ enum InstrKey {
 
     // VOP1
     /**
+     * Syntax: V_BFREV_B32 VDST, SRC0
+     * Operation:
+     * VDST = REVBIT(SRC0)
+     */
+    V_BFREV_B32,
+
+    /**
+     * Syntax: V_FFBH_U32 VDST, SRC0
+     * Description: Find last one bit in SRC0. If found, store number of skipped bits to VDST, otherwise set VDST to -1.
+     * Operation:
+     * VDST = -1
+     * for (INT8 i = 31; i >= 0; i--)
+     * if ((1U<<i) & SRC0) != 0)
+     * { VDST = 31-i; break; }
+     */
+    V_FFBH_U32,
+
+    /**
+     * Syntax: V_FFBH_I32 VDST, SRC0
+     * Description: Find last opposite bit to sign in SRC0. If found, store number of skipped bits to VDST, otherwise set VDST to -1.
+     * Operation:
+     * VDST = -1
+     * UINT32 bitval = (INT32)SRC0>=0 ? 1 : 0
+     * for (INT8 i = 31; i >= 0; i--)
+     * if ((1U<<i) & SRC0) == (bitval<<i))
+     * { VDST = 31-i; break; }
+     */
+    V_FFBH_I32,
+
+    /**
+     * Syntax: V_FFBL_B32 VDST, SRC0
+     * Description: Find first one bit in SRC0. If found, store number of bit to VDST, otherwise set VDST to -1.
+     * Operation:
+     * VDST = -1
+     * for (UINT8 i = 0; i < 32; i++)
+     * if ((1U<<i) & SRC0) != 0)
+     * { VDST = i; break; }
+     */
+    V_FFBL_B32,
+
+    /**
      * D.u = S0.u.
      * Input and output modifiers not supported; this is an untyped operation.
      */

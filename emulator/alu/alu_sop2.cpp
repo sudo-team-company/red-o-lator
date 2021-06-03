@@ -10,7 +10,7 @@ static inline void run_s_absdiff_i32(WfStateSOP2& state) {
     state.SCC = state.SDST != 0;
 }
 static inline void run_s_addc_u32(WfStateSOP2& state) {
-    uint64_t temp = state.SSRC0 + state.SSRC1 + state.SCC;
+    uint64_t temp = state.SSRC0 + state.SSRC1;
     state.SDST = temp;
     state.SCC = temp >> 32;
 }

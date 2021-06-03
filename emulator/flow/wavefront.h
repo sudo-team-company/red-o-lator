@@ -58,11 +58,11 @@ struct Wavefront {
         : workGroup(wg),
           execReg(0),
           vccReg(0),
+          sgprsnum(sgprsnum),
+          vgprsnum(vgprsnum),
           programCounter(std::make_unique<ProgramCounter>(0)),
           statusReg(std::make_unique<StatusReg>(0)),
           modeReg(std::make_unique<ModeReg>(0)),
-          sgprsnum(sgprsnum),
-          vgprsnum(vgprsnum),
           atBarrier(false),
           completed(false) {
         scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));

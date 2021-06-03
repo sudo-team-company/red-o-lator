@@ -279,6 +279,84 @@ TEST_CASE(
     delete wavefront;
 }
 
+TEST_CASE("s_addc_u32") {
+    auto* wavefront = new Wavefront(nullptr, 12, 0);
+    Instruction instruction = Instruction(0, "s_addc_u32", {"s0", "s10", "s11"});
+
+    SUBCASE("src0 is 0x00000002, src1 is 0x00000005") {
+        wavefront->scalarRegFile[10] = 0x00000002;
+        wavefront->scalarRegFile[11] = 0x00000005;
+        run_sop2(instruction, wavefront);
+        CHECK(wavefront->scalarRegFile[0] == 0x00000007);
+        CHECK(!wavefront->sccReg);
+    }
+    SUBCASE("src0 is 0x7fffffff, src1 is 0x00000001 => overflow") {
+        wavefront->scalarRegFile[10] = 0xffffffff;
+        wavefront->scalarRegFile[11] = 0x00000001;
+        run_sop2(instruction, wavefront);
+        CHECK(wavefront->scalarRegFile[0] == 0);
+        CHECK(wavefront->sccReg);
+    }
+}
+
+TEST_CASE("s_add_i32") {
+    auto* wavefront = new Wavefront(nullptr, 12, 0);
+    Instruction instruction = Instruction(0, "s_add_i32", {"s0", "s10", "s11"});
+
+    SUBCASE("src0 is -2, src1 is 3") {
+        wavefront->scalarRegFile[10] = -2;
+        wavefront->scalarRegFile[11] = 3;
+        run_sop2(instruction, wavefront);
+        CHECK(wavefront->scalarRegFile[0] == 0x00000001);
+        CHECK(!wavefront->sccReg);
+    }
+    SUBCASE("src0 is -3, src1 is -2") {
+        wavefront->scalarRegFile[10] = -2;
+        wavefront->scalarRegFile[11] = -3;
+        run_sop2(instruction, wavefront);
+        CHECK(static_cast<int32_t>(wavefront->scalarRegFile[0]) == -5);
+        CHECK(wavefront->scalarRegFile[0] == 0xfffffffb);
+        CHECK(!wavefront->sccReg);
+    }
+    SUBCASE("src0 is -2147483648, src1 is -1") {
+        wavefront->scalarRegFile[10] = -2147483648;
+        wavefront->scalarRegFile[11] = -1;
+        run_sop2(instruction, wavefront);
+        CHECK(static_cast<int32_t>(wavefront->scalarRegFile[0]) == 2147483647);
+        CHECK(wavefront->scalarRegFile[0] == 0x7fffffff);
+        CHECK(wavefront->sccReg);
+    }
+}
+TEST_CASE("s_sub_i32") {
+    auto* wavefront = new Wavefront(nullptr, 12, 0);
+    Instruction instruction = Instruction(0, "s_sub_i32", {"s0", "s10", "s11"});
+
+    SUBCASE("src0 is -2, src1 is 3") {
+        wavefront->scalarRegFile[10] = -2;
+        wavefront->scalarRegFile[11] = 3;
+        run_sop2(instruction, wavefront);
+        CHECK(static_cast<int32_t>(wavefront->scalarRegFile[0]) == -5);
+        CHECK(wavefront->scalarRegFile[0] == 0xfffffffb);
+        CHECK(!wavefront->sccReg);
+    }
+    SUBCASE("src0 is -3, src1 is -2") {
+        wavefront->scalarRegFile[10] = -2;
+        wavefront->scalarRegFile[11] = -3;
+        run_sop2(instruction, wavefront);
+        CHECK(static_cast<int32_t>(wavefront->scalarRegFile[0]) == 1);
+        CHECK(wavefront->scalarRegFile[0] == 0x00000001);
+        CHECK(!wavefront->sccReg);
+    }
+    SUBCASE("src0 is -2147483648, src1 is -1") {
+        wavefront->scalarRegFile[10] = -2147483648;
+        wavefront->scalarRegFile[11] = 1;
+        run_sop2(instruction, wavefront);
+        CHECK(static_cast<int32_t>(wavefront->scalarRegFile[0]) == 2147483647);
+        CHECK(wavefront->scalarRegFile[0] == 0x7fffffff);
+        CHECK(wavefront->sccReg);
+    }
+}
+
 static inline void fill_empty_wi(Wavefront* wf, size_t wiAmount) {
     assert(wiAmount <= 64);
 
