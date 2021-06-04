@@ -6,12 +6,43 @@
 #include "icd/CLProgram.hpp"
 #include "runtime-commons.h"
 
+std::string constructProgramName(int counter) {
+    return "program" + std::to_string(counter);
+}
+
+std::string findAvailableProgramName(const std::string& ext = "") {
+    int fileNameCounter = 0;
+
+    while (utils::fileExists(constructProgramName(fileNameCounter))) {
+        fileNameCounter++;
+    }
+
+    return constructProgramName(fileNameCounter) + ext;
+}
+
 CL_API_ENTRY cl_program CL_API_CALL
 clCreateProgramWithSource(cl_context context,
                           cl_uint count,
                           const char** strings,
                           const size_t* lengths,
                           cl_int* errcode_ret) {
+    if (!context) {
+        SET_ERROR_AND_RETURN(CL_INVALID_CONTEXT, "Context is null.");
+    }
+
+    if (!strings || !count) {
+        SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
+                             "Either count, strings or lengths are null.");
+    }
+
+    const auto text = strings[0];
+
+    try {
+        utils::writeFile(findAvailableProgramName(".cl"), text);
+    } catch (const std::runtime_error& e) {
+        kLogger.debug(e.what());
+    }
+
     SET_ERROR_AND_RETURN(CL_INVALID_OPERATION,
                          "Only creating programs from binary is supported.");
 }
@@ -64,6 +95,15 @@ clCreateProgramWithBinary(cl_context context,
     } catch (const std::runtime_error& e) {
         program->buildLog = e.what();
         SET_BINARY_STATUS_AND_RETURN(CL_INVALID_BINARY, e.what());
+    }
+
+    try {
+        utils::writeBinaryFile(findAvailableProgramName(".bin"),
+                               program->binary, program->binarySize);
+        utils::writeFile(findAvailableProgramName(".asm"),
+                         program->disassembledBinary->rawOutput);
+    } catch (const std::runtime_error& e) {
+        kLogger.debug(e.what());
     }
 
     SET_BINARY_STATUS(CL_SUCCESS);

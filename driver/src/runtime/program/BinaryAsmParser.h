@@ -11,6 +11,8 @@ struct BinaryDisassemblingResult {
     std::string compileOptions;
     std::vector<std::string> parameters{};
     std::vector<CLKernel*> kernels = std::vector<CLKernel*>();
+
+    std::string rawOutput;
 };
 
 class BinaryAsmParser {

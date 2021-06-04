@@ -59,6 +59,8 @@ cl_int getParamInfo(
         *param_value_size_ret = resultSize;
     }
 
+    kLogger.temp("getParamInfo done");
+
     return CL_SUCCESS;
 }
 

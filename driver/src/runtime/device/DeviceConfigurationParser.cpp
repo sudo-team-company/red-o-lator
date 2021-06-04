@@ -70,6 +70,9 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     hardcodeParameter(parameters, CL_DEVICE_PLATFORM, kPlatform,
                       sizeof(cl_platform_id));
 
+    hardcodeParameter(parameters, CL_DEVICE_VENDOR_ID,
+                      reinterpret_cast<void*>(0x1002), sizeof(cl_uint));
+
     hardcodeParameter(parameters, CL_DEVICE_PARENT_DEVICE, nullptr,
                       sizeof(cl_device_id));
 
@@ -81,7 +84,7 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
                       kPlatform->driverVersion.size() + 1);
 
     const auto deviceVersion = std::string(kPlatform->openClVersion) +
-                               " AMD (" + kPlatform->driverVersion + ")";
+                               " AMD-APP (" + kPlatform->driverVersion + ")";
     hardcodeParameter(parameters, CL_DEVICE_VERSION, deviceVersion,
                       deviceVersion.size() + 1);
 
@@ -297,8 +300,10 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_SIZE_PER_COMPUTE_UNIT_AMD,
                            size_t)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_GLOBAL_VARIABLE_SIZE, size_t)
 
     IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
+    IGNORE_PARAMETER(CL_DEVICE_VENDOR_ID)
     IGNORE_PARAMETER(CL_DEVICE_PARENT_DEVICE)
     IGNORE_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
     IGNORE_PARAMETER(CL_DRIVER_VERSION)

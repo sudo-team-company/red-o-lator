@@ -23,5 +23,7 @@ std::unique_ptr<BinaryDisassemblingResult> BinaryDisassembler::disassemble(
     std::unique_ptr<BinaryDisassemblingResult> parsingResult =
         parser.parseAsm();
 
+    parsingResult->rawOutput = input;
+
     return parsingResult;
 }
