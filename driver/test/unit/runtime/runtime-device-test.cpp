@@ -120,8 +120,8 @@ TEST_SUITE("Device API") {
 
             SUBCASE("device version") {
                 const auto deviceVersion =
-                    std::string(test::getPlatform()->openClVersion) + " AMD (" +
-                    test::getPlatform()->driverVersion + ")";
+                    std::string(test::getPlatform()->openClVersion) +
+                    " AMD-APP (" + test::getPlatform()->driverVersion + ")";
                 checkDeviceStringParameter(CL_DEVICE_VERSION, deviceVersion);
             }
 
@@ -143,13 +143,13 @@ TEST_SUITE("Device API") {
             }
 
             SUBCASE("image is not supported") {
-                checkDeviceParameter<cl_uint>(
-                    CL_DEVICE_IMAGE_SUPPORT, CL_FALSE);
+                checkDeviceParameter<cl_uint>(CL_DEVICE_IMAGE_SUPPORT,
+                                              CL_FALSE);
             }
 
             SUBCASE("host and device memory is unified") {
-                checkDeviceParameter<cl_uint>(
-                    CL_DEVICE_HOST_UNIFIED_MEMORY, CL_TRUE);
+                checkDeviceParameter<cl_uint>(CL_DEVICE_HOST_UNIFIED_MEMORY,
+                                              CL_TRUE);
             }
 
             SUBCASE("error resolution is not supported") {

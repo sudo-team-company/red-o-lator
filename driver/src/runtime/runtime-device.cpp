@@ -9,6 +9,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                                                cl_uint num_entries,
                                                cl_device_id* devices,
                                                cl_uint* num_devices) {
+    kLogger.temp("clGetDeviceIDs");
+
     if (!platform || platform != kPlatform) {
         RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.");
     }
@@ -22,9 +24,10 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
             std::getenv("RED_O_LATOR_DEVICE_CONFIG_PATH");
 
         if (!deviceConfigurationFile) {
-            RETURN_ERROR(CL_INVALID_DEVICE,
-                         "Could not found device config path! Set "
-                         "RED_O_LATOR_DEVICE_CONFIG_PATH environment variable.");
+            RETURN_ERROR(
+                CL_INVALID_DEVICE,
+                "Could not found device config path! Set "
+                "RED_O_LATOR_DEVICE_CONFIG_PATH environment variable.");
         }
 
         try {
@@ -68,6 +71,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
                                                 size_t param_value_size,
                                                 void* param_value,
                                                 size_t* param_value_size_ret) {
+    kLogger.temp("clGetDeviceInfo");
+
     if (device != kDevice) {
         RETURN_ERROR(CL_INVALID_DEVICE, "Device is null or not valid.");
     }
@@ -77,7 +82,18 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
 
     return getParamInfo(
         param_name, param_value_size, param_value, param_value_size_ret, [&]() {
-            return kDeviceConfigurationParser.getParameter(param_name);
+            auto param = kDeviceConfigurationParser.getParameter(param_name);
+
+            if (param.has_value() &&
+                std::holds_alternative<std::string>(param.value().value)) {
+                kLogger.temp(std::to_string(param_name) + " -- " +
+                             std::get<std::string>(param.value().value));
+            } else {
+                kLogger.temp(std::to_string(param_name) +
+                             (param.has_value() ? "!" : ""));
+            }
+
+            return param;
         });
 }
 

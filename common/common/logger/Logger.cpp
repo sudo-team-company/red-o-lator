@@ -27,6 +27,10 @@ void Logger::error(const char* message) {
     }
 }
 
+void Logger::temp(const std::string& message) {
+    temp(message.c_str());
+}
+
 void Logger::debug(const std::string& message) {
     debug(message.c_str());
 }
@@ -37,10 +41,6 @@ void Logger::warn(const std::string& message) {
 
 void Logger::error(const std::string& message) {
     error(message.c_str());
-}
-
-void Logger::temp(const std::string& message) {
-    temp(message.c_str());
 }
 
 std::string Logger::appendPrefix(const char* message, const char* level) {

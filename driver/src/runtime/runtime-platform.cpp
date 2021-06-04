@@ -9,6 +9,8 @@
 CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
                                                  cl_platform_id* platforms,
                                                  cl_uint* num_platforms) {
+    kLogger.temp("clGetPlatformIDs");
+
     if (!platforms && !num_platforms) {
         RETURN_ERROR(CL_INVALID_VALUE,
                      "platforms is null and num_platforms is null.");
@@ -22,12 +24,14 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
     if (!kPlatform) {
         kPlatform = new CLPlatformId(kDispatchTable);
         kPlatform->openClVersion = "OpenCL 1.2";
-        kPlatform->driverVersion = "0.1";
+        kPlatform->driverVersion = "3075.13";
         kPlatform->name = "AMD Accelerated Parallel Processing";
         kPlatform->vendor = "sudo-team-company";
         kPlatform->extensions = "cl_khr_icd";
         kPlatform->suffix = "red-o-lator";
         kPlatform->profile = "FULL_PROFILE";
+        kPlatform->vendor = "Advanced Micro Devices, Inc.";
+        kPlatform->suffix = "AMD";
     }
 
     if (platforms) {
@@ -47,9 +51,13 @@ clGetPlatformInfo(cl_platform_id platform,
                   size_t param_value_size,
                   void* param_value,
                   size_t* param_value_size_ret) {
+    kLogger.temp("clGetPlatformInfo");
+
     if (platform != kPlatform) {
         RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.");
     }
+
+    kLogger.temp("platform info: " + std::to_string(param_name));
 
     return getParamInfo(
         param_name, param_value_size, param_value, param_value_size_ret, [&]() {
@@ -61,7 +69,8 @@ clGetPlatformInfo(cl_platform_id platform,
                 }
 
                 case CL_PLATFORM_VERSION: {
-                    result = platform->openClVersion + " " + platform->name;
+                    result = platform->openClVersion + " AMD-APP (" +
+                             platform->driverVersion + ")";
                     break;
                 }
 
@@ -94,11 +103,15 @@ clGetPlatformInfo(cl_platform_id platform,
 
 CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
     cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms) {
+    kLogger.temp("clIcdGetPlatformIDsKHR");
+
     return clGetPlatformIDs(num_entries, platforms, num_platforms);
 }
 
 CL_API_ENTRY void* CL_API_CALL
 clGetExtensionFunctionAddress(const char* func_name) {
+    kLogger.temp("clGetExtensionFunctionAddress");
+
     const auto funcName = std::string(func_name);
     if (funcName == "clIcdGetPlatformIDsKHR") {
         return (void*) clIcdGetPlatformIDsKHR;
@@ -112,5 +125,7 @@ clGetExtensionFunctionAddress(const char* func_name) {
 
 CL_API_ENTRY void* CL_API_CALL clGetExtensionFunctionAddressForPlatform(
     cl_platform_id platform, const char* func_name) {
+    kLogger.temp("clGetExtensionFunctionAddressForPlatform");
+
     return clGetExtensionFunctionAddress(func_name);
 }
