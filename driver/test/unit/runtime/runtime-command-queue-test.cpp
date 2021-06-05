@@ -153,7 +153,7 @@ TEST_SUITE("Command queue API") {
 
             // check if context reference counter has been decremented meaning
             // queue destructor has been called
-            CHECK(context->referenceCount == contextRefCount - 1);
+            CHECK(context->referenceCount == contextRefCount);
             CHECK(event->referenceCount == 1);
         }
     }

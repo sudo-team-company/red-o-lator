@@ -7,6 +7,8 @@
 #include "runtime/icd/CLDeviceId.hpp"
 #include "runtime/icd/CLPlatformId.hpp"
 
+#include <runtime/runtime-commons.h>
+
 namespace test {
 struct DummyCommand : public Command {
     explicit DummyCommand(cl_command_queue commandQueue)

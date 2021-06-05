@@ -18,6 +18,18 @@ include_directories(${CMAKE_INCLUDE_PATH})
 
 add_compile_definitions(CL_TARGET_OPENCL_VERSION=120)
 
+if (LOG_LEVEL STREQUAL "TEMP")
+    add_compile_definitions(RED_O_LATOR_LOG_LEVEL_TEMP)
+elseif (LOG_LEVEL STREQUAL "DEBUG")
+    add_compile_definitions(RED_O_LATOR_LOG_LEVEL_DEBUG)
+elseif (LOG_LEVEL STREQUAL "WARN")
+    add_compile_definitions(RED_O_LATOR_LOG_LEVEL_WARN)
+elseif (LOG_LEVEL STREQUAL "ERROR")
+    add_compile_definitions(RED_O_LATOR_LOG_LEVEL_ERROR)
+elseif (LOG_LEVEL STREQUAL "NONE")
+    add_compile_definitions(RED_O_LATOR_LOG_LEVEL_NONE)
+endif ()
+
 add_subdirectory(common)
 add_subdirectory(driver)
 add_subdirectory(emulator)

@@ -185,7 +185,7 @@ clGetEventProfilingInfo(cl_event event,
         RETURN_ERROR(CL_INVALID_EVENT, "Event is null.");
     }
 
-    if (!event->isUserEvent && !event->command) {
+    if (!event->isUserEvent && !event->isCompleted() && !event->command) {
         RETURN_ERROR(CL_INVALID_EVENT,
                      "Event is not user event and does not have associated "
                      "command. Probably something wrong in driver "
@@ -193,7 +193,7 @@ clGetEventProfilingInfo(cl_event event,
     }
 
     if (event->isUserEvent ||
-        !event->command->commandQueue->isProfilingEnabled()) {
+        !event->commandQueue->isProfilingEnabled()) {
         return CL_PROFILING_INFO_NOT_AVAILABLE;
     }
 

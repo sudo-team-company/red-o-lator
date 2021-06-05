@@ -106,11 +106,6 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     hardcodeParameter(parameters, CL_DEVICE_ERROR_CORRECTION_SUPPORT,
                       (void*) false, sizeof(cl_bool));
 
-    hardcodeParameter(
-        parameters, CL_DEVICE_QUEUE_PROPERTIES,
-        reinterpret_cast<void*>(CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE),
-        sizeof(cl_command_queue_properties));
-
     mConfigurationPath = configurationFilePath;
     // TODO: memory leak of arrays
     mParameters.clear();
@@ -201,9 +196,9 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
 
     PARSE_PARAMETER(CL_DEVICE_TYPE, cl_device_type, parseDeviceType)
     PARSE_STRING_PARAMETER(CL_DEVICE_NAME)
-    PARSE_NUMBER_PARAMETER(
-        CL_DEVICE_VENDOR_ID,
-        cl_uint)  // TODO(parseParameter): parse hex correctly
+//    PARSE_NUMBER_PARAMETER(
+//        CL_DEVICE_VENDOR_ID,
+//        cl_uint)  // TODO(parseParameter): parse hex correctly
     PARSE_STRING_PARAMETER(CL_DEVICE_VENDOR)
     PARSE_STRING_PARAMETER(CL_DEVICE_PROFILE)
     PARSE_STRING_PARAMETER(CL_DEVICE_VERSION)
@@ -281,6 +276,8 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
                              parseDeviceAffinityDomain)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PARTITION_TYPE, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_REFERENCE_COUNT, cl_uint)
+    PARSE_PARAMETER(CL_DEVICE_QUEUE_PROPERTIES, cl_command_queue_properties,
+                    parseCommandQueueProperties);
 
     /* * * * *
      * AMD extensions
@@ -312,7 +309,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     IGNORE_PARAMETER(CL_DEVICE_IMAGE_SUPPORT)
     IGNORE_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
     IGNORE_PARAMETER(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
-    IGNORE_PARAMETER(CL_DEVICE_QUEUE_PROPERTIES)
 
     if (!clParameter) {
         kLogger.warn("Unknown config parameter: " + parameterName);
