@@ -3,16 +3,28 @@
 
 #include "Logger.h"
 
+void Logger::temp(const char* message) {
+    if (LOG_LEVEL >= LOG_LEVEL_TEMP) {
+        std::cout << appendPrefix(message, "TEMP") << std::endl;
+    }
+}
+
 void Logger::debug(const char* message) {
-    std::cout << appendPrefix(message, "DEBUG") << std::endl;
+    if (LOG_LEVEL >= LOG_LEVEL_DEBUG) {
+        std::cout << appendPrefix(message, "DEBUG") << std::endl;
+    }
 }
 
 void Logger::warn(const char* message) {
-    std::cout << appendPrefix(message, "WARN") << std::endl;
+    if (LOG_LEVEL >= LOG_LEVEL_WARN) {
+        std::cout << appendPrefix(message, "WARN") << std::endl;
+    }
 }
 
 void Logger::error(const char* message) {
-    std::cerr << appendPrefix(message, "ERROR") << std::endl;
+    if (LOG_LEVEL >= LOG_LEVEL_ERROR) {
+        std::cerr << appendPrefix(message, "ERROR") << std::endl;
+    }
 }
 
 void Logger::debug(const std::string& message) {
@@ -25,6 +37,10 @@ void Logger::warn(const std::string& message) {
 
 void Logger::error(const std::string& message) {
     error(message.c_str());
+}
+
+void Logger::temp(const std::string& message) {
+    temp(message.c_str());
 }
 
 std::string Logger::appendPrefix(const char* message, const char* level) {

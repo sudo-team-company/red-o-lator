@@ -36,8 +36,9 @@ class CLEvent {
                      const CLEventCallback& callback);
 
     IcdDispatchTable* const dispatchTable;
-    Command* const command;
+    Command* command;
     CLContext* const context;
+    CLCommandQueue* const commandQueue;
 
     bool isUserEvent = false;
 

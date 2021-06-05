@@ -42,6 +42,7 @@ void CLCommandQueue::flush() {
     }
 
     for (auto* command : executedCommands) {
+        command->requireEvent()->command = nullptr;
         delete command;
     }
 

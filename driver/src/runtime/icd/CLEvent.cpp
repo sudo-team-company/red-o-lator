@@ -10,8 +10,10 @@ CLEvent::CLEvent(IcdDispatchTable* dispatchTable,
     : dispatchTable(dispatchTable),
       mClock(clock),
       command(command),
-      context(context) {
+      context(context),
+      commandQueue(command->commandQueue) {
     clRetainContext(context);
+    clRetainCommandQueue(commandQueue);
 }
 
 CLEvent::~CLEvent() {
@@ -24,6 +26,7 @@ CLEvent::~CLEvent() {
     mCallbacks.clear();
 
     clReleaseContext(context);
+    clReleaseCommandQueue(commandQueue);
 }
 
 void CLEvent::setCallback(CommandExecutionStatus status,

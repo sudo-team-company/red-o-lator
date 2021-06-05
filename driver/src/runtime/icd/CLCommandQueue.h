@@ -18,7 +18,7 @@ struct CLCommandQueue {
 
     IcdDispatchTable* const dispatchTable;
     CLContext* const context;
-    cl_command_queue_properties properties;
+    const cl_command_queue_properties properties;
 
     unsigned int referenceCount = 1;
 
