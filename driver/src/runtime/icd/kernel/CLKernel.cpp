@@ -8,11 +8,13 @@
 
 CLKernel::CLKernel(IcdDispatchTable* const dispatchTable,
                    std::string name,
+                   KernelWorkGroupSize requiredWorkGroupSize,
                    std::vector<std::string> config,
                    std::vector<std::string> instructions,
                    std::vector<KernelArgument> arguments)
     : dispatchTable(dispatchTable),
       name(std::move(name)),
+      requiredWorkGroupSize(requiredWorkGroupSize),
       config(std::move(config)),
       instructions(std::move(instructions)),
       arguments(std::move(arguments)) {}
@@ -97,5 +99,6 @@ CLKernel* CLKernelBuilder::build() const {
                        return KernelArgument(info);
                    });
 
-    return new CLKernel(kDispatchTable, name, config, instructions, args);
+    return new CLKernel(kDispatchTable, name, requiredWorkGroupSize, config,
+                        instructions, args);
 }

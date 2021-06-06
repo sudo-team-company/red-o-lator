@@ -11,7 +11,7 @@
 
 std::shared_ptr<KernelArgumentInfo> KernelArgumentInfoParser::parse() {
     auto splitLine =
-        utils::splitMap<std::string>(asmLine, ',', -1, [](auto arg) {
+        utils::splitMap<std::string>(asmLine, ',', [](auto arg) {
             return utils::trim(arg);
         });
 

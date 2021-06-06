@@ -12,7 +12,7 @@ std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm() {
         return std::make_unique<BinaryDisassemblingResult>(parsingResult);
     }
 
-    auto lines = utils::splitMap<std::string>(*input, '\n', -1, [](auto line) {
+    auto lines = utils::splitMap<std::string>(*input, '\n', [](auto line) {
         utils::trimInplace(line);
         return line;
     });
@@ -147,7 +147,6 @@ void BinaryAsmParser::parseKernelInstruction(const std::string& line,
 void BinaryAsmParser::parseBinaryParameter(const std::string& line,
                                            const std::string& parameterName,
                                            const std::string& parameterValue) {
-
     if (parameterName == ".gpu") {
         parsingResult.gpuName = parameterValue;
 
@@ -163,6 +162,25 @@ void BinaryAsmParser::parseKernelConfigParameter(
     const std::string& line,
     const std::string& parameterName,
     const std::string& parameterValue) {
+    // clang formatting is meh, so here is a comment separating args from body
+
+    if (parameterName == ".cws" || parameterName == ".reqd_work_group_size") {
+        const auto values =
+            utils::splitMap<size_t>(parameterValue, ',', [](const auto value) {
+                return std::stoul(utils::trim(value));
+            });
+
+        currentKernelBuilder->requiredWorkGroupSize.x = values[0];
+
+        if (values.size() > 1) {
+            currentKernelBuilder->requiredWorkGroupSize.y = values[1];
+        }
+
+        if (values.size() > 2) {
+            currentKernelBuilder->requiredWorkGroupSize.z = values[2];
+        }
+    }
+
     if (parameterName == ".arg" && !utils::startsWith(parameterValue, "_")) {
         parseKernelArgument(parameterValue);
     }

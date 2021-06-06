@@ -217,6 +217,76 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
+clEnqueueFillBuffer(cl_command_queue command_queue,
+                    cl_mem buffer,
+                    const void* pattern,
+                    size_t pattern_size,
+                    size_t offset,
+                    size_t size,
+                    cl_uint num_events_in_wait_list,
+                    const cl_event* event_wait_list,
+                    cl_event* event) {
+    if (!command_queue) {
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
+    }
+
+    // TODO: further validation
+
+    enqueueCommand(
+        command_queue, num_events_in_wait_list, event_wait_list, event, [&]() {
+            return new BufferFillCommand(command_queue, buffer, pattern,
+                                         pattern_size, offset, size);
+        });
+
+    return CL_SUCCESS;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL
+clEnqueueCopyBuffer(cl_command_queue command_queue,
+                    cl_mem src_buffer,
+                    cl_mem dst_buffer,
+                    size_t src_offset,
+                    size_t dst_offset,
+                    size_t size,
+                    cl_uint num_events_in_wait_list,
+                    const cl_event* event_wait_list,
+                    cl_event* event) {
+    if (!command_queue) {
+        RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
+    }
+
+    // TODO: further validation
+
+    enqueueCommand(
+        command_queue, num_events_in_wait_list, event_wait_list, event, [&]() {
+            return new BufferCopyCommand(command_queue, src_buffer, dst_buffer,
+                                         src_offset, dst_offset, size);
+        });
+
+    return CL_SUCCESS;
+}
+
+CL_API_ENTRY void* CL_API_CALL
+clEnqueueMapBuffer(cl_command_queue command_queue,
+                   cl_mem buffer,
+                   cl_bool blocking_map,
+                   cl_map_flags map_flags,
+                   size_t offset,
+                   size_t size,
+                   cl_uint num_events_in_wait_list,
+                   const cl_event* event_wait_list,
+                   cl_event* event,
+                   cl_int* errcode_ret) {
+    if (blocking_map) {
+        clFlush(command_queue);
+    }
+
+    std::cerr << "Unimplemented OpenCL API call: clEnqueueMapBuffer"
+              << std::endl;
+    return nullptr;
+}
+
+CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueReadBufferRect(cl_command_queue command_queue,
                         cl_mem buffer,
                         cl_bool blocking_read,
@@ -265,36 +335,6 @@ clEnqueueWriteBufferRect(cl_command_queue command_queue,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
-clEnqueueFillBuffer(cl_command_queue command_queue,
-                    cl_mem buffer,
-                    const void* pattern,
-                    size_t pattern_size,
-                    size_t offset,
-                    size_t size,
-                    cl_uint num_events_in_wait_list,
-                    const cl_event* event_wait_list,
-                    cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call: clEnqueueFillBuffer"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
-}
-
-CL_API_ENTRY cl_int CL_API_CALL
-clEnqueueCopyBuffer(cl_command_queue command_queue,
-                    cl_mem src_buffer,
-                    cl_mem dst_buffer,
-                    size_t src_offset,
-                    size_t dst_offset,
-                    size_t size,
-                    cl_uint num_events_in_wait_list,
-                    const cl_event* event_wait_list,
-                    cl_event* event) {
-    std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyBuffer"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
-}
-
-CL_API_ENTRY cl_int CL_API_CALL
 clEnqueueCopyBufferRect(cl_command_queue command_queue,
                         cl_mem src_buffer,
                         cl_mem dst_buffer,
@@ -311,24 +351,4 @@ clEnqueueCopyBufferRect(cl_command_queue command_queue,
     std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyBufferRect"
               << std::endl;
     return CL_INVALID_PLATFORM;
-}
-
-CL_API_ENTRY void* CL_API_CALL
-clEnqueueMapBuffer(cl_command_queue command_queue,
-                   cl_mem buffer,
-                   cl_bool blocking_map,
-                   cl_map_flags map_flags,
-                   size_t offset,
-                   size_t size,
-                   cl_uint num_events_in_wait_list,
-                   const cl_event* event_wait_list,
-                   cl_event* event,
-                   cl_int* errcode_ret) {
-    if (blocking_map) {
-        clFlush(command_queue);
-    }
-
-    std::cerr << "Unimplemented OpenCL API call: clEnqueueMapBuffer"
-              << std::endl;
-    return nullptr;
 }

@@ -374,7 +374,72 @@ clGetKernelWorkGroupInfo(cl_kernel kernel,
                          size_t param_value_size,
                          void* param_value,
                          size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clGetKernelWorkGroupInfo"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    if (!kernel || !kernel->program) {
+        RETURN_ERROR(CL_INVALID_KERNEL,
+                     "Kernel is null or its program is null.");
+    }
+
+    if (param_name == CL_KERNEL_GLOBAL_WORK_SIZE) {
+        RETURN_ERROR(CL_INVALID_VALUE,
+                     "CL_KERNEL_GLOBAL_WORK_SIZE works only on custom device "
+                     "or built-in kernel.");
+    }
+
+    return getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
+            bool isArray = false;
+
+            switch (param_name) {
+                case CL_KERNEL_WORK_GROUP_SIZE: {
+                    // TODO: should be determined by emulator
+                    resultSize = sizeof(size_t) * 3;
+                    auto* data = new size_t[3];
+                    data[0] = kernel->requiredWorkGroupSize.x;
+                    data[1] = kernel->requiredWorkGroupSize.y;
+                    data[2] = kernel->requiredWorkGroupSize.z;
+                    result = data;
+                    isArray = true;
+                    break;
+                }
+
+                case CL_KERNEL_COMPILE_WORK_GROUP_SIZE: {
+                    resultSize = sizeof(size_t) * 3;
+                    auto* data = new size_t[3];
+                    data[0] = kernel->requiredWorkGroupSize.x;
+                    data[1] = kernel->requiredWorkGroupSize.y;
+                    data[2] = kernel->requiredWorkGroupSize.z;
+                    result = data;
+                    isArray = true;
+                    break;
+                }
+
+                case CL_KERNEL_LOCAL_MEM_SIZE: {
+                    // TODO: proper getter
+                    resultSize = sizeof(cl_ulong);
+                    result = reinterpret_cast<void*>(0);
+                    break;
+                }
+
+                case CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE: {
+                    // TODO: proper getter
+                    resultSize = sizeof(size_t);
+                    result = reinterpret_cast<void*>(1);
+                    break;
+                }
+
+                case CL_KERNEL_PRIVATE_MEM_SIZE: {
+                    // TODO: proper getter
+                    resultSize = sizeof(cl_ulong);
+                    result = reinterpret_cast<void*>(0);
+                    break;
+                }
+
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
+            }
+
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize, isArray));
+        });
 }
