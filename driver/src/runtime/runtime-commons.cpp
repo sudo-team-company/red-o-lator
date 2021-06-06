@@ -69,8 +69,6 @@ void enqueueCommand(cl_command_queue queue,
                     const cl_event* waitList,
                     cl_event* eventOut,
                     const std::function<Command*()>& commandGetter) {
-    // clang formatting is meh, so here is a comment separating args from body
-
     const auto command = commandGetter();
 
     const auto event =

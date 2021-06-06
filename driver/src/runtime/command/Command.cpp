@@ -70,3 +70,4 @@ void Command::addEventsToWaitList(cl_uint count,
         clRetainEvent(event);
     }
 }
+

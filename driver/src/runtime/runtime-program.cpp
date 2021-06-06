@@ -6,18 +6,18 @@
 #include "icd/CLProgram.hpp"
 #include "runtime-commons.h"
 
-std::string constructProgramName(int counter) {
-    return "program" + std::to_string(counter);
+std::string constructProgramName(int counter, const std::string& ext = "") {
+    return "red-o-lator/program" + std::to_string(counter) + ext;
 }
 
 std::string findAvailableProgramName(const std::string& ext = "") {
     int fileNameCounter = 0;
 
-    while (utils::fileExists(constructProgramName(fileNameCounter))) {
+    while (utils::fileExists(constructProgramName(fileNameCounter, ext))) {
         fileNameCounter++;
     }
 
-    return constructProgramName(fileNameCounter) + ext;
+    return constructProgramName(fileNameCounter, ext);
 }
 
 CL_API_ENTRY cl_program CL_API_CALL

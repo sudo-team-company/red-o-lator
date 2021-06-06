@@ -498,4 +498,65 @@ TEST_SUITE("Memory buffer API") {
             }
         }
     }
+
+    TEST_CASE("clEnqueueFillBuffer") {
+        SUBCASE("fills buffer with pattern") {
+            const auto totalSize = 6;
+            const auto totalSizeBytes = totalSize * sizeof(cl_uint);
+
+            std::vector<cl_uint> data{};
+            test::fillVector(totalSize, data);
+
+            const auto queue = test::getCommandQueue();
+            const auto buffer = test::createBuffer(CL_MEM_USE_HOST_PTR,
+                                                   totalSizeBytes, data.data());
+
+            const auto offset = 3;
+            const auto offsetBytes = offset * sizeof(cl_uint);
+            const auto offsetSize = 3;
+            const auto offsetSizeBytes = offsetSize * sizeof(cl_uint);
+
+            const cl_uint pattern = 20;
+            const auto error = clEnqueueFillBuffer(
+                queue, buffer, &pattern, sizeof(cl_uint), offsetBytes,
+                offsetSizeBytes, 0, nullptr, nullptr);
+
+            clFinish(queue);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(utils::joinToString<cl_uint>(data, " ") == "0 1 2 20 20 20");
+        }
+    }
+
+    TEST_CASE("clEnqueueCopyBuffer") {
+        SUBCASE("copies buffer to another") {
+            const auto totalSize = 6;
+            const auto totalSizeBytes = totalSize * sizeof(cl_uint);
+
+            std::vector<cl_uint> srcData{};
+            test::fillVector(totalSize, srcData);
+
+            std::vector<cl_uint> dstData(totalSize);
+
+            const auto queue = test::getCommandQueue();
+            const auto srcBuffer = test::createBuffer(
+                CL_MEM_USE_HOST_PTR, totalSizeBytes, srcData.data());
+            const auto dstBuffer = test::createBuffer(
+                CL_MEM_USE_HOST_PTR, totalSizeBytes, dstData.data());
+
+            const auto offset = 3;
+            const auto offsetBytes = offset * sizeof(cl_uint);
+            const auto offsetSize = 3;
+            const auto offsetSizeBytes = offsetSize * sizeof(cl_uint);
+
+            const auto error = clEnqueueCopyBuffer(
+                queue, srcBuffer, dstBuffer, offsetBytes, offsetBytes,
+                offsetSizeBytes, 0, nullptr, nullptr);
+
+            clFinish(queue);
+
+            CHECK(error == CL_SUCCESS);
+            CHECK(utils::joinToString<cl_uint>(dstData, " ") == "0 0 0 3 4 5");
+        }
+    }
 }

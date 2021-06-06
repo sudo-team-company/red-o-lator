@@ -11,14 +11,14 @@
 namespace utils {
 static inline void ltrimInplace(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-      return !std::isspace(ch);
-    }));
+                return !std::isspace(ch);
+            }));
 }
 
 static inline void rtrimInplace(std::string& s) {
     s.erase(std::find_if(s.rbegin(), s.rend(),
                          [](unsigned char ch) {
-                           return !std::isspace(ch);
+                             return !std::isspace(ch);
                          })
                 .base(),
             s.end());
@@ -85,11 +85,11 @@ template <typename R>
 static std::vector<R> splitMap(
     const std::string& line,
     const char separator,
-    int maxSplitCount = -1,
-    std::function<R(std::string&)> transform = nullptr) {
-    assert(transform);
+    std::function<R(std::string&)> transform,
+    int maxSplitCount = -1) {
+    //
     auto splitResult = split(line, separator, maxSplitCount);
-    std::vector<std::string> result;
+    std::vector<R> result;
     std::transform(splitResult.begin(), splitResult.end(),
                    std::back_inserter(result), transform);
     return result;
@@ -105,4 +105,4 @@ static std::pair<std::string, std::string> splitTwo(const std::string& line,
 
     return std::make_pair(splitLine[0], splitLine[1]);
 }
-}
+}  // namespace utils

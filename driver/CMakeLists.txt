@@ -77,6 +77,8 @@ set(SOURCES
         src/runtime/icd/CLEvent.cpp
         src/runtime/command/KernelExecutionCommand.cpp
         src/emulator/command_executor.cpp
+        src/runtime/command/BufferFillCommand.cpp
+        src/runtime/command/BufferCopyCommand.cpp
         )
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
