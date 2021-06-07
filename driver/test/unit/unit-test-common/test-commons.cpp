@@ -3,6 +3,8 @@
 
 #include "test-commons.h"
 
+#include <runtime/common/runtime-commons.h>
+
 namespace test {
 cl_platform_id getPlatform() {
     auto platformList = std::vector<cl_platform_id>(1);

@@ -2,7 +2,7 @@
 #include <common/utils/common.hpp>
 #include <string>
 
-#include "runtime/runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 TEST_SUITE("Runtime commons test") {
     TEST_CASE("getParamInfo") {

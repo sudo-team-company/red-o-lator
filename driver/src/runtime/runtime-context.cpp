@@ -4,7 +4,7 @@
 
 #include "icd/CLContext.h"
 #include "icd/CLDeviceId.hpp"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 cl_context createContext(const cl_context_properties* properties,
                          cl_device_id device,
@@ -20,7 +20,6 @@ cl_context createContext(const cl_context_properties* properties,
         for (int i = 0; properties[i] != 0; i += 2) {
             passedProperties.emplace(properties[i], properties[i + 1]);
         }
-
         // TODO(clCreateContext, future): parse props
     }
 
@@ -39,6 +38,8 @@ clCreateContext(const cl_context_properties* properties,
                 CLContextCallback pfn_notify,
                 void* user_data,
                 cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (!num_devices || !devices) {
         SET_ERROR_AND_RETURN(CL_INVALID_VALUE,
                              "Either num_devices == 0 or devices is null.");
@@ -63,6 +64,12 @@ clCreateContextFromType(const cl_context_properties* properties,
                         CLContextCallback pfn_notify,
                         void* user_data,
                         cl_int* errcode_ret) {
+    registerCall(__func__);
+
+    if (!kDevice) {
+        clGetDeviceIDs(kPlatform, device_type, 0, nullptr, nullptr);
+    }
+
     if (!kDevice->matchesType(device_type)) {
         if (errcode_ret) {
             *errcode_ret = CL_DEVICE_NOT_FOUND;
@@ -75,6 +82,8 @@ clCreateContextFromType(const cl_context_properties* properties,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainContext(cl_context context) {
+    registerCall(__func__);
+
     if (!context) {
         RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.");
     }
@@ -85,6 +94,8 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainContext(cl_context context) {
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseContext(cl_context context) {
+    registerCall(__func__);
+
     if (!context) {
         RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.");
     }
@@ -103,6 +114,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetContextInfo(cl_context context,
                                                  size_t param_value_size,
                                                  void* param_value,
                                                  size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!context) {
         RETURN_ERROR(CL_INVALID_CONTEXT, "Context is null.");
     }

@@ -5,7 +5,7 @@
 #include <string>
 #include <utility>
 
-#include "icd/kernel/KernelArgumentInfo.h"
+#include "runtime/kernel/KernelArgumentInfo.h"
 
 class KernelArgumentInfoParser {
    public:

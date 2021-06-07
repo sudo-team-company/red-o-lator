@@ -5,7 +5,6 @@
 
 #include "runtime/icd/CLProgram.hpp"
 #include "runtime/icd/icd.h"
-#include "runtime/icd/kernel/CLKernel.h"
 #include "unit-test-common/test-commons.h"
 
 TEST_SUITE("Kernel API") {

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "runtime/program/BinaryDisassembler.h"
+#include <cassert>
 #include "icd.h"
+#include "runtime/program/BinaryDisassembler.h"
 
 struct CLProgram {
     explicit CLProgram(IcdDispatchTable* dispatchTable, CLContext* context)
@@ -10,9 +11,12 @@ struct CLProgram {
     }
 
     ~CLProgram() {
-        for (auto kernel : disassembledBinary->kernels) {
+        assert(disassembledBinary);
+
+        for (auto kernel : createdKernels) {
             clReleaseKernel(kernel);
         }
+
         delete[] binary;
         clReleaseContext(context);
     }
@@ -26,6 +30,7 @@ struct CLProgram {
     cl_build_status buildStatus = CL_BUILD_NONE;
     std::string buildLog;
     std::unique_ptr<BinaryDisassemblingResult> disassembledBinary;
+    std::vector<CLKernel*> createdKernels;
 
     unsigned int referenceCount = 1;
 };

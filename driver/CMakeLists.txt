@@ -42,12 +42,12 @@ set(SOURCES
         src/runtime/icd/IcdDispatchTable.cpp
         src/runtime/icd/IcdDispatchTable.h
         src/runtime/icd/icd.h
-        src/runtime/icd/kernel/CLKernel.cpp
-        src/runtime/icd/kernel/CLKernel.h
-        src/runtime/icd/kernel/KernelArgument.hpp
-        src/runtime/icd/kernel/KernelArgumentInfo.cpp
-        src/runtime/icd/kernel/KernelArgumentInfo.h
-        src/runtime/icd/kernel/KernelArgumentValue.hpp
+        src/runtime/icd/CLKernel.cpp
+        src/runtime/icd/CLKernel.h
+        src/runtime/kernel/KernelArgument.hpp
+        src/runtime/kernel/KernelArgumentInfo.cpp
+        src/runtime/kernel/KernelArgumentInfo.h
+        src/runtime/kernel/KernelArgumentValue.hpp
         src/runtime/program/BinaryAsmParser.cpp
         src/runtime/program/BinaryAsmParser.h
         src/runtime/program/BinaryDisassembler.cpp
@@ -56,8 +56,8 @@ set(SOURCES
         src/runtime/program/KernelArgumentInfoParser.h
         src/runtime/runtime-command-queue.cpp
         src/runtime/runtime-command.cpp
-        src/runtime/runtime-commons.cpp
-        src/runtime/runtime-commons.h
+        src/runtime/common/runtime-commons.cpp
+        src/runtime/common/runtime-commons.h
         src/runtime/runtime-context.cpp
         src/runtime/runtime-device.cpp
         src/runtime/runtime-event.cpp
@@ -68,7 +68,7 @@ set(SOURCES
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp src/runtime/command/Command.cpp src/runtime/icd/CLEvent.cpp src/runtime/command/BufferFillCommand.cpp src/runtime/command/BufferCopyCommand.cpp)
+        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp src/runtime/command/Command.cpp src/runtime/icd/CLEvent.cpp src/runtime/command/BufferFillCommand.cpp src/runtime/command/BufferCopyCommand.cpp src/runtime/common/logger.h src/runtime/common/logger.cpp)
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 

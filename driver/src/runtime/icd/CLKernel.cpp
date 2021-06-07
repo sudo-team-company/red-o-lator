@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "CLKernel.h"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CLKernel::CLKernel(IcdDispatchTable* const dispatchTable,
                    std::string name,

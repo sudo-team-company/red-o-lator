@@ -1,10 +1,12 @@
 #include <common/utils/optional-utlis.hpp>
 
 #include "icd/icd.h"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_event CL_API_CALL clCreateUserEvent(cl_context context,
                                                     cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (!context) {
         SET_ERROR_AND_RETURN(CL_INVALID_CONTEXT, "Context is null.");
     }
@@ -18,6 +20,8 @@ CL_API_ENTRY cl_event CL_API_CALL clCreateUserEvent(cl_context context,
 
 CL_API_ENTRY cl_int CL_API_CALL clSetUserEventStatus(cl_event event,
                                                      cl_int execution_status) {
+    registerCall(__func__);
+
     if (!event || !event->isUserEvent) {
         RETURN_ERROR(CL_INVALID_EVENT, "Event is null or not user event.");
     }
@@ -39,6 +43,8 @@ CL_API_ENTRY cl_int CL_API_CALL clSetUserEventStatus(cl_event event,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainEvent(cl_event event) {
+    registerCall(__func__);
+
     if (!event) {
         RETURN_ERROR(CL_INVALID_EVENT, "Event is null.");
     }
@@ -49,6 +55,8 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainEvent(cl_event event) {
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseEvent(cl_event event) {
+    registerCall(__func__);
+
     if (!event) {
         RETURN_ERROR(CL_INVALID_EVENT, "Event is null.");
     }
@@ -64,6 +72,8 @@ CL_API_ENTRY cl_int CL_API_CALL clReleaseEvent(cl_event event) {
 
 CL_API_ENTRY cl_int CL_API_CALL clWaitForEvents(cl_uint num_events,
                                                 const cl_event* event_list) {
+    registerCall(__func__);
+
     if (!num_events || !event_list) {
         RETURN_ERROR(CL_INVALID_VALUE,
                      "num_events == 0 or event_list is null.");
@@ -94,6 +104,8 @@ clSetEventCallback(cl_event event,
                    cl_int command_exec_callback_type,
                    CLEventCallbackFunction pfn_notify,
                    void* user_data) {
+    registerCall(__func__);
+
     if (!event) {
         RETURN_ERROR(CL_INVALID_EVENT, "Event is null.");
     }
@@ -122,6 +134,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetEventInfo(cl_event event,
                                                size_t param_value_size,
                                                void* param_value,
                                                size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!event) {
         RETURN_ERROR(CL_INVALID_EVENT, "Event is null.");
     }
@@ -181,6 +195,8 @@ clGetEventProfilingInfo(cl_event event,
                         size_t param_value_size,
                         void* param_value,
                         size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!event) {
         RETURN_ERROR(CL_INVALID_EVENT, "Event is null.");
     }

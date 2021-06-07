@@ -1,5 +1,6 @@
 #include <cassert>
 
+#include "runtime/common/logger.h"
 #include "CLCommandQueue.h"
 
 CLCommandQueue::CLCommandQueue(IcdDispatchTable* dispatchTable,

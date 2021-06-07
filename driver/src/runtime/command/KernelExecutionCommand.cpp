@@ -1,6 +1,6 @@
 #include <cstring>
 #include "Command.h"
-#include "runtime/icd/kernel/CLKernel.h"
+#include "icd/CLKernel.h"
 
 KernelExecutionCommand::KernelExecutionCommand(CLCommandQueue* commandQueue,
                                                CLKernel* kernel,
