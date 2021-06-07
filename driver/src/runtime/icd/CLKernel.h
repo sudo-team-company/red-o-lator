@@ -7,8 +7,8 @@
 #include <memory>
 #include <vector>
 
-#include "KernelArgument.hpp"
 #include "runtime/icd/icd.h"
+#include "runtime/kernel/KernelArgument.hpp"
 
 struct KernelWorkGroupSize {
     size_t x;
@@ -43,7 +43,7 @@ struct CLKernel {
 
     CLProgram* program{};
 
-    unsigned int referenceCount = 0;
+    unsigned int referenceCount = 1;
 
    private:
     void releaseArgument(KernelArgument& argument);

@@ -1,15 +1,16 @@
+#include <common/utils/optional-utlis.hpp>
 #include <cstring>
 #include <iostream>
 
 #include "icd/CLDeviceId.hpp"
-#include "runtime/runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clGetDeviceIDs(cl_platform_id platform,
                                                cl_device_type device_type,
                                                cl_uint num_entries,
                                                cl_device_id* devices,
                                                cl_uint* num_devices) {
-    kLogger.temp("clGetDeviceIDs");
+    registerCall(__func__);
 
     if (!platform || platform != kPlatform) {
         RETURN_ERROR(CL_INVALID_PLATFORM, "Platform is null or not valid.");
@@ -71,6 +72,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
                                                 size_t param_value_size,
                                                 void* param_value,
                                                 size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     kLogger.temp("clGetDeviceInfo");
 
     if (device != kDevice) {
@@ -82,6 +85,14 @@ CL_API_ENTRY cl_int CL_API_CALL clGetDeviceInfo(cl_device_id device,
 
     return getParamInfo(
         param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            if (param_name == CL_DEVICE_GLOBAL_FREE_MEMORY_AMD) {
+                const auto freeMemKB =
+                    (kDevice->globalMemorySize - kDevice->usedGlobalMemory) /
+                    1024;
+                return utils::optionalOf(CLObjectInfoParameterValue(
+                    reinterpret_cast<void*>(freeMemKB), sizeof(size_t)));
+            }
+
             auto param = kDeviceConfigurationParser.getParameter(param_name);
 
             if (param.has_value() &&
@@ -103,6 +114,8 @@ clCreateSubDevices(cl_device_id in_device,
                    cl_uint num_devices,
                    cl_device_id* out_devices,
                    cl_uint* num_devices_ret) {
+    registerCall(__func__);
+
     // TODO(clCreateSubDevices, future): sub-devices support
     kLogger.warn("clCreateSubDevices is not supported!");
 
@@ -118,6 +131,8 @@ clCreateSubDevices(cl_device_id in_device,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainDevice(cl_device_id device) {
+    registerCall(__func__);
+
     // TODO(clRetainDevice, future): sub-devices support
     if (device == kDevice) {
         return CL_SUCCESS;
@@ -127,6 +142,8 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainDevice(cl_device_id device) {
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseDevice(cl_device_id device) {
+    registerCall(__func__);
+
     // TODO(clReleaseDevice, future): sub-devices support
     if (device == kDevice) {
         return CL_SUCCESS;

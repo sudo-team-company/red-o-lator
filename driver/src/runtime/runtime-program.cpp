@@ -4,10 +4,14 @@
 #include <common/utils/common.hpp>
 
 #include "icd/CLProgram.hpp"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 std::string constructProgramName(int counter, const std::string& ext = "") {
-    return "red-o-lator/program" + std::to_string(counter) + ext;
+    auto counterStr = std::to_string(counter);
+    if (counter < 10) {
+        counterStr = "0" + counterStr;
+    }
+    return "red-o-lator/program" + counterStr + ext;
 }
 
 std::string findAvailableProgramName(const std::string& ext = "") {
@@ -26,6 +30,8 @@ clCreateProgramWithSource(cl_context context,
                           const char** strings,
                           const size_t* lengths,
                           cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (!context) {
         SET_ERROR_AND_RETURN(CL_INVALID_CONTEXT, "Context is null.");
     }
@@ -68,6 +74,8 @@ clCreateProgramWithBinary(cl_context context,
                           const unsigned char** binaries,
                           cl_int* binary_status,
                           cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (!device_list || !num_devices) {
         SET_BINARY_STATUS_AND_RETURN(
             CL_INVALID_VALUE, "device_list is null or num_devices == 0.");
@@ -118,6 +126,8 @@ clCreateProgramWithBuiltInKernels(cl_context context,
                                   const cl_device_id* device_list,
                                   const char* kernel_names,
                                   cl_int* errcode_ret) {
+    registerCall(__func__);
+
     std::cerr
         << "Unimplemented OpenCL API call: clCreateProgramWithBuiltInKernels"
         << std::endl;
@@ -131,6 +141,8 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
                                                void (*pfn_notify)(cl_program,
                                                                   void*),
                                                void* user_data) {
+    registerCall(__func__);
+
     if (!program) {
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
@@ -141,6 +153,8 @@ CL_API_ENTRY cl_int CL_API_CALL clBuildProgram(cl_program program,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainProgram(cl_program program) {
+    registerCall(__func__);
+
     if (!program) {
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
@@ -150,6 +164,8 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainProgram(cl_program program) {
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseProgram(cl_program program) {
+    registerCall(__func__);
+
     if (!program) {
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
@@ -168,6 +184,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
                                                  size_t param_value_size,
                                                  void* param_value,
                                                  size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!program) {
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
@@ -246,6 +264,8 @@ clGetProgramBuildInfo(cl_program program,
                       size_t param_value_size,
                       void* param_value,
                       size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!program) {
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
@@ -296,6 +316,8 @@ clCompileProgram(cl_program program,
                  const char** header_include_names,
                  void (*pfn_notify)(cl_program, void*),
                  void* user_data) {
+    registerCall(__func__);
+
     RETURN_ERROR(CL_INVALID_OPERATION,
                  "clCompileProgram: Compiler is not available.");
 }
@@ -310,17 +332,23 @@ clLinkProgram(cl_context context,
               void (*pfn_notify)(cl_program, void*),
               void* user_data,
               cl_int* errcode_ret) {
+    registerCall(__func__);
+
     SET_ERROR_AND_RETURN(CL_INVALID_OPERATION,
                          "clLinkProgram: Linker is not available.");
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
 clUnloadPlatformCompiler(cl_platform_id platform) {
+    registerCall(__func__);
+
     RETURN_ERROR(CL_INVALID_OPERATION,
                  "clUnloadPlatformCompiler: Compiler is not available.");
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clUnloadCompiler() {
+    registerCall(__func__);
+
     RETURN_ERROR(CL_INVALID_OPERATION,
                  "clUnloadCompiler: Compiler is not available.");
 }

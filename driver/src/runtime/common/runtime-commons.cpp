@@ -1,7 +1,5 @@
 #include "runtime-commons.h"
 
-Logger kLogger = Logger("[red-o-lator driver]");  // NOLINT(cert-err58-cpp)
-
 IcdDispatchTable* kDispatchTable =  // NOLINT(cert-err58-cpp)
     IcdDispatchTableProvider().get();
 
@@ -31,7 +29,7 @@ cl_int getParamInfo(
                                            std::to_string(param_name) + ".");
     }
 
-    auto [result, resultSize, isArray] = parameterValue.value();
+    auto [result, resultSize, isPointer] = parameterValue.value();
 
     if (std::holds_alternative<std::string>(result)) {
         resultSize = strlen(std::get<std::string>(result).c_str()) + 1;
@@ -47,7 +45,7 @@ cl_int getParamInfo(
     if (param_value) {
         if (std::holds_alternative<void*>(result)) {
             const auto value = std::get<void*>(result);
-            memcpy(param_value, isArray ? value : &value, resultSize);
+            memcpy(param_value, isPointer ? value : &value, resultSize);
 
         } else {
             memcpy(param_value, std::get<std::string>(result).c_str(),
@@ -81,6 +79,10 @@ void enqueueCommand(cl_command_queue queue,
     if (eventOut) {
         *eventOut = event;
     }
+}
+
+void registerCall(const std::string& funcName) {
+    kLogger.temp("Call " + funcName);
 }
 
 bool utils::hasMutuallyExclusiveFlags(

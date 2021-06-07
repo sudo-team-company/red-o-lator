@@ -1,4 +1,4 @@
-#include <runtime-commons.h>
+#include <runtime/common/runtime-commons.h>
 #include <cassert>
 #include <common/utils/common.hpp>
 #include <string>
@@ -8,8 +8,11 @@
 
 std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm() {
     if (alreadyParsed) {
-        return std::make_unique<BinaryDisassemblingResult>(parsingResult);
+        throw std::runtime_error(
+            "Binary was parsed before so parser is invalidated.");
     }
+
+    parsingResult = std::make_unique<BinaryDisassemblingResult>();
 
     auto lines = utils::splitMap<std::string>(*input, '\n', [](auto line) {
         utils::trimInplace(line);
@@ -45,12 +48,12 @@ std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm() {
     }
 
     if (currentKernelBuilder) {
-        parsingResult.kernels.push_back(currentKernelBuilder->build());
+        parsingResult->kernelBuilders.push_back(std::move(currentKernelBuilder));
     }
 
     alreadyParsed = true;
 
-    return std::make_unique<BinaryDisassemblingResult>(parsingResult);
+    return std::move(parsingResult);
 }
 
 void BinaryAsmParser::parseSingleInstruction(const std::string& instruction) {
@@ -90,7 +93,8 @@ void BinaryAsmParser::parseParameter(const std::string& line,
                                      const std::string& parameterValue) {
     if (utils::startsWith(parameterName, ".kernel")) {
         if (currentKernelBuilder) {
-            parsingResult.kernels.push_back(currentKernelBuilder->build());
+            parsingResult->kernelBuilders.push_back(
+                std::move(currentKernelBuilder));
         }
 
         currentKernelBuilder = std::make_unique<CLKernelBuilder>();
@@ -147,13 +151,13 @@ void BinaryAsmParser::parseBinaryParameter(const std::string& line,
                                            const std::string& parameterName,
                                            const std::string& parameterValue) {
     if (parameterName == ".gpu") {
-        parsingResult.gpuName = parameterValue;
+        parsingResult->gpuName = parameterValue;
 
     } else if (parameterName == ".compile_options") {
-        parsingResult.compileOptions = parameterValue;
+        parsingResult->compileOptions = parameterValue;
 
     } else {
-        parsingResult.parameters.push_back(line);
+        parsingResult->parameters.push_back(line);
     }
 }
 

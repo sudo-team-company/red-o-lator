@@ -34,7 +34,8 @@ TEST_SUITE("Platform API") {
         }
 
         SUBCASE("platform should have cl_khr_icd extension") {
-            CHECK(test::getPlatform()->extensions == "cl_khr_icd");
+            auto actualPos = test::getPlatform()->extensions.find("cl_khr_icd");
+            CHECK(actualPos != std::string::npos);
         }
 
         SUBCASE("should fail with incorrect parameters") {

@@ -6,8 +6,7 @@
 #include "runtime/icd/CLContext.h"
 #include "runtime/icd/CLDeviceId.hpp"
 #include "runtime/icd/CLPlatformId.hpp"
-
-#include <runtime/runtime-commons.h>
+#include "runtime/common/runtime-commons.h"
 
 namespace test {
 struct DummyCommand : public Command {

@@ -3,9 +3,11 @@
 #include "icd/CLContext.h"
 #include "icd/CLDeviceId.hpp"
 #include "icd/CLMem.h"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
+    registerCall(__func__);
+
     if (!memobj) {
         RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.");
     }
@@ -16,6 +18,8 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainMemObject(cl_mem memobj) {
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseMemObject(cl_mem memobj) {
+    registerCall(__func__);
+
     if (!memobj) {
         RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.");
     }
@@ -37,6 +41,8 @@ clGetMemObjectInfo(cl_mem memobj,
                    size_t param_value_size,
                    void* param_value,
                    size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clGetMemObjectInfo"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -49,6 +55,8 @@ clEnqueueUnmapMemObject(cl_command_queue command_queue,
                         cl_uint num_events_in_wait_list,
                         const cl_event* event_wait_list,
                         cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueUnmapMemObject"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -62,6 +70,8 @@ clEnqueueMigrateMemObjects(cl_command_queue command_queue,
                            cl_uint num_events_in_wait_list,
                            const cl_event* event_wait_list,
                            cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueMigrateMemObjects"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -71,6 +81,8 @@ CL_API_ENTRY cl_int CL_API_CALL
 clSetMemObjectDestructorCallback(cl_mem memobj,
                                  CLMemDestructorCallbackFunction pfn_notify,
                                  void* user_data) {
+    registerCall(__func__);
+
     if (!memobj) {
         RETURN_ERROR(CL_INVALID_MEM_OBJECT, "Memory object is null.");
     }

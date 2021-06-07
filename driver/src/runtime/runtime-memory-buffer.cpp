@@ -7,13 +7,15 @@
 #include "icd/CLCommandQueue.h"
 #include "icd/CLContext.h"
 #include "icd/CLDeviceId.hpp"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
                                                cl_mem_flags flags,
                                                size_t size,
                                                void* host_ptr,
                                                cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (!context) {
         SET_ERROR_AND_RETURN(CL_INVALID_CONTEXT, "Context is null.");
     }
@@ -102,7 +104,7 @@ CL_API_ENTRY cl_mem CL_API_CALL clCreateBuffer(cl_context context,
         if (flags & CL_MEM_ALLOC_HOST_PTR) {
             // TODO: support CL_MEM_ALLOC_HOST_PTR
             kLogger.warn(
-                "CL_MEM_ALLOC_HOST_PTR is not supported,"
+                "CL_MEM_ALLOC_HOST_PTR is not supported, "
                 "will act like flag was not specified!");
         }
 
@@ -134,6 +136,8 @@ clCreateSubBuffer(cl_mem buffer,
                   cl_buffer_create_type buffer_create_type,
                   const void* buffer_create_info,
                   cl_int* errcode_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clCreateSubBuffer"
               << std::endl;
     return nullptr;
@@ -166,6 +170,8 @@ clEnqueueReadBuffer(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
+    registerCall(__func__);
+
     CHECK_BUFFER_PARAMETERS();
 
     if (!buffer->hostCanRead) {
@@ -196,6 +202,8 @@ clEnqueueWriteBuffer(cl_command_queue command_queue,
                      cl_uint num_events_in_wait_list,
                      const cl_event* event_wait_list,
                      cl_event* event) {
+    registerCall(__func__);
+
     CHECK_BUFFER_PARAMETERS();
 
     if (!buffer->hostCanWrite) {
@@ -226,6 +234,8 @@ clEnqueueFillBuffer(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
+    registerCall(__func__);
+
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
@@ -251,6 +261,8 @@ clEnqueueCopyBuffer(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
+    registerCall(__func__);
+
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
@@ -277,6 +289,8 @@ clEnqueueMapBuffer(cl_command_queue command_queue,
                    const cl_event* event_wait_list,
                    cl_event* event,
                    cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (blocking_map) {
         clFlush(command_queue);
     }
@@ -301,6 +315,8 @@ clEnqueueReadBufferRect(cl_command_queue command_queue,
                         cl_uint num_events_in_wait_list,
                         const cl_event* event_wait_list,
                         cl_event* event) {
+    registerCall(__func__);
+
     if (blocking_read) {
         clFlush(command_queue);
     }
@@ -325,6 +341,8 @@ clEnqueueWriteBufferRect(cl_command_queue command_queue,
                          cl_uint num_events_in_wait_list,
                          const cl_event* event_wait_list,
                          cl_event* event) {
+    registerCall(__func__);
+
     if (blocking_write) {
         clFlush(command_queue);
     }
@@ -348,6 +366,8 @@ clEnqueueCopyBufferRect(cl_command_queue command_queue,
                         cl_uint num_events_in_wait_list,
                         const cl_event* event_wait_list,
                         cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyBufferRect"
               << std::endl;
     return CL_INVALID_PLATFORM;
