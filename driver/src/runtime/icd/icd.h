@@ -8,6 +8,6 @@
  */
 #include "rename-api.h"
 
-#include <CL/opencl.h>
+#include <common/cl.h>
 
 #include "IcdDispatchTable.h"

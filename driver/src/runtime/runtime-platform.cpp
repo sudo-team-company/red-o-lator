@@ -92,6 +92,11 @@ clGetPlatformInfo(cl_platform_id platform,
         });
 }
 
+CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
+    cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms) {
+    return clGetPlatformIDs(num_entries, platforms, num_platforms);
+}
+
 CL_API_ENTRY void* CL_API_CALL
 clGetExtensionFunctionAddress(const char* func_name) {
     const auto funcName = std::string(func_name);
@@ -102,11 +107,6 @@ clGetExtensionFunctionAddress(const char* func_name) {
     } else {
         return nullptr;
     }
-}
-
-CL_API_ENTRY cl_int CL_API_CALL clIcdGetPlatformIDsKHR(
-    cl_uint num_entries, cl_platform_id* platforms, cl_uint* num_platforms) {
-    return clGetPlatformIDs(num_entries, platforms, num_platforms);
 }
 
 

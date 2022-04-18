@@ -1,10 +1,8 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "../../alu/alu.h"
-#include "../doctest.h"
+
+#include <common/test/doctest.h>
+
+#include "src/alu/alu.h"
 
 // SOP1
 TEST_CASE("run_s_abs_i32 - stores absolute signed value of the SSRC0 into SDST.") {

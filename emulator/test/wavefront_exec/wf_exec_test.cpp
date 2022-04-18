@@ -1,11 +1,9 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "../../gpu/compute_unit.h"
-#include "../../gpu/dispatcher.h"
-#include "../doctest.h"
+
+#include <common/test/doctest.h>
+
+#include "src/gpu/compute_unit.h"
+#include "src/gpu/dispatcher.h"
 
 /**
  *  __kernel void a_plus_b(__global const int* const a,

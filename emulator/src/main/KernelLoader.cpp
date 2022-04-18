@@ -1,12 +1,37 @@
-#include <string>
+#include <common/cl.h>
+#include <common/logger/Logger.h>
+#include <common/utils/common.hpp>
+#include <cstddef>
+#include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 
-#include <common/cl.h>
-#include <common/test/doctest.h>
-#include <common/utils/common.hpp>
+#include "KernelLoader.h"
 
-TEST_CASE("a_plus_b") {
+#define CHECK_ERROR(message)                                                 \
+    if (error != CL_SUCCESS) {                                               \
+        throw KernelLoadException(std::string(message) +                     \
+                                  "\nError code: " + std::to_string(error)); \
+    }
+
+#define CHECK(cond) CHECK_ERROR("Error!")
+
+std::vector<unsigned char> readBinaryFile(const std::string& path) {
+    std::ifstream input(path, std::ios::binary);
+    return std::vector<unsigned char>(std::istreambuf_iterator<char>(input),
+                                      {});
+}
+
+void printArray(cl_uint* begin, cl_uint* end) {
+    std::vector<cl_uint> vec1Out(begin, end);
+    for (auto item : vec1Out) {
+        std::cout << std::to_string(item) << " ";
+    }
+    std::cout << std::endl;
+}
+
+void KernelLoader::executeKernel(const std::string& kernelPath) {
     cl_int error;
 
     cl_uint platformCount;
@@ -48,14 +73,16 @@ TEST_CASE("a_plus_b") {
         clCreateContext(nullptr, 1, &device, nullptr, nullptr, &error);
     CHECK(error == CL_SUCCESS);
 
-    cl_command_queue queue =
+    cl_command_queue commandQueue =
         clCreateCommandQueue(context, device, 0, &error);
     CHECK(error == CL_SUCCESS);
 
     const std::string binaryPath = "test/resources/kernels/a_plus_b.bin";
-    const auto binary = utils::readBinaryFile(binaryPath);
+    const auto binary = readBinaryFile(binaryPath);
 
-    CHECK_FALSE(binary.empty());
+    if (binary.empty()) {
+        throw KernelLoadException("Binary is empty!");
+    }
 
     const size_t binarySize[1] = {binary.size()};
     const unsigned char* binaryData[1] = {binary.data()};
@@ -71,7 +98,7 @@ TEST_CASE("a_plus_b") {
     cl_kernel kernel = clCreateKernel(program, kernelName.c_str(), &error);
     CHECK(error == CL_SUCCESS);
 
-    const size_t arraySize = 3;
+    const size_t arraySize = 1000;
     const size_t arraySizeBytes = arraySize * sizeof(cl_uint);
 
     std::vector<cl_uint> data1{};
@@ -108,39 +135,18 @@ TEST_CASE("a_plus_b") {
     localWorkSize[0] = 0;
 
     error =
-        clEnqueueNDRangeKernel(queue, kernel, 1, nullptr, globalWorkSize,
+        clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr, globalWorkSize,
                                localWorkSize, 0, nullptr, nullptr);
     CHECK(error == CL_SUCCESS);
 
-    error = clFlush(queue);
+    error = clFlush(commandQueue);
     CHECK(error == CL_SUCCESS);
 
     std::vector<cl_uint> bufferData(arraySize);
-    error = clEnqueueReadBuffer(queue, mem3, true, 0, arraySizeBytes,
+    error = clEnqueueReadBuffer(commandQueue, mem3, true, 0, arraySizeBytes,
                                 bufferData.data(), 0, nullptr, nullptr);
     CHECK(error == CL_SUCCESS);
-    CHECK(utils::joinToString<cl_uint>(bufferData, " ", [](auto value) {
+    std::cout << utils::joinToString<cl_uint>(bufferData, " ", [](auto value) {
               return std::to_string(value);
-          }) == "0 0 0");
-
-    error = clReleaseKernel(kernel);
-    CHECK(error == CL_SUCCESS);
-
-    error = clReleaseMemObject(mem3);
-    CHECK(error == CL_SUCCESS);
-
-    error = clReleaseMemObject(mem2);
-    CHECK(error == CL_SUCCESS);
-
-    error = clReleaseMemObject(mem1);
-    CHECK(error == CL_SUCCESS);
-
-    error = clReleaseProgram(program);
-    CHECK(error == CL_SUCCESS);
-
-    error = clReleaseCommandQueue(queue);
-    CHECK(error == CL_SUCCESS);
-
-    error = clReleaseContext(context);
-    CHECK(error == CL_SUCCESS);
+          }) << std::endl;
 }

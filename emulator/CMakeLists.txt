@@ -4,28 +4,28 @@ find_package(OpenCL REQUIRED)
 ## Main library ##
 ##################
 add_library(red-o-lator-emulator
-        util/util.cpp
-        flow/wavefront.cpp
-        gpu/dispatcher.cpp
-        alu/alu_sop1.cpp
-        alu/alu.cpp
-        alu/alu_sop2.cpp
-        alu/alu_sopp.cpp
-        alu/alu_sopc.cpp
-        alu/alu_sopk.cpp
-        alu/alu_smem.cpp
-        alu/alu_vop1.cpp
-        alu/alu_vop2.cpp
-        alu/alu_vop3.cpp
-        alu/alu_flat.cpp
-        reg/register.cpp
-        instr/instruction.cpp
-        instr/instr_info.cpp
-        gpu/compute_unit.cpp
-        gpu/storage.cpp
-        main/KernelLoader.cpp
-        main/KernelLoader.h
-        main.cpp
+        src/util/util.cpp
+        src/flow/wavefront.cpp
+        src/alu/alu_sop1.cpp
+        src/alu/alu.cpp
+        src/alu/alu_sop2.cpp
+        src/alu/alu_sopp.cpp
+        src/alu/alu_sopc.cpp
+        src/alu/alu_sopk.cpp
+        src/alu/alu_smem.cpp
+        src/alu/alu_vop1.cpp
+        src/alu/alu_vop2.cpp
+        src/alu/alu_vop3.cpp
+        src/alu/alu_flat.cpp
+        src/reg/register.cpp
+        src/instr/instruction.cpp
+        src/instr/instr_info.cpp
+        src/gpu/dispatcher.cpp
+        src/gpu/compute_unit.cpp
+        src/gpu/storage.cpp
+        src/commons.cpp
+        src/main/KernelLoader.cpp
+        src/main/KernelLoader.h
         )
 target_link_libraries(red-o-lator-emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
 target_include_directories(red-o-lator-emulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -33,7 +33,7 @@ target_include_directories(red-o-lator-emulator PUBLIC ${CMAKE_CURRENT_SOURCE_DI
 ###################
 # Test executable #
 ###################
-add_executable(red-o-lator-emulator-exec main/main.cpp main/KernelLoader.cpp main/KernelLoader.h)
+add_executable(red-o-lator-emulator-exec src/main/main.cpp src/main/KernelLoader.cpp src/main/KernelLoader.h)
 target_link_libraries(red-o-lator-emulator-exec PRIVATE red-o-lator-emulator red-o-lator-common)
 
 
@@ -46,7 +46,7 @@ target_link_libraries(red-o-lator-emulator-exec PRIVATE red-o-lator-emulator red
 #############
 add_executable(red-o-lator-emulator-util-test
         test/util/util_test.cpp
-        util/util.cpp
+        src/util/util.cpp
         )
 target_link_libraries(red-o-lator-emulator-util-test PRIVATE
         red-o-lator-emulator red-o-lator-common
@@ -60,15 +60,16 @@ add_test(NAME red-o-lator-emulator-util-test
 # Alu test #
 #############
 add_executable(red-o-lator-emulator-alu-test
-        alu/alu_sop1.cpp
-        alu/alu_sop2.cpp
-        alu/alu_vop1.cpp
-        util/util.cpp
+        src/alu/alu_sop1.cpp
+        src/alu/alu_sop2.cpp
+        src/alu/alu_vop1.cpp
+        src/util/util.cpp
         test/alu/alu_test.cpp
-        flow/wavefront.cpp
-        reg/register.cpp
-        instr/instruction.cpp
-        instr/instr_info.cpp
+        src/flow/wavefront.cpp
+        src/reg/register.cpp
+        src/instr/instruction.cpp
+        src/instr/instr_info.cpp
+        src/commons.cpp
         )
 target_link_libraries(red-o-lator-emulator-alu-test PRIVATE
         red-o-lator-emulator red-o-lator-common
@@ -78,26 +79,37 @@ add_test(NAME red-o-lator-emulator-alu-test
         --config $<CONFIG>
         --exe $<TARGET_FILE:red-o-lator-emulator-alu-test>)
 
-add_executable(wf_exec_test
+#############
+# Wavefront execution test #
+#############
+add_executable(red-o-lator-emulator-wf-test
         test/wavefront_exec/wf_exec_test.cpp
-        gpu/compute_unit.cpp
-        alu/alu.cpp
-        alu/alu_sop1.cpp
-        alu/alu_sop2.cpp
-        alu/alu_sopc.cpp
-        alu/alu_sopk.cpp
-        alu/alu_sopp.cpp
-        alu/alu_smem.cpp
-        alu/alu_vop1.cpp
-        alu/alu_vop2.cpp
-        alu/alu_vop3.cpp
-        alu/alu_flat.cpp
-        gpu/storage.cpp
-        util/util.cpp
-        flow/wavefront.cpp
-        reg/register.cpp
-        instr/instruction.cpp
-        instr/instr_info.cpp
-        gpu/dispatcher.cpp
-        ../common/common/common.hpp
+        src/alu/alu.cpp
+        src/alu/alu_sop1.cpp
+        src/alu/alu_sop2.cpp
+        src/alu/alu_sopc.cpp
+        src/alu/alu_sopk.cpp
+        src/alu/alu_sopp.cpp
+        src/alu/alu_smem.cpp
+        src/alu/alu_vop1.cpp
+        src/alu/alu_vop2.cpp
+        src/alu/alu_vop3.cpp
+        src/alu/alu_flat.cpp
+        src/gpu/compute_unit.cpp
+        src/gpu/dispatcher.cpp
+        src/gpu/storage.cpp
+        src/util/util.cpp
+        src/flow/wavefront.cpp
+        src/reg/register.cpp
+        src/instr/instruction.cpp
+        src/instr/instr_info.cpp
+        src/commons.cpp
         )
+
+target_link_libraries(red-o-lator-emulator-wf-test PRIVATE
+        red-o-lator-emulator red-o-lator-common
+        )
+add_test(NAME red-o-lator-emulator-wf-test
+        COMMAND red-o-lator-emulator-alu-test
+        --config $<CONFIG>
+        --exe $<TARGET_FILE:red-o-lator-emulator-wf-test>)
