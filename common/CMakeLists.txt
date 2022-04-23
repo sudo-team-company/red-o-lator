@@ -7,4 +7,3 @@ set(COMMON_SOURCES
 
 add_library(red-o-lator-common SHARED ${COMMON_SOURCES})
 target_include_directories(red-o-lator-common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(red-o-lator-common stdc++fs)
