@@ -1,12 +1,12 @@
 #include "runtime-commons.h"
 
-Logger kLogger = Logger("[red-o-lator driver]");  // NOLINT(cert-err58-cpp)
-
 IcdDispatchTable* kDispatchTable =  // NOLINT(cert-err58-cpp)
     IcdDispatchTableProvider().get();
 
 DeviceConfigurationParser kDeviceConfigurationParser =
     DeviceConfigurationParser();
+
+utils::Clock* kClock = new utils::SystemClock();  // NOLINT(cert-err58-cpp)
 
 CLPlatformId* kPlatform = nullptr;
 CLDeviceId* kDevice = nullptr;
@@ -29,7 +29,7 @@ cl_int getParamInfo(
                                            std::to_string(param_name) + ".");
     }
 
-    auto [result, resultSize, isArray] = parameterValue.value();
+    auto [result, resultSize, isPointer] = parameterValue.value();
 
     if (std::holds_alternative<std::string>(result)) {
         resultSize = strlen(std::get<std::string>(result).c_str()) + 1;
@@ -45,7 +45,7 @@ cl_int getParamInfo(
     if (param_value) {
         if (std::holds_alternative<void*>(result)) {
             const auto value = std::get<void*>(result);
-            memcpy(param_value, isArray ? value : &value, resultSize);
+            memcpy(param_value, isPointer ? value : &value, resultSize);
 
         } else {
             memcpy(param_value, std::get<std::string>(result).c_str(),
@@ -57,7 +57,32 @@ cl_int getParamInfo(
         *param_value_size_ret = resultSize;
     }
 
+    kLogger.temp("getParamInfo done");
+
     return CL_SUCCESS;
+}
+
+void enqueueCommand(cl_command_queue queue,
+                    cl_uint waitListEventsCount,
+                    const cl_event* waitList,
+                    cl_event* eventOut,
+                    const std::function<Command*()>& commandGetter) {
+    const auto command = commandGetter();
+
+    const auto event =
+        new CLEvent(kDispatchTable, queue->context, kClock, command);
+    command->setEvent(event);
+    command->addEventsToWaitList(waitListEventsCount, waitList);
+
+    queue->enqueue(command);
+
+    if (eventOut) {
+        *eventOut = event;
+    }
+}
+
+void registerCall(const std::string& funcName) {
+    kLogger.temp("Call " + funcName);
 }
 
 bool utils::hasMutuallyExclusiveFlags(

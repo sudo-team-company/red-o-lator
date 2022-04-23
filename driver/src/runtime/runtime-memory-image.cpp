@@ -1,5 +1,6 @@
 #include <iostream>
 #include "icd/icd.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_mem CL_API_CALL
 clCreateImage(cl_context context,
@@ -8,6 +9,8 @@ clCreateImage(cl_context context,
               const cl_image_desc* image_desc,
               void* host_ptr,
               cl_int* errcode_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clCreateImage" << std::endl;
     return nullptr;
 }
@@ -24,6 +27,8 @@ clEnqueueReadImage(cl_command_queue command_queue,
                    cl_uint num_events_in_wait_list,
                    const cl_event* event_wait_list,
                    cl_event* event) {
+    registerCall(__func__);
+
     if (blocking_read) {
         clFlush(command_queue);
     }
@@ -45,6 +50,8 @@ clEnqueueWriteImage(cl_command_queue command_queue,
                     cl_uint num_events_in_wait_list,
                     const cl_event* event_wait_list,
                     cl_event* event) {
+    registerCall(__func__);
+
     if (blocking_write) {
         clFlush(command_queue);
     }
@@ -63,6 +70,8 @@ clEnqueueFillImage(cl_command_queue command_queue,
                    cl_uint num_events_in_wait_list,
                    const cl_event* event_wait_list,
                    cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueFillImage"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -78,6 +87,8 @@ clEnqueueCopyImage(cl_command_queue command_queue,
                    cl_uint num_events_in_wait_list,
                    const cl_event* event_wait_list,
                    cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyImage"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -93,6 +104,8 @@ clEnqueueCopyImageToBuffer(cl_command_queue command_queue,
                            cl_uint num_events_in_wait_list,
                            const cl_event* event_wait_list,
                            cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyImageToBuffer"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -108,6 +121,8 @@ clEnqueueCopyBufferToImage(cl_command_queue command_queue,
                            cl_uint num_events_in_wait_list,
                            const cl_event* event_wait_list,
                            cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueCopyBufferToImage"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -126,6 +141,8 @@ clEnqueueMapImage(cl_command_queue command_queue,
                   const cl_event* event_wait_list,
                   cl_event* event,
                   cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (blocking_map) {
         clFlush(command_queue);
     }
@@ -143,6 +160,8 @@ clGetSupportedImageFormats(cl_context context,
                            cl_uint num_entries,
                            cl_image_format* image_formats,
                            cl_uint* num_image_formats) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clGetSupportedImageFormats"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -153,6 +172,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetImageInfo(cl_mem image,
                                                size_t param_value_size,
                                                void* param_value,
                                                size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clGetImageInfo" << std::endl;
     return CL_INVALID_PLATFORM;
 }
@@ -166,11 +187,12 @@ clCreateImage2D(cl_context context,
                 size_t image_row_pitch,
                 void* host_ptr,
                 cl_int* errcode_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clCreateImage2D" << std::endl;
     return nullptr;
 }
 
-CL_API_ENTRY
 CL_API_ENTRY cl_mem CL_API_CALL
 clCreateImage3D(cl_context context,
                 cl_mem_flags flags,
@@ -182,6 +204,8 @@ clCreateImage3D(cl_context context,
                 size_t image_slice_pitch,
                 void* host_ptr,
                 cl_int* errcode_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clCreateImage3D" << std::endl;
     return nullptr;
 }

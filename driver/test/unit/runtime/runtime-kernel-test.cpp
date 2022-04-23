@@ -1,12 +1,10 @@
 #include <common/test/doctest.h>
 
-#include <runtime/runtime-commons.h>
 #include <common/utils/vector-utils.hpp>
 #include <vector>
 
 #include "runtime/icd/CLProgram.hpp"
 #include "runtime/icd/icd.h"
-#include "runtime/icd/kernel/CLKernel.h"
 #include "unit-test-common/test-commons.h"
 
 TEST_SUITE("Kernel API") {

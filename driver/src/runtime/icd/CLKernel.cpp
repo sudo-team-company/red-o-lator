@@ -4,20 +4,26 @@
 #include <utility>
 
 #include "CLKernel.h"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CLKernel::CLKernel(IcdDispatchTable* const dispatchTable,
                    std::string name,
+                   KernelWorkGroupSize requiredWorkGroupSize,
                    std::vector<std::string> config,
                    std::vector<std::string> instructions,
                    std::vector<KernelArgument> arguments)
     : dispatchTable(dispatchTable),
       name(std::move(name)),
+      requiredWorkGroupSize(requiredWorkGroupSize),
       config(std::move(config)),
       instructions(std::move(instructions)),
       arguments(std::move(arguments)) {}
 
 CLKernel::~CLKernel() {
+    for (auto& argument : arguments) {
+        releaseArgument(argument);
+    }
+
     if (program) {
         clReleaseProgram(program);
     }
@@ -37,14 +43,34 @@ void CLKernel::setArgument(cl_uint index, size_t size, const void* value) {
     if (!value) {
         data = nullptr;
     } else if (std::dynamic_pointer_cast<PointerKernelArgumentInfo>(argInfo)) {
-        data = *const_cast<cl_mem*>(static_cast<const cl_mem*>(value));
+        // TODO: handle memobj (should be copied as per spec)
+        const auto memObject =
+            *const_cast<cl_mem*>(static_cast<const cl_mem*>(value));
+        clRetainMemObject(memObject);
+        data = memObject;
     } else {
         auto* temp = new std::byte[size];
         memcpy(temp, value, size);
         data = temp;
     }
 
+    releaseArgument(arguments[index]);
     arguments[index].value = KernelArgumentValue(index, size, data);
+}
+
+void CLKernel::releaseArgument(KernelArgument& argument) {
+    if (!argument.value.has_value()) {
+        return;
+    }
+
+    const auto argValue = argument.value.value().value;
+
+    // TODO: handle memobj
+    if (std::holds_alternative<std::byte*>(argValue)) {
+        delete[] std::get<std::byte*>(argValue);
+    } else if (std::holds_alternative<CLMem*>(argValue)) {
+        clReleaseMemObject(std::get<CLMem*>(argValue));
+    }
 }
 
 KernelArgument CLKernel::getArgument(cl_uint index) const {
@@ -73,5 +99,6 @@ CLKernel* CLKernelBuilder::build() const {
                        return KernelArgument(info);
                    });
 
-    return new CLKernel(kDispatchTable, name, config, instructions, args);
+    return new CLKernel(kDispatchTable, name, requiredWorkGroupSize, config,
+                        instructions, args);
 }

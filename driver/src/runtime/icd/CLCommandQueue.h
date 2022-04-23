@@ -18,19 +18,21 @@ struct CLCommandQueue {
 
     IcdDispatchTable* const dispatchTable;
     CLContext* const context;
-    cl_command_queue_properties properties;
+    const cl_command_queue_properties properties;
 
     unsigned int referenceCount = 1;
 
-    void enqueue(const std::shared_ptr<const Command>& command);
+    void enqueue(Command* command);
 
     void flush();
 
-    size_t size();
+    [[nodiscard]] size_t size() const;
+
+    [[nodiscard]] bool isProfilingEnabled() const;
+    [[nodiscard]] bool isOutOfOrder() const;
 
    private:
-    std::queue<std::shared_ptr<const Command>> commands =
-        std::queue<std::shared_ptr<const Command>>();
+    std::deque<Command*> commands = std::deque<Command*>();
 
     bool flushInProcess = false;
 };

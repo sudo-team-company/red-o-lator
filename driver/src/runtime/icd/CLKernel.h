@@ -7,13 +7,20 @@
 #include <memory>
 #include <vector>
 
-#include "KernelArgument.hpp"
 #include "runtime/icd/icd.h"
+#include "runtime/kernel/KernelArgument.hpp"
+
+struct KernelWorkGroupSize {
+    size_t x;
+    size_t y;
+    size_t z;
+};
 
 struct CLKernel {
    public:
     CLKernel(IcdDispatchTable* dispatchTable,
              std::string name,
+             KernelWorkGroupSize requiredWorkGroupSize,
              std::vector<std::string> config,
              std::vector<std::string> instructions,
              std::vector<KernelArgument> arguments);
@@ -30,14 +37,17 @@ struct CLKernel {
 
     IcdDispatchTable* const dispatchTable;
     const std::string name;
+    const KernelWorkGroupSize requiredWorkGroupSize;
     const std::vector<std::string> config{};
     const std::vector<std::string> instructions{};
 
     CLProgram* program{};
 
-    unsigned int referenceCount = 0;
+    unsigned int referenceCount = 1;
 
    private:
+    void releaseArgument(KernelArgument& argument);
+
     std::vector<KernelArgument> arguments;
 };
 
@@ -45,6 +55,9 @@ struct CLKernelBuilder {
     [[nodiscard]] CLKernel* build() const;
 
     std::string name;
+
+    KernelWorkGroupSize requiredWorkGroupSize{};
+
     std::vector<std::string> config{};
     std::vector<std::string> instructions{};
     std::vector<std::shared_ptr<KernelArgumentInfo>> argumentInfo{};

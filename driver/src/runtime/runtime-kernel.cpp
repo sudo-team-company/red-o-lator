@@ -4,11 +4,13 @@
 #include "command/Command.h"
 #include "icd/CLCommandQueue.h"
 #include "icd/CLProgram.hpp"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
                                                   const char* kernel_name,
                                                   cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (!program) {
         SET_ERROR_AND_RETURN(CL_INVALID_PROGRAM, "Program is null.");
     }
@@ -17,10 +19,11 @@ CL_API_ENTRY cl_kernel CL_API_CALL clCreateKernel(cl_program program,
         SET_ERROR_AND_RETURN(CL_INVALID_VALUE, "Kernel name is null.");
     }
 
-    for (auto* kernel : program->disassembledBinary->kernels) {
-        if (kernel->name == kernel_name) {
+    for (auto& kernelBuilder : program->disassembledBinary->kernelBuilders) {
+        if (kernelBuilder->name == kernel_name) {
+            const auto kernel = kernelBuilder->build();
             kernel->program = program;
-            clRetainKernel(kernel);
+            program->createdKernels.push_back(kernel);
             clRetainProgram(program);
 
             SET_SUCCESS();
@@ -39,11 +42,13 @@ clCreateKernelsInProgram(cl_program program,
                          cl_uint num_kernels,
                          cl_kernel* kernels,
                          cl_uint* num_kernels_ret) {
+    registerCall(__func__);
+
     if (!program) {
         RETURN_ERROR(CL_INVALID_PROGRAM, "Program is null.");
     }
 
-    const auto disassembledKernels = program->disassembledBinary->kernels;
+    const auto& disassembledKernels = program->disassembledBinary->kernelBuilders;
 
     if (kernels && num_kernels < disassembledKernels.size()) {
         RETURN_ERROR(
@@ -54,10 +59,12 @@ clCreateKernelsInProgram(cl_program program,
 
     if (kernels) {
         for (int i = 0; i < disassembledKernels.size(); ++i) {
-            kernels[i] = disassembledKernels[i];
-            kernels[i]->program = program;
+            auto kernel = disassembledKernels[i]->build();
+            kernel->program = program;
+            program->createdKernels.push_back(kernel);
             clRetainProgram(program);
-            clRetainKernel(kernels[i]);
+
+            kernels[i] = kernel;
         }
     }
 
@@ -72,6 +79,8 @@ CL_API_ENTRY cl_int CL_API_CALL clSetKernelArg(cl_kernel kernel,
                                                cl_uint arg_index,
                                                size_t arg_size,
                                                const void* arg_value) {
+    registerCall(__func__);
+
     if (!kernel) {
         RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
     }
@@ -86,6 +95,8 @@ CL_API_ENTRY cl_int CL_API_CALL clSetKernelArg(cl_kernel kernel,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainKernel(cl_kernel kernel) {
+    registerCall(__func__);
+
     if (!kernel) {
         RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
     }
@@ -96,6 +107,8 @@ CL_API_ENTRY cl_int CL_API_CALL clRetainKernel(cl_kernel kernel) {
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseKernel(cl_kernel kernel) {
+    registerCall(__func__);
+
     if (!kernel) {
         RETURN_ERROR(CL_INVALID_KERNEL, "Kernel is null.");
     }
@@ -119,6 +132,8 @@ clEnqueueNDRangeKernel(cl_command_queue command_queue,
                        cl_uint num_events_in_wait_list,
                        const cl_event* event_wait_list,
                        cl_event* event) {
+    registerCall(__func__);
+
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
@@ -184,11 +199,12 @@ clEnqueueNDRangeKernel(cl_command_queue command_queue,
                      "Not all kernel arguments are set.");
     }
 
-    const auto command = std::make_shared<KernelExecutionCommand>(
-        kernel, work_dim, global_work_offset, global_work_size,
-        local_work_size);
-
-    command_queue->enqueue(command);
+    enqueueCommand(command_queue, num_events_in_wait_list, event_wait_list,
+                   event, [&]() {
+                       return new KernelExecutionCommand(
+                           command_queue, kernel, work_dim, global_work_offset,
+                           global_work_size, local_work_size);
+                   });
 
     return CL_SUCCESS;
 }
@@ -198,6 +214,8 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueTask(cl_command_queue command_queue,
                                               cl_uint num_events_in_wait_list,
                                               const cl_event* event_wait_list,
                                               cl_event* event) {
+    registerCall(__func__);
+
     size_t workSize[1];
     workSize[0] = 1;
     return clEnqueueNDRangeKernel(command_queue, kernel, 1, nullptr, workSize,
@@ -216,6 +234,8 @@ clEnqueueNativeKernel(cl_command_queue command_queue,
                       cl_uint num_events_in_wait_list,
                       const cl_event* event_wait_list,
                       cl_event* event) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clEnqueueNativeKernel"
               << std::endl;
     return CL_INVALID_PLATFORM;
@@ -226,6 +246,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetKernelInfo(cl_kernel kernel,
                                                 size_t param_value_size,
                                                 void* param_value,
                                                 size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!kernel || !kernel->program) {
         RETURN_ERROR(CL_INVALID_KERNEL,
                      "Kernel is null or its program is null.");
@@ -285,6 +307,8 @@ clGetKernelArgInfo(cl_kernel kernel,
                    size_t param_value_size,
                    void* param_value,
                    size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!kernel || !kernel->program) {
         RETURN_ERROR(CL_INVALID_KERNEL,
                      "Kernel is null or its program is null.");
@@ -373,7 +397,74 @@ clGetKernelWorkGroupInfo(cl_kernel kernel,
                          size_t param_value_size,
                          void* param_value,
                          size_t* param_value_size_ret) {
-    std::cerr << "Unimplemented OpenCL API call: clGetKernelWorkGroupInfo"
-              << std::endl;
-    return CL_INVALID_PLATFORM;
+    registerCall(__func__);
+
+    if (!kernel || !kernel->program) {
+        RETURN_ERROR(CL_INVALID_KERNEL,
+                     "Kernel is null or its program is null.");
+    }
+
+    if (param_name == CL_KERNEL_GLOBAL_WORK_SIZE) {
+        RETURN_ERROR(CL_INVALID_VALUE,
+                     "CL_KERNEL_GLOBAL_WORK_SIZE works only on custom device "
+                     "or built-in kernel.");
+    }
+
+    return getParamInfo(
+        param_name, param_value_size, param_value, param_value_size_ret, [&]() {
+            CLObjectInfoParameterValueType result;
+            size_t resultSize;
+            bool isArray = false;
+
+            switch (param_name) {
+                case CL_KERNEL_WORK_GROUP_SIZE: {
+                    // TODO: should be determined by emulator
+                    resultSize = sizeof(size_t) * 3;
+                    auto* data = new size_t[3];
+                    data[0] = kernel->requiredWorkGroupSize.x;
+                    data[1] = kernel->requiredWorkGroupSize.y;
+                    data[2] = kernel->requiredWorkGroupSize.z;
+                    result = data;
+                    isArray = true;
+                    break;
+                }
+
+                case CL_KERNEL_COMPILE_WORK_GROUP_SIZE: {
+                    resultSize = sizeof(size_t) * 3;
+                    auto* data = new size_t[3];
+                    data[0] = kernel->requiredWorkGroupSize.x;
+                    data[1] = kernel->requiredWorkGroupSize.y;
+                    data[2] = kernel->requiredWorkGroupSize.z;
+                    result = data;
+                    isArray = true;
+                    break;
+                }
+
+                case CL_KERNEL_LOCAL_MEM_SIZE: {
+                    // TODO: proper getter
+                    resultSize = sizeof(cl_ulong);
+                    result = reinterpret_cast<void*>(0);
+                    break;
+                }
+
+                case CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE: {
+                    // TODO: proper getter
+                    resultSize = sizeof(size_t);
+                    result = reinterpret_cast<void*>(1);
+                    break;
+                }
+
+                case CL_KERNEL_PRIVATE_MEM_SIZE: {
+                    // TODO: proper getter
+                    resultSize = sizeof(cl_ulong);
+                    result = reinterpret_cast<void*>(0);
+                    break;
+                }
+
+                default: return utils::optionalOf<CLObjectInfoParameterValue>();
+            }
+
+            return utils::optionalOf(
+                CLObjectInfoParameterValue(result, resultSize, isArray));
+        });
 }

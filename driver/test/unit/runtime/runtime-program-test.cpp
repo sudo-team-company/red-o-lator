@@ -1,6 +1,5 @@
 #include <common/test/doctest.h>
 
-#include <runtime/runtime-commons.h>
 #include <common/utils/common.hpp>
 #include <vector>
 
@@ -150,8 +149,12 @@ TEST_SUITE("Program API") {
     TEST_CASE("clCreateProgramWithSource") {
         SUBCASE("clCreateProgramWithSource is not supported") {
             cl_int error;
-            const auto program =
-                clCreateProgramWithSource(nullptr, 0, nullptr, nullptr, &error);
+            const size_t* lengths = new size_t[1]{2};
+            const char** sources = new const char* [1] {
+                "a"
+            };
+            const auto program = clCreateProgramWithSource(
+                test::getContext(), 1, sources, lengths, &error);
 
             CHECK(error == CL_INVALID_OPERATION);
             CHECK(program == nullptr);

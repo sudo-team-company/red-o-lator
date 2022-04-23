@@ -1,6 +1,5 @@
 #include <common/test/doctest.h>
 
-#include <runtime/runtime-commons.h>
 #include <vector>
 
 #include "runtime/icd/icd.h"
@@ -26,7 +25,7 @@ TEST_SUITE("Platform API") {
         }
 
         SUBCASE("platform should have correct vendor") {
-            CHECK(test::getPlatform()->vendor == "sudo-team-company");
+            CHECK(test::getPlatform()->vendor == "Advanced Micro Devices, Inc.");
         }
 
         SUBCASE("platform should have correct name") {
@@ -35,7 +34,8 @@ TEST_SUITE("Platform API") {
         }
 
         SUBCASE("platform should have cl_khr_icd extension") {
-            CHECK(test::getPlatform()->extensions == "cl_khr_icd");
+            auto actualPos = test::getPlatform()->extensions.find("cl_khr_icd");
+            CHECK(actualPos != std::string::npos);
         }
 
         SUBCASE("should fail with incorrect parameters") {
@@ -51,7 +51,7 @@ TEST_SUITE("Platform API") {
 
     TEST_CASE("clGetPlatformInfo") {
         SUBCASE("should correctly return platform param") {
-            const std::string expected = "sudo-team-company";
+            const std::string expected = "Advanced Micro Devices, Inc.";
 
             auto platform = test::getPlatform();
 

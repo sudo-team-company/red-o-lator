@@ -1,19 +1,24 @@
 #pragma once
 
-#include <common/logger/Logger.h>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <variant>
 
-#include "icd/CLPlatformId.hpp"
-#include "CLObjectInfoParameterValue.hpp"
-#include "device/DeviceConfigurationParser.h"
-#include "icd/IcdDispatchTable.h"
+#include "common/utils/time-utils.hpp"
 
-extern Logger kLogger;
+#include "runtime/CLObjectInfoParameterValue.hpp"
+#include "runtime/device/DeviceConfigurationParser.h"
+#include "runtime/icd/CLPlatformId.hpp"
+#include "runtime/icd/CLCommandQueue.h"
+#include "runtime/icd/IcdDispatchTable.h"
+#include "runtime/common/logger.h"
+
 extern IcdDispatchTable* kDispatchTable;
 extern DeviceConfigurationParser kDeviceConfigurationParser;
+extern utils::Clock* kClock;
+
 extern CLPlatformId* kPlatform;
 extern CLDeviceId* kDevice;
 
@@ -47,7 +52,15 @@ extern cl_int getParamInfo(
     const std::function<std::optional<CLObjectInfoParameterValue>()>&
         parameterValueGetter);
 
+extern void enqueueCommand(cl_command_queue queue,
+                      cl_uint waitListEventsCount,
+                      const cl_event* waitList,
+                      cl_event* eventOut,
+                      const std::function<Command*()>& commandGetter);
+
+extern void registerCall(const std::string& funcName);
+
 namespace utils {
 extern bool hasMutuallyExclusiveFlags(cl_bitfield flags,
-                                std::initializer_list<cl_int> checkFlags);
+                                      std::initializer_list<cl_int> checkFlags);
 }  // namespace utils

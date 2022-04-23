@@ -1,4 +1,4 @@
-#include <runtime-commons.h>
+#include <runtime/common/runtime-commons.h>
 #include <cassert>
 #include <common/utils/common.hpp>
 #include <iostream>
@@ -9,10 +9,13 @@
 
 std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm() {
     if (alreadyParsed) {
-        return std::make_unique<BinaryDisassemblingResult>(parsingResult);
+        throw std::runtime_error(
+            "Binary was parsed before so parser is invalidated.");
     }
 
-    auto lines = utils::splitMap<std::string>(*input, '\n', -1, [](auto line) {
+    parsingResult = std::make_unique<BinaryDisassemblingResult>();
+
+    auto lines = utils::splitMap<std::string>(*input, '\n', [](auto line) {
         utils::trimInplace(line);
         return line;
     });
@@ -46,12 +49,12 @@ std::unique_ptr<BinaryDisassemblingResult> BinaryAsmParser::parseAsm() {
     }
 
     if (currentKernelBuilder) {
-        parsingResult.kernels.push_back(currentKernelBuilder->build());
+        parsingResult->kernelBuilders.push_back(std::move(currentKernelBuilder));
     }
 
     alreadyParsed = true;
 
-    return std::make_unique<BinaryDisassemblingResult>(parsingResult);
+    return std::move(parsingResult);
 }
 
 void BinaryAsmParser::parseSingleInstruction(const std::string& instruction) {
@@ -91,7 +94,8 @@ void BinaryAsmParser::parseParameter(const std::string& line,
                                      const std::string& parameterValue) {
     if (utils::startsWith(parameterName, ".kernel")) {
         if (currentKernelBuilder) {
-            parsingResult.kernels.push_back(currentKernelBuilder->build());
+            parsingResult->kernelBuilders.push_back(
+                std::move(currentKernelBuilder));
         }
 
         currentKernelBuilder = std::make_unique<CLKernelBuilder>();
@@ -147,15 +151,14 @@ void BinaryAsmParser::parseKernelInstruction(const std::string& line,
 void BinaryAsmParser::parseBinaryParameter(const std::string& line,
                                            const std::string& parameterName,
                                            const std::string& parameterValue) {
-
     if (parameterName == ".gpu") {
-        parsingResult.gpuName = parameterValue;
+        parsingResult->gpuName = parameterValue;
 
     } else if (parameterName == ".compile_options") {
-        parsingResult.compileOptions = parameterValue;
+        parsingResult->compileOptions = parameterValue;
 
     } else {
-        parsingResult.parameters.push_back(line);
+        parsingResult->parameters.push_back(line);
     }
 }
 
@@ -163,6 +166,25 @@ void BinaryAsmParser::parseKernelConfigParameter(
     const std::string& line,
     const std::string& parameterName,
     const std::string& parameterValue) {
+    // clang formatting is meh, so here is a comment separating args from body
+
+    if (parameterName == ".cws" || parameterName == ".reqd_work_group_size") {
+        const auto values =
+            utils::splitMap<size_t>(parameterValue, ',', [](const auto value) {
+                return std::stoul(utils::trim(value));
+            });
+
+        currentKernelBuilder->requiredWorkGroupSize.x = values[0];
+
+        if (values.size() > 1) {
+            currentKernelBuilder->requiredWorkGroupSize.y = values[1];
+        }
+
+        if (values.size() > 2) {
+            currentKernelBuilder->requiredWorkGroupSize.z = values[2];
+        }
+    }
+
     if (parameterName == ".arg" && !utils::startsWith(parameterValue, "_")) {
         parseKernelArgument(parameterValue);
     }
