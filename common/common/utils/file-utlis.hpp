@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cstddef>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <vector>
 
-namespace filesystem = std::experimental::filesystem;
+namespace filesystem = std::filesystem;
 
 namespace utils {
 static std::vector<unsigned char> readBinaryFile(const std::string& path) {
