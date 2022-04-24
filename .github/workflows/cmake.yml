@@ -49,6 +49,7 @@ jobs:
         run: cp -r ${{github.workspace}}/OpenCL-Headers/CL ${{github.workspace}}/OpenCL-ICD-Loader/inc &&
           cmake -H${{github.workspace}}/OpenCL-ICD-Loader -B ${{github.workspace}}/OpenCL-ICD-Loader/build
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -DCMAKE_INSTALL_LIBDIR=lib
 
       - name: Build ICD Loader
         run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build -j 16
