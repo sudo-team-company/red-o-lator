@@ -89,7 +89,7 @@ target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
         OpenCL::OpenCL
         red-o-lator-emulator
         )
-target_link_libraries(red-o-lator-icd PRIVATE
+target_link_libraries(red-o-lator-icd PUBLIC
         red-o-lator-common
         red-o-lator-emulator
         PkgConfig::LIB_CLRX_AMD_ASM
@@ -117,6 +117,7 @@ set(TEST_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/resources)
 # Unit tests #
 ##############
 set(UNIT_TEST_SOURCES
+        ${SOURCES}
         test/unit/runner.cpp
         test/unit/runtime/runtime-platform-test.cpp
         test/unit/unit-test-common/test-commons.h
