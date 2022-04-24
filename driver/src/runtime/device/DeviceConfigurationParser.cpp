@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "CL/cl_ext2.h"
 #include "DeviceConfigurationParser.h"
 #include "common/utils/common.hpp"
 #include "runtime/common/runtime-commons.h"
