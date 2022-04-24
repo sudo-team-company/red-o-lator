@@ -76,11 +76,11 @@ add_library(red-o-lator-icd SHARED ${SOURCES})
 target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
         OpenCL::OpenCL
         )
-target_link_libraries(red-o-lator-icd PRIVATE
+target_link_libraries(red-o-lator-icd PUBLIC
         red-o-lator-common
         PkgConfig::LIB_CLRX_AMD_ASM
         )
-target_include_directories(red-o-lator-icd PRIVATE src/runtime)
+target_include_directories(red-o-lator-icd PUBLIC src/runtime)
 install(TARGETS red-o-lator-icd DESTINATION lib)
 
 
@@ -103,6 +103,7 @@ set(TEST_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/resources)
 # Unit tests #
 ##############
 set(UNIT_TEST_SOURCES
+        ${SOURCES}
         test/unit/runner.cpp
         test/unit/runtime/runtime-platform-test.cpp
         test/unit/unit-test-common/test-commons.h
