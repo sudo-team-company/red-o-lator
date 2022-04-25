@@ -3,8 +3,7 @@
 static inline void run_flat_store_dwordxn(WfStateFLAT& state, size_t wiInd, size_t n) {
     for (size_t i = 0; i < n; ++i) {
         //todo
-        Storage::get_instance()->write_data(
-            state.VADDR[wiInd], 0, state.VDATA[wiInd * state.VDATA_SIZE_PER_WI + i]);
+        Storage::get_instance()->write_data(state.VADDR[wiInd], 0, state.VDATA[wiInd * state.VDATA_SIZE_PER_WI + i]);
     }
 }
 static inline void run_flat_store_dword(WfStateFLAT& state, size_t wiInd) {

@@ -13,6 +13,7 @@ KernelConfig::KernelConfig(uint32_t dims,
     if (!globalWorkSize) {
         throw std::runtime_error("Global work size parameter can not be empty!");
     }
+    std::copy_n(globalWorkSize, dims, this->globalWorkSize.begin());
     if (localWorkSize) {
         std::copy_n(localWorkSize, dims, this->localWorkSize.begin());
     }

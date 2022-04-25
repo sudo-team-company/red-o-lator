@@ -31,10 +31,10 @@ void WorkGroup::init_wavefronts(const KernelConfig &kernelConfig) {
     while (workitemInd < workItems.size()) {
         size_t wiLeft = workItems.size() - workitemInd;
         size_t wfSize;
-        if (wiLeft > DEFAULT_WAVEFRONT_SIZE) {
+        if (wiLeft >= DEFAULT_WAVEFRONT_SIZE) {
             wfSize = DEFAULT_WAVEFRONT_SIZE;
         } else {
-            wfSize = wiLeft % DEFAULT_WAVEFRONT_SIZE;
+            wfSize = wiLeft;
         }
         wavefronts.push_back(std::make_unique<Wavefront>(kernelConfig, this, wfSize, wfInd));
         auto &curWf = *wavefronts.back();
@@ -59,8 +59,6 @@ Wavefront::Wavefront(const KernelConfig &kernelConfig, const WorkGroup *const wg
     scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));
     vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
     init_regs(kernelConfig);
-    //todo у меня для каждого wi своя куча регистров,
-    // на реальной карточке 256 штук регистров векторных для 16 wi
 }
 
 void Wavefront::init_regs(const KernelConfig &kernelConfig) {
@@ -243,11 +241,11 @@ void Wavefront::update_with_common_sopp_state(const Instruction &instruction,
 WfStateSMEM Wavefront::get_smem_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() == 3 &&
            "Unexpected amount of operands for SMEM instruction");
-
-    uint64_t BASE = to_uin64_t(read_operand(*instruction[1]));
-    uint64_t OFFSET = to_uin64_t(read_operand(*instruction[2]));
-
-    return WfStateSMEM{BASE, OFFSET, read_operand(*instruction[0])};
+    auto BASE = read_operand(*instruction[1]);
+    std::reverse(BASE.begin(), BASE.end());
+    auto OFFSET = read_operand(*instruction[2]);
+    std::reverse(OFFSET.begin(), OFFSET.end());
+    return WfStateSMEM{to_uin64_t(BASE), to_uin64_t(OFFSET), read_operand(*instruction[0])};
 }
 
 void Wavefront::update_with_smem_state(const Instruction &instruction,
@@ -292,6 +290,7 @@ WfStateVOP2 Wavefront::get_vop2_state(const Instruction &instruction) {
                 SRC0.push_back(to_uin64_t(read_operand(*instruction[1], i)));
                 SRC1.push_back(to_uin64_t(read_operand(*instruction[2], i)));
             }
+            break;
         case 5:
             assert(instruction[1]->type == REGISTER && instruction[4]->type == REGISTER
                 && std::get<RegisterType>(instruction[1]->value) == VCC && std::get<RegisterType>(instruction[4]->value) == VCC && "Unsupported operands");
@@ -300,6 +299,7 @@ WfStateVOP2 Wavefront::get_vop2_state(const Instruction &instruction) {
                 SRC0.push_back(to_uin64_t(read_operand(*instruction[2], i)));
                 SRC1.push_back(to_uin64_t(read_operand(*instruction[3], i)));
             }
+            break;
     }
     return {std::move(VDST), std::move(SRC0), std::move(SRC1), vccReg};
 }
@@ -347,10 +347,10 @@ WfStateFLAT Wavefront::get_flat_state(const Instruction &instruction) {
     auto VDATA = std::vector<uint32_t>();
     for (int i = 0; i < get_size(); ++i) {
         auto vaddr = read_operand(*instruction[0], i);
-        std::reverse(vaddr.end(), vaddr.begin());
+        std::reverse(vaddr.begin(), vaddr.end());
         VADDR.push_back(to_uin64_t(vaddr));
         auto vDataPerWI = read_operand(*instruction[1], i);
-        VDATA.insert(VDATA.end(), vDataPerWI.rbegin(), vDataPerWI.rend());
+        std::copy(vDataPerWI.begin(), vDataPerWI.end(), std::back_inserter(VDATA));
     }
     assert(VDATA.size() % get_size() == 0);
     return {VADDR, VDATA, VDATA.size() / get_size()};
@@ -471,7 +471,7 @@ void Wavefront::write_operand_to_gpr(const Operand &operand,
 }
 
 bool Wavefront::work_item_masked(size_t wiInd) const {
-    return (execReg & (1 << wiInd)) != 0;
+    return (execReg & (1ull << wiInd)) != 0;
 }
 
 void Wavefront::set_sgpr_pair(size_t sgprInd, uint64_t data) {

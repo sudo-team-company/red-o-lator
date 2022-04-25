@@ -130,7 +130,7 @@ TEST_CASE("data[global_id(0)] = x + x") {
     int x = 50;
     uint64_t dataAddress = 60;
     auto storage = Storage::get_instance();
-    storage->init(60 + 1024); //[0:60] - args, [60:1084] - data
+    storage->init(60 + (1024 * 4)); //[0:60] - args, [60:1084] - data
     storage->write_data(48, 0, uint64_t(dataAddress)); //write address of data
     storage->write_data(56, 0, uint32_t(x)); //write value of x
 
@@ -139,7 +139,8 @@ TEST_CASE("data[global_id(0)] = x + x") {
         std::unique_ptr<WorkGroup> workGroup(dispatcher.next_wg());
         ComputeUnit::run_work_group(workGroup.get());
     }
-    for(size_t i = 0; i < 1024; ++i) {
-        CHECK(storage->read_4_bytes(dataAddress, 4 * i) == 100);
+
+    for(size_t i = 0; i < 1024; i+=4) {
+        CHECK(storage->read_4_bytes(dataAddress, i) == 100);
     }
 }

@@ -43,10 +43,12 @@ struct Instruction {
     }
 
     Operand* operator[](size_t index) {
+        assert(index < operands.size());
         return operands[index].get();
     }
 
     Operand const* operator[](size_t index) const {
+        assert(index < operands.size());
         return operands[index].get();
     }
 

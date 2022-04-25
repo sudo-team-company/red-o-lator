@@ -3,6 +3,7 @@
 static inline void run_s_load_dword_n(WfStateSMEM& state, uint32_t n) {
     //todo
     state.SDST = to_uint32_v(Storage::get_instance()->read_data(state.BASE, state.OFFSET, n));
+    std::reverse(state.SDST.begin(), state.SDST.end());
 }
 
 static inline void run_s_load_dword(WfStateSMEM& state) {

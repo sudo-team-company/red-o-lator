@@ -139,7 +139,6 @@ void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
     wavefront->update_with_common_sopp_state(instruction, state);
 }
 
-//todo шо це
 void set_reladdr_and_run(const Instruction& instruction,
                          Wavefront* wf,
                          WfStateSOPP& state,

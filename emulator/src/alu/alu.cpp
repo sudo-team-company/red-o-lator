@@ -38,7 +38,6 @@ void run_instr(const Instruction& instr, Wavefront* wf) {
         case VINTRP:
         case VOP3P:
         default:
-            logger.error(std::string("Unsupported instruction format: ")); //todo
             assert(false && "Unsupported instruction type");
     }
 }
