@@ -1,12 +1,11 @@
-#include <common/cl.h>
-#include <common/logger/Logger.h>
-#include <common/utils/common.hpp>
+#include "common/logger/Logger.h"
+#include "common/utils/common.hpp"
 #include <cstddef>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
+#include "runtime/icd/icd.h"
 #include "KernelLoader.h"
 
 #define CHECK_ERROR(message)                                                 \

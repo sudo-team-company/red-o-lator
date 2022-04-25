@@ -68,7 +68,10 @@ set(SOURCES
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp)
+        src/runtime/icd/CLMem.cpp
+        src/runtime/command/KernelExecutionCommand.cpp
+        src/emulator/command_executor.cpp
+        )
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
@@ -78,9 +81,10 @@ target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
         )
 target_link_libraries(red-o-lator-icd PRIVATE
         red-o-lator-common
+        red-o-lator-emulator
         PkgConfig::LIB_CLRX_AMD_ASM
         )
-target_include_directories(red-o-lator-icd PRIVATE src/runtime)
+target_include_directories(red-o-lator-icd PUBLIC src/runtime)
 install(TARGETS red-o-lator-icd DESTINATION lib)
 
 
@@ -119,7 +123,10 @@ add_executable(red-o-lator-icd-test-unit ${UNIT_TEST_SOURCES})
 target_link_libraries(red-o-lator-icd-test-unit PRIVATE red-o-lator-icd red-o-lator-common)
 target_include_directories(red-o-lator-icd-test-unit PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/)
-
+add_test(NAME red-o-lator-icd-test-unit
+        COMMAND red-o-lator-icd-test-unit
+        --config $<CONFIG>
+        -exe $<TARGET_FILE:red-o-lator-icd-test-unit>)
 add_custom_command(TARGET red-o-lator-icd-test-unit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${TEST_RESOURCES}
@@ -135,11 +142,24 @@ set(E2E_TEST_SOURCES
         )
 
 add_executable(red-o-lator-icd-test-e2e ${E2E_TEST_SOURCES})
-target_link_libraries(red-o-lator-icd-test-e2e PRIVATE OpenCL::OpenCL red-o-lator-common)
+target_link_libraries(red-o-lator-icd-test-e2e PRIVATE OpenCL::OpenCL red-o-lator-common red-o-lator-icd)
+add_test(NAME red-o-lator-icd-test-e2e
+        COMMAND red-o-lator-icd-test-e2e
+        --config $<CONFIG>
+        -exe $<TARGET_FILE:red-o-lator-icd-test-e2e>)
+
 add_custom_command(TARGET red-o-lator-icd-test-e2e POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${TEST_RESOURCES}
         $<TARGET_FILE_DIR:red-o-lator-icd-test-e2e>/test/resources
         )
 target_compile_definitions(red-o-lator-icd-test-e2e PRIVATE __CL_ENABLE_EXCEPTIONS)
+
+###################
+# Test executable #
+###################
+add_executable(red-o-lator-driver-exec
+        src/runtime/main/main.cpp
+        src/runtime/main/KernelLoader.cpp)
+target_link_libraries(red-o-lator-driver-exec PRIVATE red-o-lator-icd red-o-lator-common)
 

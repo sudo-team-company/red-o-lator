@@ -1,9 +1,4 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
-#ifndef RED_O_LATOR_STORAGE_H
-#define RED_O_LATOR_STORAGE_H
+#pragma once
 
 #include <vector>
 #include <cstdint>
@@ -32,5 +27,3 @@ struct Storage {
 
     void validate_addr(uint64_t);
 };
-
-#endif  // RED_O_LATOR_STORAGE_H

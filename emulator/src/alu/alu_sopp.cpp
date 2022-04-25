@@ -134,7 +134,7 @@ void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
         case S_BARRIER:
         case S_ENDPGM:
         default:
-            unsupported_instruction("SOPP", get_instr_str(instrKey));
+            UNSUPPORTED_INSTRUCTION("SOPP", get_instr_str(instrKey));
     }
     wavefront->update_with_common_sopp_state(instruction, state);
 }

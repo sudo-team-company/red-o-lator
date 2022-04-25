@@ -1,9 +1,6 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
 #include "storage.h"
 #include <string>
+
 std::vector<uint8_t> Storage::read_data(uint64_t address,
                                         uint32_t offset,
                                         uint32_t byteSize) {
@@ -51,5 +48,5 @@ Storage* Storage::get_instance() {
 }
 
 void Storage::init(size_t bufferSize) {
-    data_.resize(bufferSize);
+    data_.resize(bufferSize, 0);
 }

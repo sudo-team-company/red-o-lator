@@ -5,7 +5,8 @@
 
 extern Logger logger;
 
-static inline void unsupported_instruction(const char* const instrType, const char* const instrKey) {
-    logger.error(std::string("Unsupported ") + instrType + " instruction: "+ instrKey);
-    assert(false && "Unsupported instruction");
-}
+#define UNSUPPORTED_INSTRUCTION(instrType, instrKey) \
+do {                                                 \
+    logger.error(std::string("Unsupported ") + instrType + " instruction: "+ instrKey); \
+    assert(false && "Can not execute kernel due to unsupported instruction"); \
+} while(false)

@@ -16,7 +16,7 @@ void ComputeUnit::run_wavefront(Wavefront* wavefront) {
         InstrKey instrKey = curInstr->get_key();
 
         if (instrKey == S_ENDPGM) {
-            wavefront->completed = true;
+            wavefront->compete();
             break;
         }
 
@@ -35,7 +35,7 @@ void ComputeUnit::resolve_barrier(WorkGroup* wg) {
     if (wg->all_wf_completed()) return;
     for (auto& wavefront : wg->wavefronts) {
         auto* wf = wavefront.get();
-        if (!wf->atBarrier) assert(false && "Illegal wavefront state");
+        if (!wf->atBarrier)assert(false && "Illegal wavefront state");
         wf->atBarrier = false;
     }
 }

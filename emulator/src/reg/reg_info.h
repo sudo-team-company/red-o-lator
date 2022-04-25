@@ -110,6 +110,8 @@ enum RegisterType {
     S99,
     S100,
     S101,
+    S102,
+    S103,
 
     /**
      *  A bit mask with one bit per thread, which is applied to vector

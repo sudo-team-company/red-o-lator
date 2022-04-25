@@ -288,10 +288,9 @@ static inline void run_s_quadmask_b64(WfStateSOP1& state) {
     state.SCC = state.SDST != 0;
 }
 
-// Return from exception handler and continue. This instruction may
-// only be used within a trap handler.
+// Return from exception handler and continue. This instruction may only be used within a trap handler.
 static inline void run_s_rfe_b64(WfStateSOP1& state) {
-    state.STATUS->priv(0);
+    state.STATUS->priv(false);
     state.PC->set_value(state.SSRC0);
 }
 
@@ -524,7 +523,7 @@ void run_sop1(const Instruction& instr, Wavefront* wf) {
             run_s_xor_saveexec_b64(state);
             break;
         default:
-            unsupported_instruction("SOP1", get_instr_str(instr.get_key()));
+            UNSUPPORTED_INSTRUCTION("SOP1", get_instr_str(instr.get_key()));
     }
 
     wf->update_with_sop1_state(instr, state);

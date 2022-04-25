@@ -162,6 +162,8 @@ clEnqueueNDRangeKernel(cl_command_queue command_queue,
                         " is greater than max allowed of " +
                         std::to_string(maxWorkItemSizes[i]));
             }
+        } else {
+            local_work_size = maxWorkItemSizes;
         }
     }
 

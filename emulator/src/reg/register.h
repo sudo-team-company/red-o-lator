@@ -1,16 +1,11 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
-#ifndef RED_O_LATOR_REGISTER_H
-#define RED_O_LATOR_REGISTER_H
+#pragma once
 
 #include <bitset>
 #include <unordered_map>
 #include "reg_info.h"
 
 constexpr bool is_s_reg(RegisterType type) {
-    return type >= S0 && type <= S101;
+    return type >= S0 && type <= S103;
 }
 
 constexpr bool is_v_reg(RegisterType type) {
@@ -51,8 +46,7 @@ struct ProgramCounter {
 };
 
 struct ModeReg {
-    std::bitset<32> value;
-
+public:
     explicit ModeReg(uint32_t);
 
     uint8_t fp_round() const;   //[3:0] bits
@@ -84,11 +78,13 @@ struct ModeReg {
     void gpr_idx_en(bool);
     void vskip(bool);
     void csp(uint8_t);
+
+private:
+    std::bitset<32> value;
 };
 
 struct StatusReg {
-    std::bitset<32> value;
-
+public:
     explicit StatusReg(uint32_t);
 
     /**
@@ -96,7 +92,8 @@ struct StatusReg {
      * this bit indicates failure or success. For logical operations, this is 1 if the
      * result was non-zero.
      */
-    bool scc() const;  // 0 - in docs 1, mb it is mistake
+    bool scc() const;  //0
+    void scc(bool);
     /**
      * Wavefront priority set by the shader processor interpolator (SPI) when the
      * wavefront is created. See the S_SETPRIO instruction for
@@ -207,6 +204,7 @@ struct StatusReg {
      * terminating.
      */
     bool must_export() const;  // 27
-};
 
-#endif  // RED_O_LATOR_REGISTER_H
+private:
+    std::bitset<32> value;
+};

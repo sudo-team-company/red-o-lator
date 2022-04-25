@@ -1,28 +1,118 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
 #include "wavefront.h"
 
-void WorkGroup::set_ids(int idX, int idY, int idZ) {
-    IDX = idX;
-    IDY = idY;
-    IDZ = idZ;
-}
-void WorkGroup::set_actual_size(int x, int y, int z) {
-    actualSizeX = x;
-    actualSizeY = y;
-    actualSizeZ = z;
-}
 bool WorkGroup::all_wf_completed() {
-    for (auto& wavefront : wavefronts) {
-        if (!wavefront->completed) {
+    for (auto &wavefront: wavefronts) {
+        if (!wavefront->is_completed()) {
             return false;
         }
     }
     return true;
 }
-Instruction* Wavefront::get_cur_instr() const {
+
+WorkItem &WorkGroup::get_workitem_for_wf(size_t wiId, size_t wfId) const {
+    auto ind = wfId * DEFAULT_WAVEFRONT_SIZE + wiId;
+    assert(ind < workItems.size() && "Index of work item is out of bound");
+    return *workItems[ind];
+}
+
+void WorkGroup::init_workitems() {
+    for (int x = 0; x < sizeX; x++) {
+        for (int y = 0; y < sizeY; y++) {
+            for (int z = 0; z < sizeZ; z++) {
+                workItems.push_back(std::make_unique<WorkItem>(x, y, z));
+            }
+        }
+    }
+}
+
+void WorkGroup::init_wavefronts(const KernelConfig &kernelConfig) {
+    size_t workitemInd = 0;
+    size_t wfInd = 0;
+    while (workitemInd < workItems.size()) {
+        size_t wiLeft = workItems.size() - workitemInd;
+        size_t wfSize;
+        if (wiLeft > DEFAULT_WAVEFRONT_SIZE) {
+            wfSize = DEFAULT_WAVEFRONT_SIZE;
+        } else {
+            wfSize = wiLeft % DEFAULT_WAVEFRONT_SIZE;
+        }
+        wavefronts.push_back(std::make_unique<Wavefront>(kernelConfig, this, wfSize, wfInd));
+        auto &curWf = *wavefronts.back();
+        curWf.set_exec_reg(evaluate_exec_reg_value(wfSize));
+        workitemInd += wfSize;
+    }
+}
+
+Wavefront::Wavefront(const KernelConfig &kernelConfig, const WorkGroup *const wg, size_t size, size_t id)
+    : workGroup(wg),
+      size(size),
+      id(id),
+      execReg(0),
+      vccReg(0),
+      sgprsnum(kernelConfig.get_sgpr_size()),
+      vgprsnum(kernelConfig.get_vgpr_size()),
+      programCounter(std::make_unique<ProgramCounter>(0)),
+      statusReg(std::make_unique<StatusReg>(0)),
+      modeReg(std::make_unique<ModeReg>(0)),
+      atBarrier(false),
+      completed(false) {
+    scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));
+    vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
+    init_regs(kernelConfig);
+    //todo у меня для каждого wi своя куча регистров,
+    // на реальной карточке 256 штук регистров векторных для 16 wi
+}
+
+void Wavefront::init_regs(const KernelConfig &kernelConfig) {
+    size_t sgprInd = 0;
+
+    sgprInd += kernelConfig.get_user_sgpr();
+
+    if (kernelConfig.is_enabled_idx()) {
+        scalarRegFile[sgprInd++] = workGroup->idX;
+    }
+
+    if (kernelConfig.is_enabled_idy()) {
+        scalarRegFile[sgprInd++] = workGroup->idY;
+    }
+
+    if (kernelConfig.is_enabled_idz()) {
+        scalarRegFile[sgprInd++] = workGroup->idZ;
+    }
+
+    if (kernelConfig.is_enabled_sgpr_workgroup_info()) {
+        logger.error(
+            std::string("Unsupported configuration parameter: enable loading of threadgroup related info to SGPR."));
+        sgprInd++;
+    }
+
+    if (kernelConfig.is_enabled_scratch()) {
+        logger.error(std::string("Unsupported configuration parameter: scratch space for register spilling."));
+        sgprInd++;
+    }
+
+    if (kernelConfig.use_setup()) {
+        set_sgpr_pair(6, kernelConfig.kernArgAddr);
+    }
+    if (kernelConfig.use_args()) {
+        set_sgpr_pair(4, kernelConfig.kernArgAddr);
+    }
+
+    //MODE register initialization
+    modeReg->ieee(kernelConfig.ieee_mode_enabled());
+    modeReg->dx10_clamp(kernelConfig.dx10_clamp_enabled());
+
+    //todo STATUS register initialization
+
+    for (size_t i = 0; i < get_size(); i++) {
+        auto workItem = workGroup->get_workitem_for_wf(i, id);
+        set_vgpr(i, 0, workItem.get_local_id_x());
+        set_vgpr(i, 1, workItem.get_local_id_y());
+        set_vgpr(i, 2, workItem.get_local_id_z());
+    }
+}
+
+Instruction *Wavefront::get_cur_instr() const {
     return workGroup->kernelCode->get_instr(this->programCounter->get_value());
 }
 
@@ -44,11 +134,11 @@ uint32_t Wavefront::read_vgpr(size_t wiInd, size_t vInd) {
     return vectorRegFile[ind];
 }
 
-WfStateSOP1 Wavefront::get_sop1_state(const Instruction& instr) {
+WfStateSOP1 Wavefront::get_sop1_state(const Instruction &instr) {
     assert(instr.get_operands_count() <= 2 && "Unexpected operands count for SOP1");
 
-    auto state = WfStateSOP1{execReg,       programCounter.get(), m0Reg,
-                             modeReg.get(), statusReg.get(),      sccReg};
+    auto state = WfStateSOP1{execReg, programCounter.get(), m0Reg,
+                             modeReg.get(), statusReg.get(), sccReg};
     if (instr.get_operands_count() < 2) {
         return state;
     }
@@ -60,8 +150,8 @@ WfStateSOP1 Wavefront::get_sop1_state(const Instruction& instr) {
     return state;
 }
 
-void Wavefront::update_with_sop1_state(const Instruction& instr,
-                                       const WfStateSOP1& state) {
+void Wavefront::update_with_sop1_state(const Instruction &instr,
+                                       const WfStateSOP1 &state) {
     assert(instr.get_operands_count() <= 2 && "Unexpected operands count for SOP1");
 
     execReg = state.EXEC;
@@ -75,7 +165,7 @@ void Wavefront::update_with_sop1_state(const Instruction& instr,
     write_operand_to_gpr(*instr[0], state.SDST);
 }
 
-WfStateSOP2 Wavefront::get_sop2_state(const Instruction& instruction) {
+WfStateSOP2 Wavefront::get_sop2_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() <= 3 && "Unexpected operands count for SOP2");
 
     auto state = WfStateSOP2(execReg, programCounter.get(), modeReg.get(),
@@ -90,8 +180,8 @@ WfStateSOP2 Wavefront::get_sop2_state(const Instruction& instruction) {
     return state;
 }
 
-void Wavefront::update_with_sop2_state(const Instruction& instruction,
-                                       const WfStateSOP2& state) {
+void Wavefront::update_with_sop2_state(const Instruction &instruction,
+                                       const WfStateSOP2 &state) {
     assert(instruction.get_operands_count() <= 3 && "Unexpected operands count for SOP2");
 
     execReg = state.EXEC;
@@ -105,10 +195,10 @@ void Wavefront::update_with_sop2_state(const Instruction& instruction,
 }
 
 WfStateSOPK Wavefront::get_sopk_state() const {
-    return WfStateSOPK(programCounter.get(), sccReg);
+    return {programCounter.get(), sccReg};
 }
 
-WfStateSOPK Wavefront::get_sopk_state(const Instruction& instruction) {
+WfStateSOPK Wavefront::get_sopk_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() == 2 && "Unexpected operands count for SOPK");
 
     auto state = WfStateSOPK(programCounter.get(), sccReg);
@@ -118,13 +208,13 @@ WfStateSOPK Wavefront::get_sopk_state(const Instruction& instruction) {
     return state;
 }
 
-void Wavefront::update_with_sopk_state(const Instruction& instruction,
-                                       const WfStateSOPK& state) {
+void Wavefront::update_with_sopk_state(const Instruction &instruction,
+                                       const WfStateSOPK &state) {
     sccReg = state.SCC;
     write_operand_to_gpr(*instruction[0], state.SDST);
 }
 
-WfStateSOPC Wavefront::get_sopc_state(const Instruction& instruction) {
+WfStateSOPC Wavefront::get_sopc_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() == 2 && "Unexpected operands count for SOP2");
 
     auto state = WfStateSOPC(execReg, modeReg.get(), sccReg);
@@ -133,24 +223,24 @@ WfStateSOPC Wavefront::get_sopc_state(const Instruction& instruction) {
     return state;
 }
 
-void Wavefront::update_with_sopc_state(const WfStateSOPC& state) {
+void Wavefront::update_with_sopc_state(const WfStateSOPC &state) {
     sccReg = state.SCC;
     m0Reg = state.M0;
 }
 
-WfStateSOPP Wavefront::get_common_sopp_state(const Instruction& instruction) const {
-    return WfStateSOPP{programCounter.get(), execReg,       vccReg, m0Reg,
-                       statusReg.get(),      modeReg.get(), sccReg};
+WfStateSOPP Wavefront::get_common_sopp_state(const Instruction &instruction) const {
+    return WfStateSOPP{programCounter.get(), execReg, vccReg, m0Reg,
+                       statusReg.get(), modeReg.get(), sccReg};
 }
 
-void Wavefront::update_with_common_sopp_state(const Instruction& instruction,
-                                              const WfStateSOPP& state) {
+void Wavefront::update_with_common_sopp_state(const Instruction &instruction,
+                                              const WfStateSOPP &state) {
     execReg = state.EXEC;
     vccReg = state.VCC;
     sccReg = state.SCC;
 }
 
-WfStateSMEM Wavefront::get_smem_state(const Instruction& instruction) {
+WfStateSMEM Wavefront::get_smem_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() == 3 &&
            "Unexpected amount of operands for SMEM instruction");
 
@@ -160,56 +250,69 @@ WfStateSMEM Wavefront::get_smem_state(const Instruction& instruction) {
     return WfStateSMEM{BASE, OFFSET, read_operand(*instruction[0])};
 }
 
-void Wavefront::update_with_smem_state(const Instruction& instruction,
-                                       const WfStateSMEM& state) {
+void Wavefront::update_with_smem_state(const Instruction &instruction,
+                                       const WfStateSMEM &state) {
     write_operand_to_gpr(*instruction[0], state.SDST);
 }
 
-WfStateVOP1 Wavefront::get_vop1_state(const Instruction& instruction) {
+WfStateVOP1 Wavefront::get_vop1_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() == 2 &&
            "Unexpected amount of operands for VOP1 instruction");
     auto VDST = std::vector<uint64_t>();
     auto SRC0 = std::vector<uint64_t>();
 
-    for (int i = 0; i < workItems.size(); ++i) {
+    for (int i = 0; i < get_size(); ++i) {
         VDST.push_back(to_uin64_t(read_operand(*instruction[0], i)));
         SRC0.push_back(to_uin64_t(read_operand(*instruction[1], i)));
     }
 
-    return WfStateVOP1(std::move(VDST), std::move(SRC0));
+    return {std::move(VDST), std::move(SRC0)};
 }
 
-void Wavefront::update_with_vop1_state(const Instruction& instruction,
-                                       const WfStateVOP1& state) {
-    for (int i = 0; i < workItems.size(); ++i) {
+void Wavefront::update_with_vop1_state(const Instruction &instruction,
+                                       const WfStateVOP1 &state) {
+    for (int i = 0; i < get_size(); ++i) {
         write_operand_to_gpr(*instruction[0], state.VDST[i], i);
     }
 }
 
-WfStateVOP2 Wavefront::get_vop2_state(const Instruction& instruction) {
-    assert(instruction.get_operands_count() == 3 &&
-           "Unexpected amount of operands for VOP2 instruction");
+WfStateVOP2 Wavefront::get_vop2_state(const Instruction &instruction) {
+    if (instruction.get_operands_count() != 3 && instruction.get_operands_count() != 5) {
+        throw std::runtime_error(std::string("Expected 3 or 5 operands but got ") + std::to_string(instruction.get_operands_count()) +
+                     " for VOP2 instruction: " + get_instr_str(instruction.get_key()));
+    }
     auto VDST = std::vector<uint64_t>();
     auto SRC0 = std::vector<uint64_t>();
     auto SRC1 = std::vector<uint64_t>();
 
-    for (int i = 0; i < workItems.size(); ++i) {
-        VDST.push_back(to_uin64_t(read_operand(*instruction[0], i)));
-        SRC0.push_back(to_uin64_t(read_operand(*instruction[1], i)));
-        SRC1.push_back(to_uin64_t(read_operand(*instruction[2], i)));
+    switch (instruction.get_operands_count()) {
+        case 3:
+            for (int i = 0; i < get_size(); ++i) {
+                VDST.push_back(to_uin64_t(read_operand(*instruction[0], i)));
+                SRC0.push_back(to_uin64_t(read_operand(*instruction[1], i)));
+                SRC1.push_back(to_uin64_t(read_operand(*instruction[2], i)));
+            }
+        case 5:
+            assert(instruction[1]->type == REGISTER && instruction[4]->type == REGISTER
+                && std::get<RegisterType>(instruction[1]->value) == VCC && std::get<RegisterType>(instruction[4]->value) == VCC && "Unsupported operands");
+            for (int i = 0; i < get_size(); ++i) {
+                VDST.push_back(to_uin64_t(read_operand(*instruction[0], i)));
+                SRC0.push_back(to_uin64_t(read_operand(*instruction[2], i)));
+                SRC1.push_back(to_uin64_t(read_operand(*instruction[3], i)));
+            }
     }
-
-    return WfStateVOP2(std::move(VDST), std::move(SRC0), std::move(SRC1));
+    return {std::move(VDST), std::move(SRC0), std::move(SRC1), vccReg};
 }
 
-void Wavefront::update_with_vop2_state(const Instruction& instruction,
-                                       const WfStateVOP2& state) {
-    for (int i = 0; i < workItems.size(); ++i) {
+void Wavefront::update_with_vop2_state(const Instruction &instruction,
+                                       const WfStateVOP2 &state) {
+    for (int i = 0; i < get_size(); ++i) {
         write_operand_to_gpr(*instruction[0], state.VDST[i], i);
     }
+    vccReg = state.VCC;
 }
 
-WfStateVOP3 Wavefront::get_vop3_state(const Instruction& instruction) {
+WfStateVOP3 Wavefront::get_vop3_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() <= 4 &&
            "Unexpected amount of operands for VOP3 instruction");
     auto VDST = std::vector<uint64_t>();
@@ -217,7 +320,7 @@ WfStateVOP3 Wavefront::get_vop3_state(const Instruction& instruction) {
     auto SRC1 = std::vector<uint64_t>();
     auto SRC2 = std::vector<uint64_t>();
 
-    for (int i = 0; i < workItems.size(); ++i) {
+    for (int i = 0; i < get_size(); ++i) {
         VDST.push_back(to_uin64_t(read_operand(*instruction[0], i)));
         SRC0.push_back(to_uin64_t(read_operand(*instruction[1], i)));
         SRC1.push_back(to_uin64_t(read_operand(*instruction[2], i)));
@@ -226,42 +329,41 @@ WfStateVOP3 Wavefront::get_vop3_state(const Instruction& instruction) {
         }
     }
 
-    return WfStateVOP3(std::move(VDST), std::move(SRC0), std::move(SRC1),
-                       std::move(SRC2));
+    return {std::move(VDST), std::move(SRC0), std::move(SRC1),std::move(SRC2), vccReg};
 }
 
-void Wavefront::update_with_vop3_state(const Instruction& instruction,
-                                       const WfStateVOP3& state) {
-    for (int i = 0; i < workItems.size(); ++i) {
+void Wavefront::update_with_vop3_state(const Instruction &instruction,
+                                       const WfStateVOP3 &state) {
+    for (int i = 0; i < get_size(); ++i) {
         write_operand_to_gpr(*instruction[0], state.VDST[i], i);
     }
 }
 
-WfStateFLAT Wavefront::get_flat_state(const Instruction& instruction) {
+WfStateFLAT Wavefront::get_flat_state(const Instruction &instruction) {
     assert(instruction.get_operands_count() == 2 &&
            "Unexpected args amount for FLAT instruction");
 
     auto VADDR = std::vector<uint64_t>();
     auto VDATA = std::vector<uint32_t>();
-    for (int i = 0; i < workItems.size(); ++i) {
+    for (int i = 0; i < get_size(); ++i) {
         auto vaddr = read_operand(*instruction[0], i);
         std::reverse(vaddr.end(), vaddr.begin());
         VADDR.push_back(to_uin64_t(vaddr));
         auto vDataPerWI = read_operand(*instruction[1], i);
         VDATA.insert(VDATA.end(), vDataPerWI.rbegin(), vDataPerWI.rend());
     }
-    assert(VDATA.size() % workItems.size() == 0);
-    return WfStateFLAT(VADDR, VDATA, VDATA.size() / workItems.size());
+    assert(VDATA.size() % get_size() == 0);
+    return {VADDR, VDATA, VDATA.size() / get_size()};
 }
 
-void Wavefront::update_with_flat_state(const Instruction& instruction,
-                                       const WfStateFLAT& state) {}
+void Wavefront::update_with_flat_state(const Instruction &instruction,
+                                       const WfStateFLAT &state) {}
 
-std::vector<uint32_t> Wavefront::read_operand(const Operand& op) {
+std::vector<uint32_t> Wavefront::read_operand(const Operand &op) {
     return read_operand(op, -1);
 }
 
-std::vector<uint32_t> Wavefront::read_operand(const Operand& operand, int wiInd) {
+std::vector<uint32_t> Wavefront::read_operand(const Operand &operand, int wiInd) {
     switch (operand.type) {
         case FLOAT:
             return {to_uint32_t(std::get<float>(operand.value))};
@@ -274,7 +376,7 @@ std::vector<uint32_t> Wavefront::read_operand(const Operand& operand, int wiInd)
     }
 }
 
-std::vector<uint32_t> Wavefront::read_reg_operand(const Operand& operand, int wiInd) {
+std::vector<uint32_t> Wavefront::read_reg_operand(const Operand &operand, int wiInd) {
     auto regType = std::get<RegisterType>(operand.value);
 
     bool isScalarReg = is_s_reg(regType);
@@ -319,16 +421,16 @@ std::vector<uint32_t> Wavefront::read_reg_operand(const Operand& operand, int wi
     }
 }
 
-void Wavefront::write_operand_to_gpr(const Operand& operand, uint64_t data) {
+void Wavefront::write_operand_to_gpr(const Operand &operand, uint64_t data) {
     write_operand_to_gpr(operand, data, -1);
 }
 
-void Wavefront::write_operand_to_gpr(const Operand& operand,
-                                     const std::vector<uint32_t>& data) {
+void Wavefront::write_operand_to_gpr(const Operand &operand,
+                                     const std::vector<uint32_t> &data) {
     write_operand_to_gpr(operand, data, -1);
 }
 
-void Wavefront::write_operand_to_gpr(const Operand& operand, uint64_t data, int wiInd) {
+void Wavefront::write_operand_to_gpr(const Operand &operand, uint64_t data, int wiInd) {
     assert(operand.regAmount <= 2);
     auto vData = std::vector<uint32_t>();
     if (operand.regAmount == 2) {
@@ -338,13 +440,10 @@ void Wavefront::write_operand_to_gpr(const Operand& operand, uint64_t data, int 
     write_operand_to_gpr(operand, vData, wiInd);
 }
 
-void Wavefront::write_operand_to_gpr(const Operand& operand,
-                                     const std::vector<uint32_t>& data,
+void Wavefront::write_operand_to_gpr(const Operand &operand,
+                                     const std::vector<uint32_t> &data,
                                      int wiInd) {
-    if (operand.type != REGISTER) {
-        // todo log
-        return;
-    }
+    assert(operand.type == REGISTER);
     auto reg = std::get<RegisterType>(operand.value);
 
     if (is_s_reg(reg)) {
@@ -367,9 +466,10 @@ void Wavefront::write_operand_to_gpr(const Operand& operand,
             set_vgpr(wiInd, vRegInd, data[i]);
         }
     } else {
-        // todo log
+        logger.error(std::string("Unexpected operand for writing into GPR"));
     }
 }
+
 bool Wavefront::work_item_masked(size_t wiInd) const {
     return (execReg & (1 << wiInd)) != 0;
 }

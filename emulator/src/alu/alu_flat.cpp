@@ -2,6 +2,7 @@
 
 static inline void run_flat_store_dwordxn(WfStateFLAT& state, size_t wiInd, size_t n) {
     for (size_t i = 0; i < n; ++i) {
+        //todo
         Storage::get_instance()->write_data(
             state.VADDR[wiInd], 0, state.VDATA[wiInd * state.VDATA_SIZE_PER_WI + i]);
     }
@@ -21,13 +22,14 @@ static inline void run_flat_store_dwordx4(WfStateFLAT& state, size_t wiInd) {
 
 static inline void run_flat_store_short(WfStateFLAT& state, size_t wiInd) {
     assert(state.VDATA_SIZE_PER_WI == 1);
+    //todo
     Storage::get_instance()->write_data(state.VADDR[wiInd], 0,
                                         static_cast<uint16_t>(state.VDATA[wiInd]));
 }
 
 void run_flat(const Instruction& instr, Wavefront* wf) {
     auto state = wf->get_flat_state(instr);
-    for (size_t wiInd = 0; wiInd < wf->workItems.size(); ++wiInd) {
+    for (size_t wiInd = 0; wiInd < wf->get_size(); ++wiInd) {
         if (!wf->work_item_masked(wiInd)) continue;
 
         switch (instr.get_key()) {
@@ -47,7 +49,7 @@ void run_flat(const Instruction& instr, Wavefront* wf) {
                 run_flat_store_short(state, wiInd);
                 break;
             default:
-                unsupported_instruction("FLAT", get_instr_str(instr.get_key()));
+                UNSUPPORTED_INSTRUCTION("FLAT", get_instr_str(instr.get_key()));
         }
     }
 

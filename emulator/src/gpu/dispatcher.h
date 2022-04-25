@@ -1,31 +1,19 @@
-//
-// Created by Diana Kudaiberdieva
-//
+#pragma once
 
-#ifndef RED_O_LATOR_DISPATCHER_H
-#define RED_O_LATOR_DISPATCHER_H
+#include "flow/kernel_config.h"
+#include "flow/wavefront.h"
 
-#include "src/flow/kernel_config.h"
-#include "src/flow/wavefront.h"
 struct Dispatcher {
-    Dispatcher(KernelConfig config, KernelCode* code);
+    Dispatcher(const KernelConfig* config, const KernelCode* code);
     bool has_next_wg() const;
-    WorkGroup* next_wg();
+    std::unique_ptr<WorkGroup> next_wg();
 
    private:
-    int curIdX = 0;
-    int curIdY = 0;
-    int curIdZ = 0;
+    size_t curIdX = 0;
+    size_t curIdY = 0;
+    size_t curIdZ = 0;
     size_t dispatchedWg = 0;
     size_t wgAmount;
-    KernelConfig kernelConfig;
-    KernelCode* code;
-
-    void set_workitems(WorkGroup* wg);
-    void set_wavefronts(WorkGroup* wg);
-    void init_wf_regs(Wavefront*);
-    void init_mode_reg(Wavefront*) const;
-    void init_status_reg(Wavefront*);
+    const KernelConfig* const kernelConfig;
+    const KernelCode* code;
 };
-
-#endif  // RED_O_LATOR_DISPATCHER_H

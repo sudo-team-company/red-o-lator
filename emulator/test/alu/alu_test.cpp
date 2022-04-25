@@ -2,7 +2,7 @@
 
 #include <common/test/doctest.h>
 
-#include "src/alu/alu.h"
+#include "alu/alu.h"
 
 // SOP1
 TEST_CASE("run_s_abs_i32 - stores absolute signed value of the SSRC0 into SDST.") {

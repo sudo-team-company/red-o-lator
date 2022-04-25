@@ -1823,86 +1823,251 @@ enum InstrKey {
     // END SOPK_FORMAT
 
     // VOP1
-    /**
-     * Syntax: V_BFREV_B32 VDST, SRC0
-     * Operation:
-     * VDST = REVBIT(SRC0)
-     */
     V_BFREV_B32,
-
-    /**
-     * Syntax: V_FFBH_U32 VDST, SRC0
-     * Description: Find last one bit in SRC0. If found, store number of skipped bits to VDST, otherwise set VDST to -1.
-     * Operation:
-     * VDST = -1
-     * for (INT8 i = 31; i >= 0; i--)
-     * if ((1U<<i) & SRC0) != 0)
-     * { VDST = 31-i; break; }
-     */
     V_FFBH_U32,
-
-    /**
-     * Syntax: V_FFBH_I32 VDST, SRC0
-     * Description: Find last opposite bit to sign in SRC0. If found, store number of skipped bits to VDST, otherwise set VDST to -1.
-     * Operation:
-     * VDST = -1
-     * UINT32 bitval = (INT32)SRC0>=0 ? 1 : 0
-     * for (INT8 i = 31; i >= 0; i--)
-     * if ((1U<<i) & SRC0) == (bitval<<i))
-     * { VDST = 31-i; break; }
-     */
     V_FFBH_I32,
-
-    /**
-     * Syntax: V_FFBL_B32 VDST, SRC0
-     * Description: Find first one bit in SRC0. If found, store number of bit to VDST, otherwise set VDST to -1.
-     * Operation:
-     * VDST = -1
-     * for (UINT8 i = 0; i < 32; i++)
-     * if ((1U<<i) & SRC0) != 0)
-     * { VDST = i; break; }
-     */
     V_FFBL_B32,
-
-    /**
-     * D.u = S0.u.
-     * Input and output modifiers not supported; this is an untyped operation.
-     */
     V_MOV_B32,
+    V_SWAP_B32,
+    V_MOVRELD_B32,
+    V_MOVRELS_B32,
+    V_MOVRELSD_B32,
+    V_NOT_B32,
+    V_READFIRSTLANE_B32,
+    V_SAT_PK_U8_I16,
+    V_SCREEN_PARTITION_4SE_B32,
+    V_NOP,
+    V_CVT_I32_F64,
+    V_CVT_F64_I32,
+    V_CVT_F32_I32,
+    V_CVT_F32_U32,
+    V_CVT_U32_F32,
+    V_CVT_I32_F32,
+    V_CVT_F16_F32,
+    V_CVT_F32_F16,
+    V_CVT_RPI_I32_F32,
+    V_CVT_FLR_I32_F32,
+    V_CVT_OFF_F32_I4,
+    V_CVT_F32_F64,
+    V_CVT_F64_F32,
+    V_CVT_F32_UBYTE0,
+    V_CVT_F32_UBYTE1,
+    V_CVT_F32_UBYTE2,
+    V_CVT_F32_UBYTE3,
+    V_CVT_U32_F64,
+    V_CVT_F64_U32,
+    V_TRUNC_F64,
+    V_CEIL_F64,
+    V_RNDNE_F64,
+    V_FLOOR_F64,
+    V_FRACT_F32,
+    V_TRUNC_F32,
+    V_CEIL_F32,
+    V_RNDNE_F32,
+    V_FLOOR_F32,
+    V_EXP_F32,
+    V_LOG_F32,
+    V_RCP_F32,
+    V_RCP_IFLAG_F32,
+    V_RSQ_F32,
+    V_RCP_F64,
+    V_RSQ_F64,
+    V_SQRT_F32,
+    V_SQRT_F64,
+    V_SIN_F32,
+    V_COS_F32,
+    V_FREXP_EXP_I32_F64,
+    V_FREXP_MANT_F64,
+    V_FRACT_F64,
+    V_FREXP_EXP_I32_F32,
+    V_FREXP_MANT_F32,
+    V_CLREXCP,
+    V_CVT_F16_U16,
+    V_CVT_F16_I16,
+    V_CVT_U16_F16,
+    V_CVT_I16_F16,
+    V_RCP_F16,
+    V_SQRT_F16,
+    V_RSQ_F16,
+    V_LOG_F16,
+    V_EXP_F16,
+    V_FREXP_MANT_F16,
+    V_FREXP_EXP_I16_F16,
+    V_FLOOR_F16,
+    V_CEIL_F16,
+    V_TRUNC_F16,
+    V_RNDNE_F16,
+    V_FRACT_F16,
+    V_SIN_F16,
+    V_COS_F16,
+    V_EXP_LEGACY_F32,
+    V_LOG_LEGACY_F32,
+    V_CVT_NORM_I16_F16,
+    V_CVT_NORM_U16_F16,
 
     // VOP2
-
-    /**
-     * D.u = S0.u + S1.u.
-     */
     V_ADD_U32,
-
     V_SUB_U32,
-
-    /**
-     * todo not in ofdoc
-     */
     V_ADDC_U32,
+    V_CNDMASK_B32,
+    V_ADD_F32,
+    V_SUB_F32,
+    V_SUBREV_F32,
+    V_MUL_LEGACY_F32,
+    V_MUL_F32,
+    V_MUL_I32_I24,
+    V_MUL_HI_I32_I24,
+    V_MUL_U32_U24,
+    V_MUL_HI_U32_U24,
+    V_MIN_F32,
+    V_MAX_F32,
+    V_MIN_I32,
+    V_MAX_I32,
+    V_MIN_U32,
+    V_MAX_U32,
+    V_LSHRREV_B32,
+    V_ASHRREV_I32,
+    V_LSHLREV_B32,
+    V_AND_B32,
+    V_OR_B32,
+    V_XOR_B32,
+    V_MAC_F32,
+    V_MADMK_F32,
+    V_MADAK_F32,
+    V_ADD_CO_U32,
+    V_SUB_CO_U32,
+    V_SUBREV_CO_U32,
+    V_ADDC_CO_U32,
+    V_SUBB_CO_U32,
+    V_SUBBREV_CO_U32,
+    V_ADD_F16,
+    V_SUB_F16,
+    V_SUBREV_F16,
+    V_MUL_F16,
+    V_MAC_F16,
+    V_MADMK_F16,
+    V_MADAK_F16,
+    V_ADD_U16,
+    V_SUB_U16,
+    V_SUBREV_U16,
+    V_MUL_LO_U16,
+    V_LSHLREV_B16,
+    V_LSHRREV_B16,
+    V_ASHRREV_I16,
+    V_MAX_F16,
+    V_MIN_F16,
+    V_MAX_U16,
+    V_MAX_I16,
+    V_MIN_U16,
+    V_MIN_I16,
+    V_LDEXP_F16,
+    V_SUBREV_U32,
 
     //VOP3
     V_MUL_LO_U32,
+    V_ADD3_U32,
+    V_ADD_LSHL_U32,
+    V_AND_OR_B32,
+    V_ASHR_I64,
+    V_BCNT_U32_B32,
+    V_LSHL_ADD_U32,
+    V_LSHL_B64,
+    V_LSHL_OR_B32,
+    V_LSHR_B64,
+    V_LSHRREV_B64,
+    V_MAD_I16,
+    V_MAD_I32_I16,
+    V_MAD_U16,
+    V_MAD_U32_U16,
+    V_MAX3_I16,
+    V_MAX3_U16,
+    V_MBCNT_HI_U32_B32,
+    V_MBCNT_LO_U32_B32,
+    V_MED3_I16,
+    V_MED3_U16,
+    V_MIN3_I16,
+    V_MIN3_U16,
+    V_MUL_HI_I32,
+    V_MUL_HI_U32,
+    V_MUL_LO_I32,
+    V_OR3_B32,
+    V_READLANE_B32,
+    V_WRITELANE_B32,
+    V_XAD_U32,
 
     // VOP3A
-    /**
-     * D.u64 = S1.u64 << S0.u[5:0].
-     */
     V_LSHLREV_B64,
+    V_MAD_LEGACY_F32,
+    V_MAD_F32,
+    V_MAD_I32_I24,
+    V_MAD_U32_U24,
+    V_CUBEID_F32,
+    V_CUBESC_F32,
+    V_CUBETC_F32,
+    V_CUBEMA_F32,
+    V_BFE_U32,
+    V_BFE_I32,
+    V_BFI_B32,
+    V_FMA_F32,
+    V_FMA_F64,
+    V_LERP_U8,
+    V_ALIGNBIT_B32,
+    V_ALIGNBYTE_B32,
+    V_MIN3_F32,
+    V_MIN3_I32,
+    V_MIN3_U32,
+    V_MAX3_F32,
+    V_MAX3_I32,
+    V_MAX3_U32,
+    V_MED3_F32,
+    V_MED3_I32,
+    V_MED3_U32,
+    V_SAD_U8,
+    V_SAD_HI_U8,
+    V_SAD_U16,
+    V_SAD_U32,
+    V_CVT_PK_U8_F32,
+    V_DIV_FIXUP_F32,
+    V_DIV_FIXUP_F64,
+    V_DIV_FMAS_F32,
+    V_DIV_FMAS_F64,
+    V_MSAD_U8,
+    V_QSAD_PK_U16_U8,
+    V_MQSAD_PK_U16_U8,
+    V_MQSAD_U32_U8,
+    V_MAD_LEGACY_F16,
+    V_MAD_LEGACY_U16,
+    V_MAD_LEGACY_I16,
+    V_PERM_B32,
+    V_FMA_LEGACY_F16,
+    V_DIV_FIXUP_LEGACY_F16,
+    V_CVT_PKACCUM_U8_F32,
+    V_ASHRREV_I64,
+    V_TRIG_PREOP_F64,
+    V_BFM_B32,
+    V_CVT_PKNORM_I16_F32,
+    V_CVT_PKNORM_U16_F32,
+    V_CVT_PKRTZ_F16_F32,
+    V_CVT_PK_U16_U32,
+    V_CVT_PK_I16_I32,
+    V_CVT_PKNORM_I16_F16,
+    V_CVT_PKNORM_U16_F16,
+    V_ADD_I32,
+    V_SUB_I32,
+    V_ADD_I16,
+    V_SUB_I16,
+    V_PACK_B32_F16,
+
+    //VOP3B
+    V_DIV_SCALE_F32,
+    V_DIV_SCALE_F64,
+    V_MAD_U64_U32,
+    V_MAD_I64_I32,
 
     // VOPC
-    /**
-     * D.u64[threadId] = (S0 == S1).
-     */
     V_CMP_EQ_I32,
 
     // FLAT
-    /**
-     * Untyped buffer store dword
-     */
     FLAT_STORE_DWORD,
     FLAT_STORE_DWORDX2,
     FLAT_STORE_DWORDX3,
@@ -1916,7 +2081,6 @@ enum InstrFormat {
     SOPK, SOPP, SMEM, SOPC, VOP1, VOP2, VOPC, VINTRP, VOP3A, VOP3B, VOP3P, FLAT
 };
 
-//todo use this function to parse asm
 /**
  * @return InstructionKey for the given mnemonic
  */
@@ -1925,7 +2089,7 @@ InstrKey get_instr_key(std::string_view);
 /**
  * @return mnemonic for InstrKey
  */
-char const* get_instr_str(InstrKey) noexcept;
+char const *get_instr_str(InstrKey) noexcept;
 
 /**
  * @return InstrFormat of the instruction which given InstrKey represents

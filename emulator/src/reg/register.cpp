@@ -1,7 +1,3 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
 #include "register.h"
 
 ModeReg::ModeReg(uint32_t i) {
@@ -98,6 +94,10 @@ StatusReg::StatusReg(uint32_t i) {
 bool StatusReg::scc() const {
     return value[0];
 }
+void StatusReg::scc(bool scc) {
+    value[0] = scc;
+}
+
 uint8_t StatusReg::spi_prio() const {
     return uint8_t((value.to_ulong() >> 1) & 0x3);
 }

@@ -156,7 +156,7 @@ void run_sopc(const Instruction& instr, Wavefront* wavefront)  {
             run_s_setvskip(state);
             break;
         default:
-            unsupported_instruction("SOPC", get_instr_str(instr.get_key()));
+            UNSUPPORTED_INSTRUCTION("SOPC", get_instr_str(instr.get_key()));
     }
     wavefront->update_with_sopc_state(state);
 }

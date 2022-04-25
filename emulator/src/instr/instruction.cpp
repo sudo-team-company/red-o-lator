@@ -1,21 +1,39 @@
 #include "instruction.h"
 
-Instruction* KernelCode::get_instr(uint64_t address) {
-    assert(address % 4 == 0&& "Wrong instr address: not a multiple of 4");
-    Instruction* instr = code[address].get();
-    assert(instr != nullptr && "Wrong instruction address: instr is nullptr");
-    return instr;
+KernelCode::KernelCode(const std::vector<std::string> &instruction) {
+    for (auto &instr: instruction) {
+        auto dividedInstr = utils::split(instr, ' ', 2);
+        assert(dividedInstr.size() >= 2 && "Unsupported asm instruction format");
+        auto addressStr = utils::trim(dividedInstr[0].substr(2));
+        auto address = stoul(addressStr, nullptr, 16);
+        auto mnemonic = utils::trim(dividedInstr[1]);
+        if (dividedInstr.size() == 3) {
+            auto args = utils::split(dividedInstr[2], ',');
+            std::for_each(args.begin(), args.end(), utils::trimInplace);
+            add_instr(address, utils::trim(mnemonic), args);
+        } else {
+            add_instr(address, mnemonic);
+        }
+    }
 }
+
+Instruction *KernelCode::get_instr(uint64_t address) const {
+    assert(address % 4 == 0 && "Wrong instr address: not a multiple of 4");
+    auto instrIter = code.find(address);
+    assert(instrIter != code.end() && "Wrong instruction address: instr is nullptr");
+    return instrIter->second.get();
+}
+
 void KernelCode::add_instr(uint32_t addr,
-                           const std::string& instr,
-                           const std::vector<std::string>& args) {
+                           const std::string &instr,
+                           const std::vector<std::string> &args) {
     code[addr] = std::make_unique<Instruction>(Instruction{addr, instr, args});
 }
 
 std::set<std::string> Operand::float_values = {"0.5", "-0.5", "1.0", "-1.0",
                                                "2.0", "-2.0", "4.0", "-4.0"};
 
-Operand::Operand(const std::string& arg) {
+Operand::Operand(const std::string &arg) {
     if (is_float(arg)) {
         type = FLOAT;
         value = std::stof(arg);
@@ -33,22 +51,22 @@ Operand::Operand(const std::string& arg) {
     }
 }
 
-bool Operand::is_float(const std::string& arg) {
+bool Operand::is_float(const std::string &arg) {
     // todo 1.0 / (2.0 * PI) unsupported
     return float_values.find(arg) != float_values.end();
 }
 
-bool Operand::is_scalar(const std::string& arg) {
+bool Operand::is_scalar(const std::string &arg) {
     if (arg.size() < 2) return false;
     return (arg[0] == 'S' || arg[0] == 's') && !std::isalpha(arg[1]);
 }
 
-bool Operand::is_vector(const std::string& arg) {
+bool Operand::is_vector(const std::string &arg) {
     if (arg.size() < 2) return false;
     return (arg[0] == 'v' || arg[0] == 'V') && !std::isalpha(arg[1]);
 }
 
-std::pair<RegisterType, size_t> Operand::get_register(const std::string& arg) {
+std::pair<RegisterType, size_t> Operand::get_register(const std::string &arg) {
     if (arg == "vcc") {
         return std::make_pair(VCC, 1);
     }
@@ -77,7 +95,12 @@ std::pair<RegisterType, size_t> Operand::get_register(const std::string& arg) {
 
     if (is_scalar(arg)) {
         auto sgprInd = regCount > 1 ? fromRegInd : stoi(arg.substr(1));
-        return std::make_pair(RegisterType(sgprInd + S0), regCount);
+        auto registerType = RegisterType(sgprInd + S0);
+        if (registerType > S103) {
+            logger.error(std::string("Unsupported scalar register: " + arg));
+            throw std::runtime_error("Unsupported register!");
+        }
+        return std::make_pair(registerType, regCount);
     }
     if (is_vector(arg)) {
         auto vgprInd = regCount > 1 ? fromRegInd : stoi(arg.substr(1));
@@ -86,15 +109,14 @@ std::pair<RegisterType, size_t> Operand::get_register(const std::string& arg) {
 
     throw std::runtime_error("Unsupported instruction argument: " + arg);
 }
+
 Instruction::Instruction(uint32_t addr,
-                         const std::string& instr,
-                         const std::vector<std::string>& args): addr(addr) {
+                         const std::string &instr,
+                         const std::vector<std::string> &args) : addr(addr) {
     instrKey = get_instr_key(instr);
     operands = std::vector<std::unique_ptr<Operand>>();
-    for (auto& arg : args) {
-        if (arg.empty()) {
-            // todo log strange behaviour
-        }
+    for (auto &arg: args) {
+        assert(!args.empty() && "Instruction argument can not be empty");
         operands.push_back(std::make_unique<Operand>(arg));
     }
 }

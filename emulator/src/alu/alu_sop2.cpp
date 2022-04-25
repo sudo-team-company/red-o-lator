@@ -1,13 +1,7 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
-#include <stdexcept>
 #include "alu.h"
 
 static inline void run_s_absdiff_i32(WfStateSOP2& state) {
-    state.SDST =
-        std::abs(static_cast<int32_t>(state.SSRC0) - static_cast<int32_t>(state.SSRC1));
+    state.SDST = std::abs(static_cast<int32_t>(state.SSRC0) - static_cast<int32_t>(state.SSRC1));
     state.SCC = state.SDST != 0;
 }
 static inline void run_s_addc_u32(WfStateSOP2& state) {
@@ -284,10 +278,9 @@ static inline void run_s_pack_ll_b32_b16(WfStateSOP2& state) {
     state.SDST = (state.SSRC0 & 0xffff) | ((state.SSRC1 & 0xffff) << 16);
 }
 
-// Return from exception handler and continue. This instruction may
-// only be used within a trap handler.
+// Return from exception handler and continue. This instruction may only be used within a trap handler.
 static inline void run_s_rfe_restore_b64(WfStateSOP2& state) {
-    state.STATUS->priv(0);
+    state.STATUS->priv(false);
     state.PC->set_value(state.SSRC0);
 }
 
@@ -501,7 +494,7 @@ void run_sop2(const Instruction& instr, Wavefront* wf) {
             run_s_xor_b64(state);
             break;
         default:
-            unsupported_instruction("SOP2", get_instr_str(instr.get_key()));
+            UNSUPPORTED_INSTRUCTION("SOP2", get_instr_str(instr.get_key()));
     }
 
     wf->update_with_sop2_state(instr, state);

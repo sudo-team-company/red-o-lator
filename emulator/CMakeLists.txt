@@ -1,11 +1,13 @@
-find_package(OpenCL REQUIRED)
-
 ##################
 ## Main library ##
 ##################
+include_directories(src)
+
 add_library(red-o-lator-emulator
+        SHARED
         src/util/util.cpp
         src/flow/wavefront.cpp
+        src/flow/kernel_config.cpp
         src/alu/alu_sop1.cpp
         src/alu/alu.cpp
         src/alu/alu_sop2.cpp
@@ -24,18 +26,9 @@ add_library(red-o-lator-emulator
         src/gpu/compute_unit.cpp
         src/gpu/storage.cpp
         src/commons.cpp
-        src/main/KernelLoader.cpp
-        src/main/KernelLoader.h
         )
-target_link_libraries(red-o-lator-emulator PRIVATE OpenCL::OpenCL red-o-lator-common)
+target_link_libraries(red-o-lator-emulator PRIVATE red-o-lator-common)
 target_include_directories(red-o-lator-emulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-###################
-# Test executable #
-###################
-add_executable(red-o-lator-emulator-exec src/main/main.cpp src/main/KernelLoader.cpp src/main/KernelLoader.h)
-target_link_libraries(red-o-lator-emulator-exec PRIVATE red-o-lator-emulator red-o-lator-common)
-
 
 ###########
 ## Tests ##
@@ -110,6 +103,6 @@ target_link_libraries(red-o-lator-emulator-wf-test PRIVATE
         red-o-lator-emulator red-o-lator-common
         )
 add_test(NAME red-o-lator-emulator-wf-test
-        COMMAND red-o-lator-emulator-alu-test
+        COMMAND red-o-lator-emulator-wf-test
         --config $<CONFIG>
         --exe $<TARGET_FILE:red-o-lator-emulator-wf-test>)

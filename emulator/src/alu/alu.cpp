@@ -1,7 +1,3 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
 #include "alu.h"
 
 void run_instr(const Instruction& instr, Wavefront* wf) {

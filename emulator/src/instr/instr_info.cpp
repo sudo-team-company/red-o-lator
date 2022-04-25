@@ -5,296 +5,296 @@
 InstrKey get_instr_key(std::string_view instruction) {
     static std::unordered_map<std::string_view, InstrKey> instruction_repo{
         // SOP1_FORMAT
-        {"s_abs_i32", S_ABS_I32},
-        {"s_and_saveexec_b64", S_AND_SAVEEXEC_B64},
-        {"s_andn1_saveexec_b64", S_ANDN1_SAVEEXEC_B64},
-        {"s_andn1_wrexec_b64", S_ANDN1_WREXEC_B64},
-        {"s_andn2_saveexec_b64", S_ANDN2_SAVEEXEC_B64},
-        {"s_andn2_wrexec_b64", S_ANDN2_WREXEC_B64},
-        {"s_bcnt0_i32_b32", S_BCNT0_I32_B32},
-        {"s_bcnt0_i32_b64", S_BCNT0_I32_B64},
-        {"s_bcnt1_i32_b32", S_BCNT1_I32_B32},
-        {"s_bcnt1_i32_b64", S_BCNT1_I32_B64},
-        {"s_bitreplicate_b64_b32", S_BITREPLICATE_B64_B32},
-        {"s_bitset0_b32", S_BITSET0_B32},
-        {"s_bitset0_b64", S_BITSET0_B64},
-        {"s_bitset1_b32", S_BITSET1_B32},
-        {"s_bitset1_b64", S_BITSET1_B64},
-        {"s_brev_b32", S_BREV_B32},
-        {"s_brev_b64", S_BREV_B64},
-        {"s_cbranch_join", S_CBRANCH_JOIN},
-        {"s_cmov_b32", S_CMOV_B32},
-        {"s_cmov_b64", S_CMOV_B64},
-        {"s_ff0_i32_b32", S_FF0_I32_B32},
-        {"s_ff0_i32_b64", S_FF0_I32_B64},
-        {"s_ff1_i32_b32", S_FF1_I32_B32},
-        {"s_ff1_i32_b64", S_FF1_I32_B64},
-        {"s_flbit_i32_b32", S_FLBIT_I32_B32},
-        {"s_flbit_i32_b64", S_FLBIT_I32_B64},
-        {"s_flbit_i32", S_FLBIT_I32},
-        {"s_flbit_i32_i64", S_FLBIT_I32_I64},
-        {"s_getpc_b64", S_GETPC_B64},
-        {"s_mov_b32", S_MOV_B32},
-        {"s_mov_b64", S_MOV_B64},
-        {"s_movreld_b32", S_MOVRELD_B32},
-        {"s_movreld_b64", S_MOVRELD_B64},
-        {"s_movrels_b32", S_MOVRELS_B32},
-        {"s_movrels_b64", S_MOVRELS_B64},
-        {"s_nand_saveexec_b64", S_NAND_SAVEEXEC_B64},
-        {"s_nor_saveexec_b64", S_NOR_SAVEEXEC_B64},
-        {"s_not_b32", S_NOT_B32},
-        {"s_not_b64", S_NOT_B64},
-        {"s_or_saveexec_b64", S_OR_SAVEEXEC_B64},
-        {"s_orn2_saveexec_b64", S_ORN2_SAVEEXEC_B64},
-        {"s_quadmask_b32", S_QUADMASK_B32},
-        {"s_quadmask_b64", S_QUADMASK_B64},
-        {"s_rfe_b64", S_RFE_B64},
-        {"s_set_gpr_idx_idx", S_SET_GPR_IDX_IDX},
-        {"s_setpc_b64", S_SETPC_B64},
-        {"s_sext_i32_i8", S_SEXT_I32_I8},
-        {"s_sext_i32_i16", S_SEXT_I32_I16},
-        {"s_swappc_b64", S_SWAPPC_B64},
-        {"s_wqm_b32", S_WQM_B32},
-        {"s_wqm_b64", S_WQM_B64},
-        {"s_xnor_saveexec_b64", S_XNOR_SAVEEXEC_B64},
-        {"s_xor_saveexec_b64", S_XOR_SAVEEXEC_B64},
+        {"s_abs_i32",                  S_ABS_I32},
+        {"s_and_saveexec_b64",         S_AND_SAVEEXEC_B64},
+        {"s_andn1_saveexec_b64",       S_ANDN1_SAVEEXEC_B64},
+        {"s_andn1_wrexec_b64",         S_ANDN1_WREXEC_B64},
+        {"s_andn2_saveexec_b64",       S_ANDN2_SAVEEXEC_B64},
+        {"s_andn2_wrexec_b64",         S_ANDN2_WREXEC_B64},
+        {"s_bcnt0_i32_b32",            S_BCNT0_I32_B32},
+        {"s_bcnt0_i32_b64",            S_BCNT0_I32_B64},
+        {"s_bcnt1_i32_b32",            S_BCNT1_I32_B32},
+        {"s_bcnt1_i32_b64",            S_BCNT1_I32_B64},
+        {"s_bitreplicate_b64_b32",     S_BITREPLICATE_B64_B32},
+        {"s_bitset0_b32",              S_BITSET0_B32},
+        {"s_bitset0_b64",              S_BITSET0_B64},
+        {"s_bitset1_b32",              S_BITSET1_B32},
+        {"s_bitset1_b64",              S_BITSET1_B64},
+        {"s_brev_b32",                 S_BREV_B32},
+        {"s_brev_b64",                 S_BREV_B64},
+        {"s_cbranch_join",             S_CBRANCH_JOIN},
+        {"s_cmov_b32",                 S_CMOV_B32},
+        {"s_cmov_b64",                 S_CMOV_B64},
+        {"s_ff0_i32_b32",              S_FF0_I32_B32},
+        {"s_ff0_i32_b64",              S_FF0_I32_B64},
+        {"s_ff1_i32_b32",              S_FF1_I32_B32},
+        {"s_ff1_i32_b64",              S_FF1_I32_B64},
+        {"s_flbit_i32_b32",            S_FLBIT_I32_B32},
+        {"s_flbit_i32_b64",            S_FLBIT_I32_B64},
+        {"s_flbit_i32",                S_FLBIT_I32},
+        {"s_flbit_i32_i64",            S_FLBIT_I32_I64},
+        {"s_getpc_b64",                S_GETPC_B64},
+        {"s_mov_b32",                  S_MOV_B32},
+        {"s_mov_b64",                  S_MOV_B64},
+        {"s_movreld_b32",              S_MOVRELD_B32},
+        {"s_movreld_b64",              S_MOVRELD_B64},
+        {"s_movrels_b32",              S_MOVRELS_B32},
+        {"s_movrels_b64",              S_MOVRELS_B64},
+        {"s_nand_saveexec_b64",        S_NAND_SAVEEXEC_B64},
+        {"s_nor_saveexec_b64",         S_NOR_SAVEEXEC_B64},
+        {"s_not_b32",                  S_NOT_B32},
+        {"s_not_b64",                  S_NOT_B64},
+        {"s_or_saveexec_b64",          S_OR_SAVEEXEC_B64},
+        {"s_orn2_saveexec_b64",        S_ORN2_SAVEEXEC_B64},
+        {"s_quadmask_b32",             S_QUADMASK_B32},
+        {"s_quadmask_b64",             S_QUADMASK_B64},
+        {"s_rfe_b64",                  S_RFE_B64},
+        {"s_set_gpr_idx_idx",          S_SET_GPR_IDX_IDX},
+        {"s_setpc_b64",                S_SETPC_B64},
+        {"s_sext_i32_i8",              S_SEXT_I32_I8},
+        {"s_sext_i32_i16",             S_SEXT_I32_I16},
+        {"s_swappc_b64",               S_SWAPPC_B64},
+        {"s_wqm_b32",                  S_WQM_B32},
+        {"s_wqm_b64",                  S_WQM_B64},
+        {"s_xnor_saveexec_b64",        S_XNOR_SAVEEXEC_B64},
+        {"s_xor_saveexec_b64",         S_XOR_SAVEEXEC_B64},
 
         // SOP2_FORMAT
-        {"s_absdiff_i32", S_ABSDIFF_I32},
-        {"s_addc_u32", S_ADDC_U32},
-        {"s_add_i32", S_ADD_I32},
-        {"s_add_u32", S_ADD_U32},
-        {"s_and_b32", S_AND_B32},
-        {"s_and_b64", S_AND_B64},
-        {"s_andn2_b32", S_ANDN2_B32},
-        {"s_andn2_b64", S_ANDN2_B64},
-        {"s_ashr_i32", S_ASHR_I32},
-        {"s_ashr_i64", S_ASHR_I64},
-        {"s_bfe_i32", S_BFE_I32},
-        {"s_bfe_i64", S_BFE_I64},
-        {"s_bfe_u32", S_BFE_U32},
-        {"s_bfe_u64", S_BFE_U64},
-        {"s_bfm_b32", S_BFM_B32},
-        {"s_bfm_b64", S_BFM_B64},
-        {"s_cbranch_g_fork", S_CBRANCH_G_FORK},
-        {"s_cselect_b32", S_CSELECT_B32},
-        {"s_cselect_b64", S_CSELECT_B64},
-        {"s_lshl_b32", S_LSHL_B32},
-        {"s_lshl_b64", S_LSHL_B64},
-        {"s_lshl1_add_u32", S_LSHL1_ADD_U32},
-        {"s_lshl2_add_u32", S_LSHL2_ADD_U32},
-        {"s_lshl3_add_u32", S_LSHL3_ADD_U32},
-        {"s_lshl4_add_u32", S_LSHL4_ADD_U32},
-        {"s_lshr_b32", S_LSHR_B32},
-        {"s_lshr_b64", S_LSHR_B64},
-        {"s_max_i32", S_MAX_I32},
-        {"s_max_u32", S_MAX_U32},
-        {"s_min_i32", S_MIN_I32},
-        {"s_min_u32", S_MIN_U32},
-        {"s_mul_hi_i32", S_MUL_HI_I32},
-        {"s_mul_hi_u32", S_MUL_HI_U32},
-        {"s_mul_i32", S_MUL_I32},
-        {"s_nand_b32", S_NAND_B32},
-        {"s_nand_b64", S_NAND_B64},
-        {"s_nor_b32", S_NOR_B32},
-        {"s_nor_b64", S_NOR_B64},
-        {"s_or_b32", S_OR_B32},
-        {"s_or_b64", S_OR_B64},
-        {"s_orn2_b32", S_ORN2_B32},
-        {"s_orn2_b64", S_ORN2_B64},
-        {"s_pack_hh_b32_b16", S_PACK_HH_B32_B16},
-        {"s_pack_lh_b32_b16", S_PACK_LH_B32_B16},
-        {"s_pack_ll_b32_b16", S_PACK_LL_B32_B16},
-        {"s_rfe_restore_b64", S_RFE_RESTORE_B64},
-        {"s_subb_u32", S_SUBB_U32},
-        {"s_sub_i32", S_SUB_I32},
-        {"s_sub_u32", S_SUB_U32},
-        {"s_xnor_b32", S_XNOR_B32},
-        {"s_xnor_b64", S_XNOR_B64},
-        {"s_xor_b32", S_XOR_B32},
-        {"s_xor_b64", S_XOR_B64},
+        {"s_absdiff_i32",              S_ABSDIFF_I32},
+        {"s_addc_u32",                 S_ADDC_U32},
+        {"s_add_i32",                  S_ADD_I32},
+        {"s_add_u32",                  S_ADD_U32},
+        {"s_and_b32",                  S_AND_B32},
+        {"s_and_b64",                  S_AND_B64},
+        {"s_andn2_b32",                S_ANDN2_B32},
+        {"s_andn2_b64",                S_ANDN2_B64},
+        {"s_ashr_i32",                 S_ASHR_I32},
+        {"s_ashr_i64",                 S_ASHR_I64},
+        {"s_bfe_i32",                  S_BFE_I32},
+        {"s_bfe_i64",                  S_BFE_I64},
+        {"s_bfe_u32",                  S_BFE_U32},
+        {"s_bfe_u64",                  S_BFE_U64},
+        {"s_bfm_b32",                  S_BFM_B32},
+        {"s_bfm_b64",                  S_BFM_B64},
+        {"s_cbranch_g_fork",           S_CBRANCH_G_FORK},
+        {"s_cselect_b32",              S_CSELECT_B32},
+        {"s_cselect_b64",              S_CSELECT_B64},
+        {"s_lshl_b32",                 S_LSHL_B32},
+        {"s_lshl_b64",                 S_LSHL_B64},
+        {"s_lshl1_add_u32",            S_LSHL1_ADD_U32},
+        {"s_lshl2_add_u32",            S_LSHL2_ADD_U32},
+        {"s_lshl3_add_u32",            S_LSHL3_ADD_U32},
+        {"s_lshl4_add_u32",            S_LSHL4_ADD_U32},
+        {"s_lshr_b32",                 S_LSHR_B32},
+        {"s_lshr_b64",                 S_LSHR_B64},
+        {"s_max_i32",                  S_MAX_I32},
+        {"s_max_u32",                  S_MAX_U32},
+        {"s_min_i32",                  S_MIN_I32},
+        {"s_min_u32",                  S_MIN_U32},
+        {"s_mul_hi_i32",               S_MUL_HI_I32},
+        {"s_mul_hi_u32",               S_MUL_HI_U32},
+        {"s_mul_i32",                  S_MUL_I32},
+        {"s_nand_b32",                 S_NAND_B32},
+        {"s_nand_b64",                 S_NAND_B64},
+        {"s_nor_b32",                  S_NOR_B32},
+        {"s_nor_b64",                  S_NOR_B64},
+        {"s_or_b32",                   S_OR_B32},
+        {"s_or_b64",                   S_OR_B64},
+        {"s_orn2_b32",                 S_ORN2_B32},
+        {"s_orn2_b64",                 S_ORN2_B64},
+        {"s_pack_hh_b32_b16",          S_PACK_HH_B32_B16},
+        {"s_pack_lh_b32_b16",          S_PACK_LH_B32_B16},
+        {"s_pack_ll_b32_b16",          S_PACK_LL_B32_B16},
+        {"s_rfe_restore_b64",          S_RFE_RESTORE_B64},
+        {"s_subb_u32",                 S_SUBB_U32},
+        {"s_sub_i32",                  S_SUB_I32},
+        {"s_sub_u32",                  S_SUB_U32},
+        {"s_xnor_b32",                 S_XNOR_B32},
+        {"s_xnor_b64",                 S_XNOR_B64},
+        {"s_xor_b32",                  S_XOR_B32},
+        {"s_xor_b64",                  S_XOR_B64},
 
         // SOPK_FORMAT
-        {"s_addk_i32", S_ADDK_I32},
-        {"s_call_b64", S_CALL_B64},
-        {"s_cbranch_i_fork", S_CBRANCH_I_FORK},
-        {"s_cmovk_i32", S_CMOVK_I32},
-        {"s_cmpk_eq_i32", S_CMPK_EQ_I32},
-        {"s_cmpk_eq_u32", S_CMPK_EQ_U32},
-        {"s_cmpk_ge_i32", S_CMPK_GE_I32},
-        {"s_cmpk_ge_u32", S_CMPK_GE_U32},
-        {"s_cmpk_gt_i32", S_CMPK_GT_I32},
-        {"s_cmpk_gt_u32", S_CMPK_GT_U32},
-        {"s_cmpk_le_i32", S_CMPK_LE_I32},
-        {"s_cmpk_le_u32", S_CMPK_LE_U32},
-        {"s_cmpk_lg_i32", S_CMPK_LG_I32},
-        {"s_cmpk_lg_u32", S_CMPK_LG_U32},
-        {"s_cmpk_lt_i32", S_CMPK_LT_I32},
-        {"s_cmpk_lt_u32", S_CMPK_LT_U32},
-        {"s_getreg_b32", S_GETREG_B32},
-        {"s_movk_i32", S_MOVK_I32},
-        {"s_mulk_i32", S_MULK_I32},
-        {"s_setreg_b32", S_SETREG_B32},
-        {"s_setreg_imm32_b32", S_SETREG_IMM32_B32},
+        {"s_addk_i32",                 S_ADDK_I32},
+        {"s_call_b64",                 S_CALL_B64},
+        {"s_cbranch_i_fork",           S_CBRANCH_I_FORK},
+        {"s_cmovk_i32",                S_CMOVK_I32},
+        {"s_cmpk_eq_i32",              S_CMPK_EQ_I32},
+        {"s_cmpk_eq_u32",              S_CMPK_EQ_U32},
+        {"s_cmpk_ge_i32",              S_CMPK_GE_I32},
+        {"s_cmpk_ge_u32",              S_CMPK_GE_U32},
+        {"s_cmpk_gt_i32",              S_CMPK_GT_I32},
+        {"s_cmpk_gt_u32",              S_CMPK_GT_U32},
+        {"s_cmpk_le_i32",              S_CMPK_LE_I32},
+        {"s_cmpk_le_u32",              S_CMPK_LE_U32},
+        {"s_cmpk_lg_i32",              S_CMPK_LG_I32},
+        {"s_cmpk_lg_u32",              S_CMPK_LG_U32},
+        {"s_cmpk_lt_i32",              S_CMPK_LT_I32},
+        {"s_cmpk_lt_u32",              S_CMPK_LT_U32},
+        {"s_getreg_b32",               S_GETREG_B32},
+        {"s_movk_i32",                 S_MOVK_I32},
+        {"s_mulk_i32",                 S_MULK_I32},
+        {"s_setreg_b32",               S_SETREG_B32},
+        {"s_setreg_imm32_b32",         S_SETREG_IMM32_B32},
 
         // SOPC
-        {"s_bitcmp0_b32", S_BITCMP0_B32},
-        {"s_bitcmp0_b64", S_BITCMP0_B64},
-        {"s_bitcmp1_b32", S_BITCMP1_B32},
-        {"s_bitcmp1_b64", S_BITCMP1_B64},
-        {"s_cmp_eq_i32", S_CMP_EQ_I32},
-        {"s_cmp_eq_u32", S_CMP_EQ_U32},
-        {"s_cmp_eq_u64", S_CMP_EQ_U64},
-        {"s_cmp_ge_i32", S_CMP_GE_I32},
-        {"s_cmp_ge_u32", S_CMP_GE_U32},
-        {"s_cmp_gt_i32", S_CMP_GT_I32},
-        {"s_cmp_gt_u32", S_CMP_GT_U32},
-        {"s_cmp_le_i32", S_CMP_LE_I32},
-        {"s_cmp_le_u32", S_CMP_LE_U32},
-        {"s_cmp_lg_i32", S_CMP_LG_I32},
-        {"s_cmp_lg_u32", S_CMP_LG_U32},
-        {"s_cmp_lg_u64", S_CMP_LG_U64},
-        {"s_cmp_ne_u64", S_CMP_NE_U64},
-        {"s_cmp_lt_i32", S_CMP_LT_I32},
-        {"s_cmp_lt_u32", S_CMP_LT_U32},
-        {"s_set_gpr_idx_on", S_SET_GPR_IDX_ON},
-        {"s_setvskip", S_SETVSKIP},
+        {"s_bitcmp0_b32",              S_BITCMP0_B32},
+        {"s_bitcmp0_b64",              S_BITCMP0_B64},
+        {"s_bitcmp1_b32",              S_BITCMP1_B32},
+        {"s_bitcmp1_b64",              S_BITCMP1_B64},
+        {"s_cmp_eq_i32",               S_CMP_EQ_I32},
+        {"s_cmp_eq_u32",               S_CMP_EQ_U32},
+        {"s_cmp_eq_u64",               S_CMP_EQ_U64},
+        {"s_cmp_ge_i32",               S_CMP_GE_I32},
+        {"s_cmp_ge_u32",               S_CMP_GE_U32},
+        {"s_cmp_gt_i32",               S_CMP_GT_I32},
+        {"s_cmp_gt_u32",               S_CMP_GT_U32},
+        {"s_cmp_le_i32",               S_CMP_LE_I32},
+        {"s_cmp_le_u32",               S_CMP_LE_U32},
+        {"s_cmp_lg_i32",               S_CMP_LG_I32},
+        {"s_cmp_lg_u32",               S_CMP_LG_U32},
+        {"s_cmp_lg_u64",               S_CMP_LG_U64},
+        {"s_cmp_ne_u64",               S_CMP_NE_U64},
+        {"s_cmp_lt_i32",               S_CMP_LT_I32},
+        {"s_cmp_lt_u32",               S_CMP_LT_U32},
+        {"s_set_gpr_idx_on",           S_SET_GPR_IDX_ON},
+        {"s_setvskip",                 S_SETVSKIP},
         // END SOPC
 
         // SOPP
-        {"s_barrier", S_BARRIER},
-        {"s_branch", S_BRANCH},
-        {"s_cbranch_cdbgsys", S_CBRANCH_CDBGSYS},
+        {"s_barrier",                  S_BARRIER},
+        {"s_branch",                   S_BRANCH},
+        {"s_cbranch_cdbgsys",          S_CBRANCH_CDBGSYS},
         {"s_cbranch_cdbgsys_and_user", S_CBRANCH_CDBGSYS_AND_USER},
-        {"s_cbranch_cdbgsys_or_user", S_CBRANCH_CDBGSYS_OR_USER},
-        {"s_cbranch_cdbguser", S_CBRANCH_CDBGUSER},
-        {"s_cbranch_execnz", S_CBRANCH_EXECNZ},
-        {"s_cbranch_execz", S_CBRANCH_EXECZ},
-        {"s_cbranch_scc0", S_CBRANCH_SCC0},
-        {"s_cbranch_scc1", S_CBRANCH_SCC1},
-        {"s_cbranch_vccnz", S_CBRANCH_VCCNZ},
-        {"s_cbranch_vccz", S_CBRANCH_VCCZ},
-        {"s_decperflevel", S_DECPERFLEVEL},
-        {"s_endpgm", S_ENDPGM},
-        {"s_endpgm_ordered_ps_done", S_ENDPGM_ORDERED_PS_DONE},
-        {"s_endpgm_saved", S_ENDPGM_SAVED},
-        {"s_icache_inv", S_ICACHE_INV},
-        {"s_incperflevel", S_INCPERFLEVEL},
-        {"s_nop", S_NOP},
-        {"s_sendmsg", S_SENDMSG},
-        {"s_sendmsghalt", S_SENDMSGHALT},
-        {"s_set_gpr_idx_mode", S_SET_GPR_IDX_MODE},
-        {"s_set_gpr_idx_off", S_SET_GPR_IDX_OFF},
-        {"s_sethalt", S_SETHALT},
-        {"s_setkill", S_SETKILL},
-        {"s_setprio", S_SETPRIO},
-        {"s_sleep", S_SLEEP},
-        {"s_trap", S_TRAP},
-        {"s_ttracedata", S_TTRACEDATA},
-        {"s_waitcnt", S_WAITCNT},
+        {"s_cbranch_cdbgsys_or_user",  S_CBRANCH_CDBGSYS_OR_USER},
+        {"s_cbranch_cdbguser",         S_CBRANCH_CDBGUSER},
+        {"s_cbranch_execnz",           S_CBRANCH_EXECNZ},
+        {"s_cbranch_execz",            S_CBRANCH_EXECZ},
+        {"s_cbranch_scc0",             S_CBRANCH_SCC0},
+        {"s_cbranch_scc1",             S_CBRANCH_SCC1},
+        {"s_cbranch_vccnz",            S_CBRANCH_VCCNZ},
+        {"s_cbranch_vccz",             S_CBRANCH_VCCZ},
+        {"s_decperflevel",             S_DECPERFLEVEL},
+        {"s_endpgm",                   S_ENDPGM},
+        {"s_endpgm_ordered_ps_done",   S_ENDPGM_ORDERED_PS_DONE},
+        {"s_endpgm_saved",             S_ENDPGM_SAVED},
+        {"s_icache_inv",               S_ICACHE_INV},
+        {"s_incperflevel",             S_INCPERFLEVEL},
+        {"s_nop",                      S_NOP},
+        {"s_sendmsg",                  S_SENDMSG},
+        {"s_sendmsghalt",              S_SENDMSGHALT},
+        {"s_set_gpr_idx_mode",         S_SET_GPR_IDX_MODE},
+        {"s_set_gpr_idx_off",          S_SET_GPR_IDX_OFF},
+        {"s_sethalt",                  S_SETHALT},
+        {"s_setkill",                  S_SETKILL},
+        {"s_setprio",                  S_SETPRIO},
+        {"s_sleep",                    S_SLEEP},
+        {"s_trap",                     S_TRAP},
+        {"s_ttracedata",               S_TTRACEDATA},
+        {"s_waitcnt",                  S_WAITCNT},
 
         // SMEM
-        {"s_atomic_add", S_ATOMIC_ADD},
-        {"s_atomic_add_x2", S_ATOMIC_ADD_X2},
-        {"s_atomic_and", S_ATOMIC_AND},
-        {"s_atomic_and_x2", S_ATOMIC_AND_X2},
-        {"s_atomic_cmpswap", S_ATOMIC_CMPSWAP},
-        {"s_atomic_cmpswap_x2", S_ATOMIC_CMPSWAP_X2},
-        {"s_atomic_dec", S_ATOMIC_DEC},
-        {"s_atomic_dec_x2", S_ATOMIC_DEC_X2},
-        {"s_atomic_inc", S_ATOMIC_INC},
-        {"s_atomic_inc_x2", S_ATOMIC_INC_X2},
-        {"s_atomic_or", S_ATOMIC_OR},
-        {"s_atomic_or_x2", S_ATOMIC_OR_X2},
-        {"s_atomic_smax", S_ATOMIC_SMAX},
-        {"s_atomic_smax_x2", S_ATOMIC_SMAX_X2},
-        {"s_atomic_smin", S_ATOMIC_SMIN},
-        {"s_atomic_smin_x2", S_ATOMIC_SMIN_X2},
-        {"s_atomic_sub", S_ATOMIC_SUB},
-        {"s_atomic_sub_x2", S_ATOMIC_SUB_X2},
-        {"s_atomic_swap", S_ATOMIC_SWAP},
-        {"s_atomic_swap_x2", S_ATOMIC_SWAP_X2},
-        {"s_atomic_umax", S_ATOMIC_UMAX},
-        {"s_atomic_umax_x2", S_ATOMIC_UMAX_X2},
-        {"s_atomic_umin", S_ATOMIC_UMIN},
-        {"s_atomic_umin_x2", S_ATOMIC_UMIN_X2},
-        {"s_atomic_xor", S_ATOMIC_XOR},
-        {"s_atomic_xor_x2", S_ATOMIC_XOR_X2},
-        {"s_buffer_atomic_add", S_BUFFER_ATOMIC_ADD},
-        {"s_buffer_atomic_add_x2", S_BUFFER_ATOMIC_ADD_X2},
-        {"s_buffer_atomic_and", S_BUFFER_ATOMIC_AND},
-        {"s_buffer_atomic_and_x2", S_BUFFER_ATOMIC_AND_X2},
-        {"s_buffer_atomic_cmpswap", S_BUFFER_ATOMIC_CMPSWAP},
+        {"s_atomic_add",               S_ATOMIC_ADD},
+        {"s_atomic_add_x2",            S_ATOMIC_ADD_X2},
+        {"s_atomic_and",               S_ATOMIC_AND},
+        {"s_atomic_and_x2",            S_ATOMIC_AND_X2},
+        {"s_atomic_cmpswap",           S_ATOMIC_CMPSWAP},
+        {"s_atomic_cmpswap_x2",        S_ATOMIC_CMPSWAP_X2},
+        {"s_atomic_dec",               S_ATOMIC_DEC},
+        {"s_atomic_dec_x2",            S_ATOMIC_DEC_X2},
+        {"s_atomic_inc",               S_ATOMIC_INC},
+        {"s_atomic_inc_x2",            S_ATOMIC_INC_X2},
+        {"s_atomic_or",                S_ATOMIC_OR},
+        {"s_atomic_or_x2",             S_ATOMIC_OR_X2},
+        {"s_atomic_smax",              S_ATOMIC_SMAX},
+        {"s_atomic_smax_x2",           S_ATOMIC_SMAX_X2},
+        {"s_atomic_smin",              S_ATOMIC_SMIN},
+        {"s_atomic_smin_x2",           S_ATOMIC_SMIN_X2},
+        {"s_atomic_sub",               S_ATOMIC_SUB},
+        {"s_atomic_sub_x2",            S_ATOMIC_SUB_X2},
+        {"s_atomic_swap",              S_ATOMIC_SWAP},
+        {"s_atomic_swap_x2",           S_ATOMIC_SWAP_X2},
+        {"s_atomic_umax",              S_ATOMIC_UMAX},
+        {"s_atomic_umax_x2",           S_ATOMIC_UMAX_X2},
+        {"s_atomic_umin",              S_ATOMIC_UMIN},
+        {"s_atomic_umin_x2",           S_ATOMIC_UMIN_X2},
+        {"s_atomic_xor",               S_ATOMIC_XOR},
+        {"s_atomic_xor_x2",            S_ATOMIC_XOR_X2},
+        {"s_buffer_atomic_add",        S_BUFFER_ATOMIC_ADD},
+        {"s_buffer_atomic_add_x2",     S_BUFFER_ATOMIC_ADD_X2},
+        {"s_buffer_atomic_and",        S_BUFFER_ATOMIC_AND},
+        {"s_buffer_atomic_and_x2",     S_BUFFER_ATOMIC_AND_X2},
+        {"s_buffer_atomic_cmpswap",    S_BUFFER_ATOMIC_CMPSWAP},
         {"s_buffer_atomic_cmpswap_x2", S_BUFFER_ATOMIC_CMPSWAP_X2},
-        {"s_buffer_atomic_dec", S_BUFFER_ATOMIC_DEC},
-        {"s_buffer_atomic_dec_x2", S_BUFFER_ATOMIC_DEC_X2},
-        {"s_buffer_atomic_inc", S_BUFFER_ATOMIC_INC},
-        {"s_buffer_atomic_inc_x2", S_BUFFER_ATOMIC_INC_X2},
-        {"s_buffer_atomic_or", S_BUFFER_ATOMIC_OR},
-        {"s_buffer_atomic_or_x2", S_BUFFER_ATOMIC_OR_X2},
-        {"s_buffer_atomic_smax", S_BUFFER_ATOMIC_SMAX},
-        {"s_buffer_atomic_smax_x2", S_BUFFER_ATOMIC_SMAX_X2},
-        {"s_buffer_atomic_smin", S_BUFFER_ATOMIC_SMIN},
-        {"s_buffer_atomic_smin_x2", S_BUFFER_ATOMIC_SMIN_X2},
-        {"s_buffer_atomic_sub", S_BUFFER_ATOMIC_SUB},
-        {"s_buffer_atomic_sub_x2", S_BUFFER_ATOMIC_SUB_X2},
-        {"s_buffer_atomic_swap", S_BUFFER_ATOMIC_SWAP},
-        {"s_buffer_atomic_swap_x2", S_BUFFER_ATOMIC_SWAP_X2},
-        {"s_buffer_atomic_umax", S_BUFFER_ATOMIC_UMAX},
-        {"s_buffer_atomic_umax_x2", S_BUFFER_ATOMIC_UMAX_X2},
-        {"s_buffer_atomic_umin", S_BUFFER_ATOMIC_UMIN},
-        {"s_buffer_atomic_umin_x2", S_BUFFER_ATOMIC_UMIN_X2},
-        {"s_buffer_atomic_xor", S_BUFFER_ATOMIC_XOR},
-        {"s_buffer_atomic_xor_x2", S_BUFFER_ATOMIC_XOR_X2},
-        {"s_buffer_load_dword", S_BUFFER_LOAD_DWORD},
-        {"s_buffer_load_dwordx16", S_BUFFER_LOAD_DWORDX16},
-        {"s_buffer_load_dwordx2", S_BUFFER_LOAD_DWORDX2},
-        {"s_buffer_load_dwordx4", S_BUFFER_LOAD_DWORDX4},
-        {"s_buffer_load_dwordx8", S_BUFFER_LOAD_DWORDX8},
-        {"s_buffer_store_dword", S_BUFFER_STORE_DWORD},
-        {"s_buffer_store_dwordx2", S_BUFFER_STORE_DWORDX2},
-        {"s_buffer_store_dwordx4", S_BUFFER_STORE_DWORDX4},
-        {"s_dcache_discard", S_DCACHE_DISCARD},
-        {"s_dcache_discard_x2" ,S_DCACHE_DISCARD_X2},
-        {"s_dcache_inv", S_DCACHE_INV},
-        {"s_dcache_inv_vol", S_DCACHE_INV_VOL},
-        {"s_load_dword", S_LOAD_DWORD},
-        {"s_load_dwordx16", S_LOAD_DWORDX16},
-        {"s_load_dwordx2", S_LOAD_DWORDX2},
-        {"s_load_dwordx4", S_LOAD_DWORDX4},
-        {"s_load_dwordx8", S_LOAD_DWORDX8},
-        {"s_memrealtime", S_MEMREALTIME},
-        {"s_memtime", S_MEMTIME},
-        {"s_scratch_load_dword", S_SCRATCH_LOAD_DWORD},
-        {"s_scratch_load_dwordx2", S_SCRATCH_LOAD_DWORDX2},
-        {"s_scratch_load_dwordx4", S_SCRATCH_LOAD_DWORDX4},
-        {"s_scratch_store_dword", S_SCRATCH_STORE_DWORD},
-        {"s_scratch_store_dwordx2", S_SCRATCH_STORE_DWORDX2},
-        {"s_scratch_store_dwordx4", S_SCRATCH_STORE_DWORDX4},
-        {"s_store_dword", S_STORE_DWORD},
-        {"s_store_dwordx2", S_STORE_DWORDX2},
-        {"s_store_dwordx4", S_STORE_DWORDX4},
+        {"s_buffer_atomic_dec",        S_BUFFER_ATOMIC_DEC},
+        {"s_buffer_atomic_dec_x2",     S_BUFFER_ATOMIC_DEC_X2},
+        {"s_buffer_atomic_inc",        S_BUFFER_ATOMIC_INC},
+        {"s_buffer_atomic_inc_x2",     S_BUFFER_ATOMIC_INC_X2},
+        {"s_buffer_atomic_or",         S_BUFFER_ATOMIC_OR},
+        {"s_buffer_atomic_or_x2",      S_BUFFER_ATOMIC_OR_X2},
+        {"s_buffer_atomic_smax",       S_BUFFER_ATOMIC_SMAX},
+        {"s_buffer_atomic_smax_x2",    S_BUFFER_ATOMIC_SMAX_X2},
+        {"s_buffer_atomic_smin",       S_BUFFER_ATOMIC_SMIN},
+        {"s_buffer_atomic_smin_x2",    S_BUFFER_ATOMIC_SMIN_X2},
+        {"s_buffer_atomic_sub",        S_BUFFER_ATOMIC_SUB},
+        {"s_buffer_atomic_sub_x2",     S_BUFFER_ATOMIC_SUB_X2},
+        {"s_buffer_atomic_swap",       S_BUFFER_ATOMIC_SWAP},
+        {"s_buffer_atomic_swap_x2",    S_BUFFER_ATOMIC_SWAP_X2},
+        {"s_buffer_atomic_umax",       S_BUFFER_ATOMIC_UMAX},
+        {"s_buffer_atomic_umax_x2",    S_BUFFER_ATOMIC_UMAX_X2},
+        {"s_buffer_atomic_umin",       S_BUFFER_ATOMIC_UMIN},
+        {"s_buffer_atomic_umin_x2",    S_BUFFER_ATOMIC_UMIN_X2},
+        {"s_buffer_atomic_xor",        S_BUFFER_ATOMIC_XOR},
+        {"s_buffer_atomic_xor_x2",     S_BUFFER_ATOMIC_XOR_X2},
+        {"s_buffer_load_dword",        S_BUFFER_LOAD_DWORD},
+        {"s_buffer_load_dwordx16",     S_BUFFER_LOAD_DWORDX16},
+        {"s_buffer_load_dwordx2",      S_BUFFER_LOAD_DWORDX2},
+        {"s_buffer_load_dwordx4",      S_BUFFER_LOAD_DWORDX4},
+        {"s_buffer_load_dwordx8",      S_BUFFER_LOAD_DWORDX8},
+        {"s_buffer_store_dword",       S_BUFFER_STORE_DWORD},
+        {"s_buffer_store_dwordx2",     S_BUFFER_STORE_DWORDX2},
+        {"s_buffer_store_dwordx4",     S_BUFFER_STORE_DWORDX4},
+        {"s_dcache_discard",           S_DCACHE_DISCARD},
+        {"s_dcache_discard_x2",        S_DCACHE_DISCARD_X2},
+        {"s_dcache_inv",               S_DCACHE_INV},
+        {"s_dcache_inv_vol",           S_DCACHE_INV_VOL},
+        {"s_load_dword",               S_LOAD_DWORD},
+        {"s_load_dwordx16",            S_LOAD_DWORDX16},
+        {"s_load_dwordx2",             S_LOAD_DWORDX2},
+        {"s_load_dwordx4",             S_LOAD_DWORDX4},
+        {"s_load_dwordx8",             S_LOAD_DWORDX8},
+        {"s_memrealtime",              S_MEMREALTIME},
+        {"s_memtime",                  S_MEMTIME},
+        {"s_scratch_load_dword",       S_SCRATCH_LOAD_DWORD},
+        {"s_scratch_load_dwordx2",     S_SCRATCH_LOAD_DWORDX2},
+        {"s_scratch_load_dwordx4",     S_SCRATCH_LOAD_DWORDX4},
+        {"s_scratch_store_dword",      S_SCRATCH_STORE_DWORD},
+        {"s_scratch_store_dwordx2",    S_SCRATCH_STORE_DWORDX2},
+        {"s_scratch_store_dwordx4",    S_SCRATCH_STORE_DWORDX4},
+        {"s_store_dword",              S_STORE_DWORD},
+        {"s_store_dwordx2",            S_STORE_DWORDX2},
+        {"s_store_dwordx4",            S_STORE_DWORDX4},
         // END SMEM
 
         // VOP1
-        {"v_mov_b32", V_MOV_B32},
+        {"v_mov_b32",                  V_MOV_B32},
 
         // VOP2
-        {"v_add_u32", V_ADD_U32},
-        {"v_addc_u32", V_ADDC_U32},
+        {"v_add_u32",                  V_ADD_U32},
+        {"v_addc_u32",                 V_ADDC_U32},
 
         // VOP3A
-        {"v_lshlrev_b64", V_LSHLREV_B64},
+        {"v_lshlrev_b64",              V_LSHLREV_B64},
 
         // VOPC
-        {"v_cmp_eq_i32", V_CMP_EQ_I32},
+        {"v_cmp_eq_i32",               V_CMP_EQ_I32},
 
         // FLAT
-        {"flat_store_dword", FLAT_STORE_DWORD},
-        {"flat_store_dwordx2", FLAT_STORE_DWORDX2},
-        {"flat_store_dwordx3", FLAT_STORE_DWORDX3},
-        {"flat_store_dwordx4", FLAT_STORE_DWORDX4},
-        {"flat_store_short", FLAT_STORE_SHORT},
+        {"flat_store_dword",           FLAT_STORE_DWORD},
+        {"flat_store_dwordx2",         FLAT_STORE_DWORDX2},
+        {"flat_store_dwordx3",         FLAT_STORE_DWORDX3},
+        {"flat_store_dwordx4",         FLAT_STORE_DWORDX4},
+        {"flat_store_short",           FLAT_STORE_SHORT},
     };
 
     auto it = instruction_repo.find(instruction.data());
@@ -306,8 +306,8 @@ InstrKey get_instr_key(std::string_view instruction) {
     return it->second;
 }
 
-char const* get_instr_str(InstrKey instr) noexcept {
-    switch (instr)  {
+char const *get_instr_str(InstrKey instr) noexcept {
+    switch (instr) {
         case S_ATOMIC_ADD:
             return "s_atomic_add";
         case S_ATOMIC_ADD_X2:
@@ -825,15 +825,15 @@ char const* get_instr_str(InstrKey instr) noexcept {
         case S_SETREG_IMM32_B32:
             return "s_setreg_imm32_b32";
         case V_MOV_B32:
-            return "s_v_mov_b32";
+            return "v_mov_b32";
         case V_ADD_U32:
-            return "s_v_add_u32";
+            return "v_add_u32";
         case V_ADDC_U32:
-            return "s_v_addc_u32";
+            return "v_addc_u32";
         case V_LSHLREV_B64:
-            return "s_v_lshlrev_b64";
+            return "v_lshlrev_b64";
         case V_CMP_EQ_I32:
-            return "s_v_cmp_eq_i32";
+            return "v_cmp_eq_i32";
         case FLAT_STORE_DWORD:
             return "s_flat_store_dword";
         case V_SUB_U32:
@@ -855,7 +855,7 @@ char const* get_instr_str(InstrKey instr) noexcept {
         case V_FFBH_I32:
             return "v_ffbh_i32";
         case V_FFBL_B32:
-          return "v_ffbl_b32";
+            return "v_ffbl_b32";
     }
     assert(false && "Unknown command");
     return "(unknown instruction)";
@@ -1128,14 +1128,152 @@ InstrFormat get_instr_format(InstrKey instrKey) {
         case S_STORE_DWORDX4:
             return SMEM;
         case V_MOV_B32:
+        case V_BFREV_B32:
+        case V_FFBH_U32:
+        case V_FFBH_I32:
+        case V_FFBL_B32:
+        case V_SWAP_B32:
+        case V_MOVRELD_B32:
+        case V_MOVRELS_B32:
+        case V_MOVRELSD_B32:
+        case V_NOT_B32:
+        case V_READFIRSTLANE_B32:
+        case V_SAT_PK_U8_I16:
+        case V_SCREEN_PARTITION_4SE_B32:
+        case V_NOP:
+        case V_CVT_I32_F64:
+        case V_CVT_F64_I32:
+        case V_CVT_F32_I32:
+        case V_CVT_F32_U32:
+        case V_CVT_U32_F32:
+        case V_CVT_I32_F32:
+        case V_CVT_F16_F32:
+        case V_CVT_F32_F16:
+        case V_CVT_RPI_I32_F32:
+        case V_CVT_FLR_I32_F32:
+        case V_CVT_OFF_F32_I4:
+        case V_CVT_F32_F64:
+        case V_CVT_F64_F32:
+        case V_CVT_F32_UBYTE0:
+        case V_CVT_F32_UBYTE1:
+        case V_CVT_F32_UBYTE2:
+        case V_CVT_F32_UBYTE3:
+        case V_CVT_U32_F64:
+        case V_CVT_F64_U32:
+        case V_TRUNC_F64:
+        case V_CEIL_F64:
+        case V_RNDNE_F64:
+        case V_FLOOR_F64:
+        case V_FRACT_F32:
+        case V_TRUNC_F32:
+        case V_CEIL_F32:
+        case V_RNDNE_F32:
+        case V_FLOOR_F32:
+        case V_EXP_F32:
+        case V_LOG_F32:
+        case V_RCP_F32:
+        case V_RCP_IFLAG_F32:
+        case V_RSQ_F32:
+        case V_RCP_F64:
+        case V_RSQ_F64:
+        case V_SQRT_F32:
+        case V_SQRT_F64:
+        case V_SIN_F32:
+        case V_COS_F32:
+        case V_FREXP_EXP_I32_F64:
+        case V_FREXP_MANT_F64:
+        case V_FRACT_F64:
+        case V_FREXP_EXP_I32_F32:
+        case V_FREXP_MANT_F32:
+        case V_CLREXCP:
+        case V_CVT_F16_U16:
+        case V_CVT_F16_I16:
+        case V_CVT_U16_F16:
+        case V_CVT_I16_F16:
+        case V_RCP_F16:
+        case V_SQRT_F16:
+        case V_RSQ_F16:
+        case V_LOG_F16:
+        case V_EXP_F16:
+        case V_FREXP_MANT_F16:
+        case V_FREXP_EXP_I16_F16:
+        case V_FLOOR_F16:
+        case V_CEIL_F16:
+        case V_TRUNC_F16:
+        case V_RNDNE_F16:
+        case V_FRACT_F16:
+        case V_SIN_F16:
+        case V_COS_F16:
+        case V_EXP_LEGACY_F32:
+        case V_LOG_LEGACY_F32:
+        case V_CVT_NORM_I16_F16:
+        case V_CVT_NORM_U16_F16:
             return VOP1;
         case V_ADD_U32:
         case V_ADDC_U32:
         case V_SUB_U32:
+        case V_CNDMASK_B32:
+        case V_ADD_F32:
+        case V_SUB_F32:
+        case V_SUBREV_F32:
+        case V_MUL_LEGACY_F32:
+        case V_MUL_F32:
+        case V_MUL_I32_I24:
+        case V_MUL_HI_I32_I24:
+        case V_MUL_U32_U24:
+        case V_MUL_HI_U32_U24:
+        case V_MIN_F32:
+        case V_MAX_F32:
+        case V_MIN_I32:
+        case V_MAX_I32:
+        case V_MIN_U32:
+        case V_MAX_U32:
+        case V_LSHRREV_B32:
+        case V_ASHRREV_I32:
+        case V_LSHLREV_B32:
+        case V_AND_B32:
+        case V_OR_B32:
+        case V_XOR_B32:
+        case V_MAC_F32:
+        case V_MADMK_F32:
+        case V_MADAK_F32:
+        case V_ADD_CO_U32:
+        case V_SUB_CO_U32:
+        case V_SUBREV_CO_U32:
+        case V_ADDC_CO_U32:
+        case V_SUBB_CO_U32:
+        case V_SUBBREV_CO_U32:
+        case V_ADD_F16:
+        case V_SUB_F16:
+        case V_SUBREV_F16:
+        case V_MUL_F16:
+        case V_MAC_F16:
+        case V_MADMK_F16:
+        case V_MADAK_F16:
+        case V_ADD_U16:
+        case V_SUB_U16:
+        case V_SUBREV_U16:
+        case V_MUL_LO_U16:
+        case V_LSHLREV_B16:
+        case V_LSHRREV_B16:
+        case V_ASHRREV_I16:
+        case V_MAX_F16:
+        case V_MIN_F16:
+        case V_MAX_U16:
+        case V_MAX_I16:
+        case V_MIN_U16:
+        case V_MIN_I16:
+        case V_LDEXP_F16:
+        case V_SUBREV_U32:
             return VOP2;
         case V_MUL_LO_U32:
         case V_LSHLREV_B64:
             return VOP3A;
+        case V_DIV_SCALE_F32:
+        case V_DIV_SCALE_F64:
+        case V_MAD_U64_U32:
+        case V_MAD_I64_I32:
+            return VOP3B;
         case V_CMP_EQ_I32:
             return VOPC;
         case FLAT_STORE_DWORD:
@@ -1144,10 +1282,6 @@ InstrFormat get_instr_format(InstrKey instrKey) {
         case FLAT_STORE_DWORDX4:
         case FLAT_STORE_SHORT:
             return FLAT;
-        case V_BFREV_B32:
-        case V_FFBH_U32:
-        case V_FFBH_I32:
-        case V_FFBL_B32:
         default:
             //todo
             assert(false);
@@ -1165,11 +1299,13 @@ uint8_t get_instr_width(InstrKey instrKey) {
         case VOP1:
         case VOP2:
         case VOPC:
-        case VINTRP: return 32;
+        case VINTRP:
+            return 32;
         case SMEM:
         case VOP3B:
         case VOP3A:
         case VOP3P:
-        case FLAT: return 64;
+        case FLAT:
+            return 64;
     }
 }
