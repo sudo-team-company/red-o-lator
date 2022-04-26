@@ -8,6 +8,8 @@
 #include "runtime/icd/icd.h"
 #include "KernelLoader.h"
 
+#include "../../TestBinariesPath.h"
+
 #define CHECK_ERROR(message)                                                 \
     if (error != CL_SUCCESS) {                                               \
         throw KernelLoadException(std::string(message) +                     \
@@ -76,7 +78,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
         clCreateCommandQueue(context, device, 0, &error);
     CHECK(error == CL_SUCCESS);
 
-    const std::string binaryPath = "test/resources/kernels/a_plus_b.bin";
+    const std::string binaryPath = A_PLUS_B_BIN;
     const auto binary = readBinaryFile(binaryPath);
 
     if (binary.empty()) {

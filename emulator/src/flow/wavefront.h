@@ -19,7 +19,7 @@ struct WorkItem;
 
 struct WorkGroup {
 public:
-    const KernelCode* const kernelCode;
+    const KernelCode *const kernelCode;
     size_t sizeX, sizeY, sizeZ;
     size_t idX, idY, idZ;
     std::vector<std::unique_ptr<Wavefront>> wavefronts;
@@ -28,7 +28,7 @@ public:
               size_t sizeX, size_t sizeY, size_t sizeZ,
               size_t idX, size_t idY, size_t idZ)
         : kernelCode(kernelCode), sizeX(sizeX), sizeY(sizeY), sizeZ(sizeZ),
-        idX(idX), idY(idY), idZ(idZ) {}
+          idX(idX), idY(idY), idZ(idZ) {}
 
     void init_workitems();
 
@@ -40,6 +40,8 @@ public:
 
 private:
     std::vector<std::unique_ptr<WorkItem>> workItems;
+
+    void init_wf_regs(Wavefront &, const KernelConfig &) const ;
 };
 
 struct Wavefront {
@@ -55,7 +57,7 @@ public:
 
     bool atBarrier = false;
 
-    explicit Wavefront(const KernelConfig &kernelConfig, const WorkGroup *wg, size_t size, size_t id);
+    explicit Wavefront(const WorkGroup *, size_t size, size_t id, size_t sgprnum, size_t vgprnum);
 
     Instruction *get_cur_instr() const;
 
@@ -125,21 +127,15 @@ public:
 
     bool work_item_masked(size_t wiInd) const;
 
-    size_t get_size() const {
-        return size;
-    }
+    size_t get_size() const { return size; }
 
-    void compete() {
-        completed = true;
-    }
+    void compete() { completed = true; }
 
-    bool is_completed() const {
-        return completed;
-    }
+    bool is_completed() const { return completed; }
 
-    void set_exec_reg(uint64_t regValue) {
-        execReg = regValue;
-    }
+    void set_exec_reg(uint64_t regValue) { execReg = regValue; }
+
+    size_t get_local_id() const { return id; }
 
 private:
     const WorkGroup *const workGroup = nullptr;
@@ -149,8 +145,6 @@ private:
     bool completed = false;
 
     std::vector<uint32_t> read_reg_operand(const Operand &, int);
-
-    void init_regs(const KernelConfig &);
 };
 
 struct WorkItem {

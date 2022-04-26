@@ -1,0 +1,5 @@
+#cmakedefine BINARIES_PATH "@BINARIES_PATH@"
+
+constexpr auto const* A_PLUS_B_BIN = BINARIES_PATH "/a_plus_b.bin";
+constexpr auto const* WEIGHTED_SUM_BIN = BINARIES_PATH "/weighted_sum_kernel/weighted_sum_kernel.bin";
+constexpr auto const* ADDITION_BIN = BINARIES_PATH "/addition/addition.bin";

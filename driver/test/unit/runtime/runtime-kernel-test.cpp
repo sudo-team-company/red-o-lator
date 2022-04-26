@@ -9,8 +9,10 @@
 #include "runtime/icd/kernel/CLKernel.h"
 #include "unit-test-common/test-commons.h"
 
+#include "../../../TestBinariesPath.h"
+
 TEST_SUITE("Kernel API") {
-    const auto binaryPath = "test/resources/kernels/a_plus_b.bin";
+    const auto binaryPath = A_PLUS_B_BIN;
     const auto kernelName = "a_plus_b";
 
     TEST_CASE("clCreateKernel") {
@@ -114,8 +116,7 @@ TEST_SUITE("Kernel API") {
 
             cl_int error;
 
-            auto program = test::getProgram(
-                "test/resources/kernels/addition/addition.bin");
+            auto program = test::getProgram(ADDITION_BIN);
             const auto programInitRefCount = program->referenceCount;
 
             cl_uint kernelNum;

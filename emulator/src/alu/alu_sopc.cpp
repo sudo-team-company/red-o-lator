@@ -1,7 +1,3 @@
-//
-// Created by Diana Kudaiberdieva
-//
-
 #include <stdexcept>
 #include "alu.h"
 

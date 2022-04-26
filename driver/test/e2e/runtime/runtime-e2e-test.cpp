@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "runtime/icd/icd.h"
+#include "../../../TestBinariesPath.h"
 #include <common/test/doctest.h>
 #include <common/utils/common.hpp>
 
@@ -51,8 +52,7 @@ TEST_CASE("a_plus_b") {
         clCreateCommandQueue(context, device, 0, &error);
     CHECK(error == CL_SUCCESS);
 
-    const std::string binaryPath = "test/resources/kernels/a_plus_b.bin";
-    const auto binary = utils::readBinaryFile(binaryPath);
+    const auto binary = utils::readBinaryFile(A_PLUS_B_BIN);
 
     CHECK_FALSE(binary.empty());
 

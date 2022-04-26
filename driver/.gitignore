@@ -1,1 +1,2 @@
 pkgconfig/*.pc
+/TestBinariesPath.h

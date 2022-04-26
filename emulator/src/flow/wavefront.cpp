@@ -36,46 +36,30 @@ void WorkGroup::init_wavefronts(const KernelConfig &kernelConfig) {
         } else {
             wfSize = wiLeft;
         }
-        wavefronts.push_back(std::make_unique<Wavefront>(kernelConfig, this, wfSize, wfInd));
+        wavefronts.push_back(std::make_unique<Wavefront>(this, wfSize, wfInd, kernelConfig.get_sgpr_size(), kernelConfig.get_vgpr_size()));
         auto &curWf = *wavefronts.back();
+        init_wf_regs(curWf, kernelConfig);
         curWf.set_exec_reg(evaluate_exec_reg_value(wfSize));
         workitemInd += wfSize;
     }
 }
 
-Wavefront::Wavefront(const KernelConfig &kernelConfig, const WorkGroup *const wg, size_t size, size_t id)
-    : workGroup(wg),
-      size(size),
-      id(id),
-      execReg(0),
-      vccReg(0),
-      sgprsnum(kernelConfig.get_sgpr_size()),
-      vgprsnum(kernelConfig.get_vgpr_size()),
-      programCounter(std::make_unique<ProgramCounter>(0)),
-      statusReg(std::make_unique<StatusReg>(0)),
-      modeReg(std::make_unique<ModeReg>(0)),
-      atBarrier(false),
-      completed(false) {
-    scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));
-    vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
-    init_regs(kernelConfig);
-}
 
-void Wavefront::init_regs(const KernelConfig &kernelConfig) {
+void WorkGroup::init_wf_regs(Wavefront& wavefront, const KernelConfig &kernelConfig) const {
     size_t sgprInd = 0;
 
     sgprInd += kernelConfig.get_user_sgpr();
 
     if (kernelConfig.is_enabled_idx()) {
-        scalarRegFile[sgprInd++] = workGroup->idX;
+        wavefront.scalarRegFile[sgprInd++] = idX;
     }
 
     if (kernelConfig.is_enabled_idy()) {
-        scalarRegFile[sgprInd++] = workGroup->idY;
+        wavefront.scalarRegFile[sgprInd++] = idY;
     }
 
     if (kernelConfig.is_enabled_idz()) {
-        scalarRegFile[sgprInd++] = workGroup->idZ;
+        wavefront.scalarRegFile[sgprInd++] = idZ;
     }
 
     if (kernelConfig.is_enabled_sgpr_workgroup_info()) {
@@ -90,24 +74,42 @@ void Wavefront::init_regs(const KernelConfig &kernelConfig) {
     }
 
     if (kernelConfig.use_setup()) {
-        set_sgpr_pair(6, kernelConfig.kernArgAddr);
+        wavefront.set_sgpr_pair(6, kernelConfig.kernArgAddr);
     }
     if (kernelConfig.use_args()) {
-        set_sgpr_pair(4, kernelConfig.kernArgAddr);
+        wavefront.set_sgpr_pair(4, kernelConfig.kernArgAddr);
     }
 
     //MODE register initialization
-    modeReg->ieee(kernelConfig.ieee_mode_enabled());
-    modeReg->dx10_clamp(kernelConfig.dx10_clamp_enabled());
+    wavefront.modeReg->ieee(kernelConfig.ieee_mode_enabled());
+    wavefront.modeReg->dx10_clamp(kernelConfig.dx10_clamp_enabled());
 
     //todo STATUS register initialization
 
-    for (size_t i = 0; i < get_size(); i++) {
-        auto workItem = workGroup->get_workitem_for_wf(i, id);
-        set_vgpr(i, 0, workItem.get_local_id_x());
-        set_vgpr(i, 1, workItem.get_local_id_y());
-        set_vgpr(i, 2, workItem.get_local_id_z());
+    for (size_t i = 0; i < wavefront.get_size(); i++) {
+        auto workItem = get_workitem_for_wf(i, wavefront.get_local_id());
+        wavefront.set_vgpr(i, 0, workItem.get_local_id_x());
+        wavefront.set_vgpr(i, 1, workItem.get_local_id_y());
+        wavefront.set_vgpr(i, 2, workItem.get_local_id_z());
     }
+}
+
+
+Wavefront::Wavefront(const WorkGroup *const wg, size_t size, size_t id, size_t sgprnum, size_t vgprnum)
+    : workGroup(wg),
+      size(size),
+      id(id),
+      execReg(0),
+      vccReg(0),
+      sgprsnum(sgprnum),
+      vgprsnum(vgprnum),
+      programCounter(std::make_unique<ProgramCounter>(0)),
+      statusReg(std::make_unique<StatusReg>(0)),
+      modeReg(std::make_unique<ModeReg>(0)),
+      atBarrier(false),
+      completed(false) {
+    scalarRegFile = std::vector<uint32_t>(sgprsnum, uint32_t(0));
+    vectorRegFile = std::vector<uint32_t>(DEFAULT_WAVEFRONT_SIZE * vgprsnum, uint32_t(0));
 }
 
 Instruction *Wavefront::get_cur_instr() const {

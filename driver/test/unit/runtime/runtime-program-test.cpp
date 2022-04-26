@@ -7,9 +7,10 @@
 #include "runtime/icd/CLProgram.hpp"
 #include "runtime/icd/icd.h"
 #include "unit-test-common/test-commons.h"
+#include "../../../TestBinariesPath.h"
 
 TEST_SUITE("Program API") {
-    const auto binaryPath = "test/resources/kernels/a_plus_b.bin";
+    const auto binaryPath = A_PLUS_B_BIN;
 
     TEST_CASE("clCreateProgramWithBinary") {
         SUBCASE("program can be created with valid binary") {

@@ -8,6 +8,9 @@
 find_package(PkgConfig REQUIRED)
 find_package(OpenCL REQUIRED)
 
+set(BINARIES_PATH "${PROJECT_SOURCE_DIR}/driver/test/resources/kernels")
+configure_file(TestBinariesPath.h.in ${CMAKE_CURRENT_SOURCE_DIR}/TestBinariesPath.h @ONLY)
+
 ################
 # CLRX library #
 ################
