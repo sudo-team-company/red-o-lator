@@ -1,8 +1,7 @@
 import os
 import sys
 
-REGISTER_FILE_CONTENTS = """
-Windows Registry Editor Version 5.00
+REGISTER_FILE_CONTENTS = """Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\\SOFTWARE\\Khronos]
 

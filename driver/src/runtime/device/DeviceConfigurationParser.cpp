@@ -372,7 +372,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
 template <typename T>
 T parseNumber(const std::string& value) {
     try {
-        return static_cast<T>(std::stoul(value));
+        return static_cast<T>(std::stoull(value));
     } catch (std::invalid_argument& e) {
         throw DeviceConfigurationParseError("Failed to parse number: " + value);
     }

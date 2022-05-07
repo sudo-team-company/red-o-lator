@@ -25,7 +25,7 @@ TEST_SUITE("Platform API") {
         }
 
         SUBCASE("platform should have correct vendor") {
-            CHECK(test::getPlatform()->vendor == "Advanced Micro Devices, Inc.");
+            CHECK(test::getPlatform()->vendor == "sudo-team-company");
         }
 
         SUBCASE("platform should have correct name") {
@@ -51,7 +51,7 @@ TEST_SUITE("Platform API") {
 
     TEST_CASE("clGetPlatformInfo") {
         SUBCASE("should correctly return platform param") {
-            const std::string expected = "Advanced Micro Devices, Inc.";
+            const std::string expected = "sudo-team-company";
 
             auto platform = test::getPlatform();
 

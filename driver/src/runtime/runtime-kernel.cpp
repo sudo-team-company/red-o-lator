@@ -262,6 +262,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetKernelInfo(cl_kernel kernel,
 
             switch (param_name) {
                 case CL_KERNEL_FUNCTION_NAME: {
+                    resultSize = 0;
                     result = kernel->name;
                     break;
                 }
@@ -291,6 +292,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetKernelInfo(cl_kernel kernel,
                 }
 
                 case CL_KERNEL_ATTRIBUTES: {
+                    resultSize = 0;
                     break;
                 }
 
@@ -363,11 +365,13 @@ clGetKernelArgInfo(cl_kernel kernel,
                 }
 
                 case CL_KERNEL_ARG_TYPE_NAME: {
+                    resultSize = 0;
                     result = argumentInfo->type;
                     break;
                 }
 
                 case CL_KERNEL_ARG_TYPE_QUALIFIER: {
+                    resultSize = sizeof(cl_kernel_arg_type_qualifier);
                     if (auto casted = std::dynamic_pointer_cast<
                             PointerKernelArgumentInfo>(argumentInfo)) {
                         result =
@@ -380,6 +384,7 @@ clGetKernelArgInfo(cl_kernel kernel,
                 }
 
                 case CL_KERNEL_ARG_NAME: {
+                    resultSize = 0;
                     result = argumentInfo->argumentName;
                     break;
                 }

@@ -21,14 +21,18 @@ TEST_CASE("a_plus_b") {
     error = clGetPlatformIDs(platformCount, platformList, nullptr);
     REQUIRE(error == CL_SUCCESS);
 
-    const auto platform = platformList[0];
+    cl_platform_id platform;
 
     for (int i = 0; i < platformCount; i++) {
-        const auto currentPlatform = platformList[i];
-        char platformName[128];
-        error = clGetPlatformInfo(currentPlatform, CL_PLATFORM_NAME, 128,
-                                  &platformName, nullptr);
+        cl_platform_id currentPlatform = platformList[i];
+        char platformVendor[128];
+        error = clGetPlatformInfo(currentPlatform, CL_PLATFORM_VENDOR, 128,
+                                  &platformVendor, nullptr);
         REQUIRE(error == CL_SUCCESS);
+
+        if (std::string{platformVendor} == "sudo-team-company") {
+            platform = currentPlatform;
+        }
     }
 
     cl_uint num_devices;
