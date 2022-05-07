@@ -26,12 +26,12 @@ CL_API_ENTRY cl_int CL_API_CALL clGetPlatformIDs(cl_uint num_entries,
         kPlatform->openClVersion = "OpenCL 1.2";
         kPlatform->driverVersion = "3075.13";
         kPlatform->name = "AMD Accelerated Parallel Processing";
+        kPlatform->vendor = "Advanced Micro Devices, Inc.";
+        kPlatform->suffix = "AMD";
         kPlatform->vendor = "sudo-team-company";
         kPlatform->extensions = "cl_khr_icd cl_amd_device_attribute_query";
         kPlatform->suffix = "red-o-lator";
         kPlatform->profile = "FULL_PROFILE";
-        kPlatform->vendor = "Advanced Micro Devices, Inc.";
-        kPlatform->suffix = "AMD";
     }
 
     if (platforms) {

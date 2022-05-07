@@ -221,6 +221,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
                 }
 
                 case CL_PROGRAM_SOURCE: {
+                    resultSize = 0;
                     result = "";
                     break;
                 }
@@ -245,6 +246,7 @@ CL_API_ENTRY cl_int CL_API_CALL clGetProgramInfo(cl_program program,
                 }
 
                 case CL_PROGRAM_KERNEL_NAMES: {
+                    resultSize = 0;
                     result = "";
                     break;
                 }
@@ -283,11 +285,13 @@ clGetProgramBuildInfo(cl_program program,
                 }
 
                 case CL_PROGRAM_BUILD_OPTIONS: {
+                    resultSize = 0;
                     result = "";
                     break;
                 }
 
                 case CL_PROGRAM_BUILD_LOG: {
+                    resultSize = 0;
                     result = program->buildLog;
                     break;
                 }
