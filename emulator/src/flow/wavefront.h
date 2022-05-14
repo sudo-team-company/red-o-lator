@@ -1,7 +1,5 @@
 #pragma once
 
-#define DEFAULT_WAVEFRONT_SIZE 64
-
 #include <array>
 #include <cassert>
 #include <cstdint>
@@ -12,7 +10,7 @@
 #include "reg/register.h"
 #include "kernel_config.h"
 #include "wf_state.h"
-#include "commons.h"
+#include "commons/commons.h"
 
 struct Wavefront;
 struct WorkItem;
@@ -45,6 +43,8 @@ private:
 };
 
 struct Wavefront {
+    constexpr static auto WAVEFRONT_SIZE = 64u;
+
 public:
     std::vector<uint32_t> scalarRegFile;
     std::vector<uint32_t> vectorRegFile;
@@ -109,21 +109,27 @@ public:
 
     void update_with_vop3_state(const Instruction &, const WfStateVOP3 &);
 
-    WfStateFLAT get_flat_state(const Instruction &);
+    WfStateVOPC get_vopc_state(const Instruction &);
 
-    void update_with_flat_state(const Instruction &, const WfStateFLAT &);
+    void update_with_vopc_state(const Instruction &, const WfStateVOPC &);
+
+    WfStateFLATStore get_flat_store_state(const Instruction &);
+
+    WfStateFLATLoad get_flat_load_state(const Instruction &);
+
+    void update_with_flat_load_state(const Instruction &, const WfStateFLATLoad &);
 
     std::vector<uint32_t> read_operand(const Operand &);
 
     std::vector<uint32_t> read_operand(const Operand &, int);
 
-    void write_operand_to_gpr(const Operand &, const std::vector<uint32_t> &);
-
-    void write_operand_to_gpr(const Operand &, const std::vector<uint32_t> &, int);
+    void write_data_to_gpr(const Operand &operand, const std::vector<uint32_t> &data);
 
     void write_operand_to_gpr(const Operand &, uint64_t);
 
-    void write_operand_to_gpr(const Operand &, uint64_t, int);
+    void write_data_to_gpr(const Operand &operand, uint64_t data, int wiInd);
+
+    void write_data_to_gpr(const Operand &operand, const std::vector<uint32_t> &data, int wiInd);
 
     bool work_item_masked(size_t wiInd) const;
 

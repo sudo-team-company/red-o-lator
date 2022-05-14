@@ -4,11 +4,11 @@
 
 #include "alu/alu.h"
 
-// SOP1
 TEST_SUITE("Scalar ALU test") {
     size_t wfId = 0;
     size_t wfSize = 1;
     size_t vgprnum = 0;
+    // SOP1
     TEST_CASE("run_s_abs_i32 - stores absolute signed value of the SSRC0 into SDST.") {
         size_t sgprnum = 2;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
@@ -248,7 +248,7 @@ TEST_SUITE("Scalar ALU test") {
         }
     }
 
-// SOP2
+    // SOP2
     TEST_CASE("run_s_absdiff_i32 - omputes the absolute value of difference between two values.") {
         size_t sgprnum = 12;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);

@@ -108,19 +108,22 @@ public:
 };
 
 struct WfStateVOP2 {
+    bool CLAMP = false;
     std::vector<uint64_t> VDST;
     std::vector<uint64_t> SRC0;
     std::vector<uint64_t> SRC1;
-    uint64_t VCC = 0;
+    uint64_t VCC;
 
     WfStateVOP2(std::vector<uint64_t> VDST,
                 std::vector<uint64_t> SRC0,
                 std::vector<uint64_t> SRC1,
-                uint64_t VCC)
-        : VDST(std::move(VDST)), SRC0(std::move(SRC0)), SRC1(std::move(SRC1)), VCC(VCC) {}
+                uint64_t VCC,
+                bool CLAMP)
+        : VDST(std::move(VDST)), SRC0(std::move(SRC0)), SRC1(std::move(SRC1)), VCC(VCC), CLAMP(CLAMP) {}
 };
 
 struct WfStateVOP3 {
+    bool CLAMP = false;
     std::vector<uint64_t> VDST;
     std::vector<uint64_t> SRC0;
     std::vector<uint64_t> SRC1;
@@ -131,17 +134,36 @@ struct WfStateVOP3 {
                 std::vector<uint64_t> SRC0,
                 std::vector<uint64_t> SRC1,
                 std::vector<uint64_t> SRC2,
-                uint64_t VCC)
+                uint64_t VCC,
+                bool CLAMP)
         : VDST(std::move(VDST)),
           SRC0(std::move(SRC0)),
           SRC1(std::move(SRC1)),
-          SRC2(std::move(SRC2)), VCC(VCC) {}
+          SRC2(std::move(SRC2)), VCC(VCC), CLAMP(CLAMP) {}
 };
 
-struct WfStateFLAT {
+struct WfStateFLATStore {
     std::vector<uint64_t> VADDR;
     std::vector<uint32_t> VDATA;
-    size_t VDATA_SIZE_PER_WI = 0;
-    WfStateFLAT(std::vector<uint64_t> VADDR, std::vector<uint32_t> VDATA, size_t VDATA_SIZE_PER_WI)
-        : VADDR(std::move(VADDR)), VDATA(std::move(VDATA)), VDATA_SIZE_PER_WI(VDATA_SIZE_PER_WI) {}
+    size_t vdataAmountPerWi = 0;
+    WfStateFLATStore(std::vector<uint64_t> VADDR, std::vector<uint32_t> VDATA, size_t vdataAmountPerWi)
+        : VADDR(std::move(VADDR)), VDATA(std::move(VDATA)), vdataAmountPerWi(vdataAmountPerWi) {}
+};
+
+struct WfStateFLATLoad {
+    std::vector<uint64_t> VADDR;
+    std::vector<uint32_t> VDST;
+    size_t vdstAmountPerWi = 0;
+    WfStateFLATLoad(std::vector<uint64_t> VADDR, size_t vdstAmount, size_t vdstAmountPerWi)
+        : VADDR(std::move(VADDR)), VDST(std::vector<uint32_t>(vdstAmount)), vdstAmountPerWi(vdstAmountPerWi) {}
+};
+
+struct WfStateVOPC {
+    uint64_t EXEC;
+    uint64_t SDST;
+    std::vector<uint64_t> SRC0;
+    std::vector<uint64_t> SRC1;
+
+    WfStateVOPC( uint64_t EXEC, uint64_t SDST, std::vector<uint64_t> SRC0, std::vector<uint64_t> SRC1):
+        EXEC(EXEC), SDST(SDST), SRC0(std::move(SRC0)), SRC1(std::move(SRC1)) {}
 };

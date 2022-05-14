@@ -1,5 +1,4 @@
 #include <CLRX/amdasm/Disassembler.h>
-#include <iostream>
 #include <sstream>
 
 #include "BinaryDisassembler.h"

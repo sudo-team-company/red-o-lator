@@ -73,7 +73,6 @@ set(SOURCES
         src/runtime/runtime-sampler.cpp
         src/runtime/icd/CLMem.cpp
         src/runtime/command/KernelExecutionCommand.cpp
-        src/emulator/command_executor.cpp
         )
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)

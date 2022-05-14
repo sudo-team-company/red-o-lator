@@ -8,20 +8,22 @@ std::vector<uint8_t> Storage::read_data(uint64_t address,
     uint64_t addr = address + offset;
     for (uint64_t curAddr = addr; curAddr < addr + byteSize; ++curAddr) {
         validate_addr(curAddr);
-        result.push_back(data_[curAddr]);
+        result.push_back(_data[curAddr]);
     }
     return result;
 }
+
 uint32_t Storage::read_4_bytes(uint64_t address, uint32_t offset) {
     auto result = read_data(address, offset, 4);
-    return static_cast<uint32_t>(result[0]) << 24 |
-           static_cast<uint32_t>(result[1]) << 16 |
+    return static_cast<uint32_t>(result[0]) << 24 | static_cast<uint32_t>(result[1]) << 16 |
            static_cast<uint32_t>(result[2]) << 8  | static_cast<uint32_t>(result[3]);
 }
 
 void Storage::write_data(uint64_t addr, uint32_t offset, uint16_t value) {
-    data_[addr + offset] = static_cast<uint8_t>(value >> 8);
-    data_[addr + offset + 1] = static_cast<uint8_t>(value);
+    validate_addr(addr + offset);
+    _data[addr + offset] = static_cast<uint8_t>(value >> 8);
+    validate_addr(addr + offset + 1);
+    _data[addr + offset + 1] = static_cast<uint8_t>(value);
 }
 void Storage::write_data(uint64_t addr, uint32_t offset, uint32_t value) {
     write_data(addr, offset, static_cast<uint16_t>(value >> 16));
@@ -33,7 +35,7 @@ void Storage::write_data(uint64_t addr, uint32_t offset, uint64_t value) {
 }
 
 void Storage::validate_addr(uint64_t addr) {
-    if (addr < 0 || addr >= data_.size()) {
+    if (addr < 0 || addr >= _data.size()) {
         throw std::runtime_error("Invalid addr in storage: " + std::to_string(addr));
     }
 }
@@ -48,5 +50,5 @@ Storage* Storage::get_instance() {
 }
 
 void Storage::init(size_t bufferSize) {
-    data_.resize(bufferSize, 0);
+    _data.resize(bufferSize, 0);
 }

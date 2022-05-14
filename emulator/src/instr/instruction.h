@@ -7,12 +7,12 @@
 #include <variant>
 #include <vector>
 #include <common/utils/common.hpp>
-#include "commons.h"
+#include "commons/commons.h"
 #include "reg/reg_info.h"
 #include "instr_info.h"
 #include "util/util.h"
 
-enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST };
+enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST, LABEL };
 
 struct Operand {
     OperandType type;
@@ -21,14 +21,7 @@ struct Operand {
 
     explicit Operand(const std::string&);
 
-    OperandType get_type() const {
-        return type;
-    }
-
-    size_t get_reg_amount() const {
-        return regAmount;
-    }
-
+    static bool is_label(const std::string&);
    private:
     static std::set<std::string> float_values;
     static bool is_float(const std::string&);
@@ -38,9 +31,11 @@ struct Operand {
 };
 
 struct Instruction {
-    InstrKey get_key() const {
-        return instrKey;
-    }
+    Instruction(uint32_t addr,
+                std::string& instr,
+                const std::vector<std::string>& args);
+
+    InstrKey get_key() const { return instrKey; }
 
     Operand* operator[](size_t index) {
         assert(index < operands.size());
@@ -52,28 +47,42 @@ struct Instruction {
         return operands[index].get();
     }
 
-    size_t get_operands_count() const noexcept {
-        return operands.size();
+    size_t get_operands_count() const noexcept { return operands.size(); }
+
+    void set_width_and_format(size_t w) {
+        widthInBytes = w;
+        format = get_instr_format(instrKey, widthInBytes);
     }
 
-    uint32_t get_addr() const {
-        return addr;
-    };
+    size_t get_width() const {
+        if (widthInBytes != 4 && widthInBytes != 8) {
+            logger.error(std::string("Wrong instruction widthInBytes ") +
+                         std::to_string(widthInBytes) + " for " + get_mnemonic(instrKey));
+            assert(widthInBytes == 4 || widthInBytes == 8);
+        }
+        return widthInBytes;
+    }
 
-    Instruction(uint32_t addr,
-                const std::string& instr,
-                const std::vector<std::string>& args);
+    const std::string& get_raw_instr() const { return rawInstruction; }
+
+    InstrFormat get_format() const {
+        return format;
+    }
+
    private:
     InstrKey instrKey;
-    std::vector<std::unique_ptr<Operand>> operands;
+    InstrFormat format = UNDEFINED;
+    size_t widthInBytes = 0;
     uint32_t addr;
+    std::string rawInstruction;
+    std::vector<std::unique_ptr<Operand>> operands;
 };
 
 struct KernelCode {
     explicit KernelCode(const std::vector<std::string>&);
     Instruction* get_instr(uint64_t) const;
     void add_instr(uint32_t addr,
-                   const std::string& instr,
+                   std::string& instr,
                    const std::vector<std::string>& args = {});
    private:
     std::unordered_map<std::uint64_t, std::unique_ptr<Instruction>> code = std::unordered_map<std::uint64_t, std::unique_ptr<Instruction>>();

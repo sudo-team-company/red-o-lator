@@ -1,7 +1,6 @@
 #include <runtime-commons.h>
 #include <cassert>
 #include <common/utils/common.hpp>
-#include <iostream>
 #include <string>
 
 #include "BinaryAsmParser.h"

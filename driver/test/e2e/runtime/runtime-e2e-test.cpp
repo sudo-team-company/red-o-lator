@@ -122,7 +122,7 @@ TEST_CASE("a_plus_b") {
               return std::to_string(value);
           }) == "0 0 0");
 
-    error = clReleaseKernel(kernel);
+    error = clReleaseProgram(program);
     CHECK(error == CL_SUCCESS);
 
     error = clReleaseMemObject(mem3);
@@ -132,9 +132,6 @@ TEST_CASE("a_plus_b") {
     CHECK(error == CL_SUCCESS);
 
     error = clReleaseMemObject(mem1);
-    CHECK(error == CL_SUCCESS);
-
-    error = clReleaseProgram(program);
     CHECK(error == CL_SUCCESS);
 
     error = clReleaseCommandQueue(queue);

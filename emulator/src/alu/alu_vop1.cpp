@@ -108,7 +108,7 @@ void run_vop1(const Instruction& instr, Wavefront* wf) {
                 run_v_mov_b32(state, wiInd);
                 break;
           default:
-              UNSUPPORTED_INSTRUCTION("VOP1", get_instr_str(instr.get_key()));
+              UNSUPPORTED_INSTRUCTION("VOP1", get_mnemonic(instr.get_key()));
         }
     }
     wf->update_with_vop1_state(instr, state);

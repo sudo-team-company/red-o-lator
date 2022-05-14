@@ -1,56 +1,66 @@
 #include "alu.h"
 
-static inline void run_flat_store_dwordxn(WfStateFLAT& state, size_t wiInd, size_t n) {
+namespace {
+void run_flat_store_dwordxn(WfStateFLATStore& state,
+                                          size_t wiInd,
+                                          size_t n) {
     for (size_t i = 0; i < n; ++i) {
-        //todo
-        Storage::get_instance()->write_data(state.VADDR[wiInd], 0, state.VDATA[wiInd * state.VDATA_SIZE_PER_WI + i]);
+        Storage::get_instance()->write_data(
+            state.VADDR[wiInd], 0, state.VDATA[wiInd * state.vdataAmountPerWi + i]);
     }
 }
-static inline void run_flat_store_dword(WfStateFLAT& state, size_t wiInd) {
-    run_flat_store_dwordxn(state, wiInd, 1);
-}
-static inline void run_flat_store_dwordx2(WfStateFLAT& state, size_t wiInd) {
-    run_flat_store_dwordxn(state, wiInd, 2);
-}
-static inline void run_flat_store_dwordx3(WfStateFLAT& state, size_t wiInd) {
-    run_flat_store_dwordxn(state, wiInd, 3);
-}
-static inline void run_flat_store_dwordx4(WfStateFLAT& state, size_t wiInd) {
-    run_flat_store_dwordxn(state, wiInd, 4);
-}
 
-static inline void run_flat_store_short(WfStateFLAT& state, size_t wiInd) {
-    assert(state.VDATA_SIZE_PER_WI == 1);
-    //todo
+void run_flat_store_short(WfStateFLATStore& state, size_t wiInd) {
+    assert(state.vdataAmountPerWi == 1);
     Storage::get_instance()->write_data(state.VADDR[wiInd], 0,
                                         static_cast<uint16_t>(state.VDATA[wiInd]));
 }
 
-void run_flat(const Instruction& instr, Wavefront* wf) {
-    auto state = wf->get_flat_state(instr);
-    for (size_t wiInd = 0; wiInd < wf->get_size(); ++wiInd) {
-        if (!wf->work_item_masked(wiInd)) continue;
-
-        switch (instr.get_key()) {
-            case FLAT_STORE_DWORD:
-                run_flat_store_dword(state, wiInd);
-                break;
-            case FLAT_STORE_DWORDX2:
-                run_flat_store_dwordx2(state, wiInd);
-                break;
-            case FLAT_STORE_DWORDX3:
-                run_flat_store_dwordx3(state, wiInd);
-                break;
-            case FLAT_STORE_DWORDX4:
-                run_flat_store_dwordx4(state, wiInd);
-                break;
-            case FLAT_STORE_SHORT:
-                run_flat_store_short(state, wiInd);
-                break;
-            default:
-                UNSUPPORTED_INSTRUCTION("FLAT", get_instr_str(instr.get_key()));
-        }
+void run_flat_load_dwordxn(WfStateFLATLoad& state, size_t wiInd, size_t n) {
+    assert(state.vdstAmountPerWi >= n);
+    for (size_t i = 0; i < n; ++i) {
+        auto data = Storage::get_instance()->read_4_bytes(state.VADDR[wiInd], 0);
+        state.VDST[wiInd * state.vdstAmountPerWi + i] = data;
     }
+}
 
-    wf->update_with_flat_state(instr, state);
+std::function<void(WfStateFLATStore&, size_t)> execute_flat_store(
+    const Instruction& instr) {
+    using namespace std::placeholders;
+    switch (instr.get_key()) {
+        case FLAT_STORE_DWORD: return std::bind(run_flat_store_dwordxn, _1, _2, 1);
+        case FLAT_STORE_DWORDX2: return std::bind(run_flat_store_dwordxn, _1, _2, 2);
+        case FLAT_STORE_DWORDX3: return std::bind(run_flat_store_dwordxn, _1, _2, 3);
+        case FLAT_STORE_DWORDX4: return std::bind(run_flat_store_dwordxn, _1, _2, 4);
+        case FLAT_STORE_SHORT: return run_flat_store_short;
+        default: UNSUPPORTED_INSTRUCTION("FLAT", get_mnemonic(instr.get_key()));
+    }
+}
+
+std::function<void(WfStateFLATLoad&, size_t)> execute_flat_load(
+    const Instruction& instr) {
+    using namespace std::placeholders;
+    switch (instr.get_key()) {
+        case FLAT_LOAD_DWORD: return std::bind(run_flat_load_dwordxn, _1, _2, 1);
+        case FLAT_LOAD_DWORDX2: return std::bind(run_flat_load_dwordxn, _1, _2, 2);
+        case FLAT_LOAD_DWORDX3: return std::bind(run_flat_load_dwordxn, _1, _2, 3);
+        case FLAT_LOAD_DWORDX4: return std::bind(run_flat_load_dwordxn, _1, _2, 4);
+        default: UNSUPPORTED_INSTRUCTION("FLAT", get_mnemonic(instr.get_key()));
+    }
+}
+}
+void run_flat(const Instruction &instr, Wavefront *wf) {
+    auto instrKey = instr.get_key();
+    if (instrKey >= FLAT_STORE_DWORD && instrKey <= FLAT_STORE_SHORT) {
+        auto state = wf->get_flat_store_state(instr);
+        for (size_t wiInd = 0; wiInd < wf->get_size(); ++wiInd) {
+            execute_flat_store(instr)(state, wiInd);
+        }
+    } else {
+        auto state = wf->get_flat_load_state(instr);
+        for (size_t wiInd = 0; wiInd < wf->get_size(); ++wiInd) {
+            execute_flat_load(instr)(state, wiInd);
+        }
+        wf->update_with_flat_load_state(instr, state);
+    }
 }

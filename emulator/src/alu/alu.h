@@ -5,7 +5,7 @@
 #include "instr/instr_info.h"
 #include "util/util.h"
 #include "gpu/storage.h"
-#include "commons.h"
+#include "commons/commons.h"
 
 void run_instr(const Instruction& instr, Wavefront* wf);
 
@@ -18,4 +18,5 @@ void run_smem(const Instruction&, Wavefront*);
 void run_vop1(const Instruction&, Wavefront*);
 void run_vop2(const Instruction&, Wavefront*);
 void run_vop3(const Instruction&, Wavefront*);
+void run_vopc(const Instruction&, Wavefront*);
 void run_flat(const Instruction&, Wavefront*);

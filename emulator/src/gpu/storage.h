@@ -18,9 +18,9 @@ struct Storage {
     void write_data(uint64_t addr, uint32_t offset, uint64_t value);
 
    private:
-    std::vector<uint8_t> data_;
+    std::vector<uint8_t> _data;
     Storage() {
-        data_ = std::vector<uint8_t>();
+        _data = std::vector<uint8_t>();
     }
 
     static Storage* storage_;

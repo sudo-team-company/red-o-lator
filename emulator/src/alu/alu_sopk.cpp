@@ -151,7 +151,7 @@ void run_sopk(const Instruction& instruction, Wavefront* wf) {
             run_s_mulk_i32(state);
             break;
         default:
-            UNSUPPORTED_INSTRUCTION("SOPK", get_instr_str(instrKey));
+            UNSUPPORTED_INSTRUCTION("SOPK", get_mnemonic(instrKey));
     }
     wf->update_with_sopk_state(instruction, state);
 }

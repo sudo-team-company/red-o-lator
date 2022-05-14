@@ -1,1311 +1,607 @@
 #include <stdexcept>
+#include <vector>
 
+#include "commons/commons.h"
 #include "instr_info.h"
 
-InstrKey get_instr_key(std::string_view instruction) {
-    static std::unordered_map<std::string_view, InstrKey> instruction_repo{
-        // SOP1_FORMAT
-        {"s_abs_i32",                  S_ABS_I32},
-        {"s_and_saveexec_b64",         S_AND_SAVEEXEC_B64},
-        {"s_andn1_saveexec_b64",       S_ANDN1_SAVEEXEC_B64},
-        {"s_andn1_wrexec_b64",         S_ANDN1_WREXEC_B64},
-        {"s_andn2_saveexec_b64",       S_ANDN2_SAVEEXEC_B64},
-        {"s_andn2_wrexec_b64",         S_ANDN2_WREXEC_B64},
-        {"s_bcnt0_i32_b32",            S_BCNT0_I32_B32},
-        {"s_bcnt0_i32_b64",            S_BCNT0_I32_B64},
-        {"s_bcnt1_i32_b32",            S_BCNT1_I32_B32},
-        {"s_bcnt1_i32_b64",            S_BCNT1_I32_B64},
-        {"s_bitreplicate_b64_b32",     S_BITREPLICATE_B64_B32},
-        {"s_bitset0_b32",              S_BITSET0_B32},
-        {"s_bitset0_b64",              S_BITSET0_B64},
-        {"s_bitset1_b32",              S_BITSET1_B32},
-        {"s_bitset1_b64",              S_BITSET1_B64},
-        {"s_brev_b32",                 S_BREV_B32},
-        {"s_brev_b64",                 S_BREV_B64},
-        {"s_cbranch_join",             S_CBRANCH_JOIN},
-        {"s_cmov_b32",                 S_CMOV_B32},
-        {"s_cmov_b64",                 S_CMOV_B64},
-        {"s_ff0_i32_b32",              S_FF0_I32_B32},
-        {"s_ff0_i32_b64",              S_FF0_I32_B64},
-        {"s_ff1_i32_b32",              S_FF1_I32_B32},
-        {"s_ff1_i32_b64",              S_FF1_I32_B64},
-        {"s_flbit_i32_b32",            S_FLBIT_I32_B32},
-        {"s_flbit_i32_b64",            S_FLBIT_I32_B64},
-        {"s_flbit_i32",                S_FLBIT_I32},
-        {"s_flbit_i32_i64",            S_FLBIT_I32_I64},
-        {"s_getpc_b64",                S_GETPC_B64},
-        {"s_mov_b32",                  S_MOV_B32},
-        {"s_mov_b64",                  S_MOV_B64},
-        {"s_movreld_b32",              S_MOVRELD_B32},
-        {"s_movreld_b64",              S_MOVRELD_B64},
-        {"s_movrels_b32",              S_MOVRELS_B32},
-        {"s_movrels_b64",              S_MOVRELS_B64},
-        {"s_nand_saveexec_b64",        S_NAND_SAVEEXEC_B64},
-        {"s_nor_saveexec_b64",         S_NOR_SAVEEXEC_B64},
-        {"s_not_b32",                  S_NOT_B32},
-        {"s_not_b64",                  S_NOT_B64},
-        {"s_or_saveexec_b64",          S_OR_SAVEEXEC_B64},
-        {"s_orn2_saveexec_b64",        S_ORN2_SAVEEXEC_B64},
-        {"s_quadmask_b32",             S_QUADMASK_B32},
-        {"s_quadmask_b64",             S_QUADMASK_B64},
-        {"s_rfe_b64",                  S_RFE_B64},
-        {"s_set_gpr_idx_idx",          S_SET_GPR_IDX_IDX},
-        {"s_setpc_b64",                S_SETPC_B64},
-        {"s_sext_i32_i8",              S_SEXT_I32_I8},
-        {"s_sext_i32_i16",             S_SEXT_I32_I16},
-        {"s_swappc_b64",               S_SWAPPC_B64},
-        {"s_wqm_b32",                  S_WQM_B32},
-        {"s_wqm_b64",                  S_WQM_B64},
-        {"s_xnor_saveexec_b64",        S_XNOR_SAVEEXEC_B64},
-        {"s_xor_saveexec_b64",         S_XOR_SAVEEXEC_B64},
+struct InstructionView {
+    const char* mnemonic;
+    InstrKey key;
+    InstrFormat format;
+    InstrFormat extendedFormat;
+};
 
-        // SOP2_FORMAT
-        {"s_absdiff_i32",              S_ABSDIFF_I32},
-        {"s_addc_u32",                 S_ADDC_U32},
-        {"s_add_i32",                  S_ADD_I32},
-        {"s_add_u32",                  S_ADD_U32},
-        {"s_and_b32",                  S_AND_B32},
-        {"s_and_b64",                  S_AND_B64},
-        {"s_andn2_b32",                S_ANDN2_B32},
-        {"s_andn2_b64",                S_ANDN2_B64},
-        {"s_ashr_i32",                 S_ASHR_I32},
-        {"s_ashr_i64",                 S_ASHR_I64},
-        {"s_bfe_i32",                  S_BFE_I32},
-        {"s_bfe_i64",                  S_BFE_I64},
-        {"s_bfe_u32",                  S_BFE_U32},
-        {"s_bfe_u64",                  S_BFE_U64},
-        {"s_bfm_b32",                  S_BFM_B32},
-        {"s_bfm_b64",                  S_BFM_B64},
-        {"s_cbranch_g_fork",           S_CBRANCH_G_FORK},
-        {"s_cselect_b32",              S_CSELECT_B32},
-        {"s_cselect_b64",              S_CSELECT_B64},
-        {"s_lshl_b32",                 S_LSHL_B32},
-        {"s_lshl_b64",                 S_LSHL_B64},
-        {"s_lshl1_add_u32",            S_LSHL1_ADD_U32},
-        {"s_lshl2_add_u32",            S_LSHL2_ADD_U32},
-        {"s_lshl3_add_u32",            S_LSHL3_ADD_U32},
-        {"s_lshl4_add_u32",            S_LSHL4_ADD_U32},
-        {"s_lshr_b32",                 S_LSHR_B32},
-        {"s_lshr_b64",                 S_LSHR_B64},
-        {"s_max_i32",                  S_MAX_I32},
-        {"s_max_u32",                  S_MAX_U32},
-        {"s_min_i32",                  S_MIN_I32},
-        {"s_min_u32",                  S_MIN_U32},
-        {"s_mul_hi_i32",               S_MUL_HI_I32},
-        {"s_mul_hi_u32",               S_MUL_HI_U32},
-        {"s_mul_i32",                  S_MUL_I32},
-        {"s_nand_b32",                 S_NAND_B32},
-        {"s_nand_b64",                 S_NAND_B64},
-        {"s_nor_b32",                  S_NOR_B32},
-        {"s_nor_b64",                  S_NOR_B64},
-        {"s_or_b32",                   S_OR_B32},
-        {"s_or_b64",                   S_OR_B64},
-        {"s_orn2_b32",                 S_ORN2_B32},
-        {"s_orn2_b64",                 S_ORN2_B64},
-        {"s_pack_hh_b32_b16",          S_PACK_HH_B32_B16},
-        {"s_pack_lh_b32_b16",          S_PACK_LH_B32_B16},
-        {"s_pack_ll_b32_b16",          S_PACK_LL_B32_B16},
-        {"s_rfe_restore_b64",          S_RFE_RESTORE_B64},
-        {"s_subb_u32",                 S_SUBB_U32},
-        {"s_sub_i32",                  S_SUB_I32},
-        {"s_sub_u32",                  S_SUB_U32},
-        {"s_xnor_b32",                 S_XNOR_B32},
-        {"s_xnor_b64",                 S_XNOR_B64},
-        {"s_xor_b32",                  S_XOR_B32},
-        {"s_xor_b64",                  S_XOR_B64},
+static inline const InstructionView instructionRepo[] = {
+    // SOP1 FORMAT
+    {"s_abs_i32", S_ABS_I32, SOP1, UNDEFINED},
+    {"s_and_saveexec_b64", S_AND_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_andn1_saveexec_b64", S_ANDN1_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_andn1_wrexec_b64", S_ANDN1_WREXEC_B64, SOP1, UNDEFINED},
+    {"s_andn2_saveexec_b64", S_ANDN2_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_andn2_wrexec_b64", S_ANDN2_WREXEC_B64, SOP1, UNDEFINED},
+    {"s_bcnt0_i32_b32", S_BCNT0_I32_B32, SOP1, UNDEFINED},
+    {"s_bcnt0_i32_b64", S_BCNT0_I32_B64, SOP1, UNDEFINED},
+    {"s_bcnt1_i32_b32", S_BCNT1_I32_B32, SOP1, UNDEFINED},
+    {"s_bcnt1_i32_b64", S_BCNT1_I32_B64, SOP1, UNDEFINED},
+    {"s_bitreplicate_b64_b32", S_BITREPLICATE_B64_B32, SOP1, UNDEFINED},
+    {"s_bitset0_b32", S_BITSET0_B32, SOP1, UNDEFINED},
+    {"s_bitset0_b64", S_BITSET0_B64, SOP1, UNDEFINED},
+    {"s_bitset1_b32", S_BITSET1_B32, SOP1, UNDEFINED},
+    {"s_bitset1_b64", S_BITSET1_B64, SOP1, UNDEFINED},
+    {"s_brev_b32", S_BREV_B32, SOP1, UNDEFINED},
+    {"s_brev_b64", S_BREV_B64, SOP1, UNDEFINED},
+    {"s_cbranch_join", S_CBRANCH_JOIN, SOP1, UNDEFINED},
+    {"s_cmov_b32", S_CMOV_B32, SOP1, UNDEFINED},
+    {"s_cmov_b64", S_CMOV_B64, SOP1, UNDEFINED},
+    {"s_ff0_i32_b32", S_FF0_I32_B32, SOP1, UNDEFINED},
+    {"s_ff0_i32_b64", S_FF0_I32_B64, SOP1, UNDEFINED},
+    {"s_ff1_i32_b32", S_FF1_I32_B32, SOP1, UNDEFINED},
+    {"s_ff1_i32_b64", S_FF1_I32_B64, SOP1, UNDEFINED},
+    {"s_flbit_i32_b32", S_FLBIT_I32_B32, SOP1, UNDEFINED},
+    {"s_flbit_i32_b64", S_FLBIT_I32_B64, SOP1, UNDEFINED},
+    {"s_flbit_i32", S_FLBIT_I32, SOP1, UNDEFINED},
+    {"s_flbit_i32_i64", S_FLBIT_I32_I64, SOP1, UNDEFINED},
+    {"s_getpc_b64", S_GETPC_B64, SOP1, UNDEFINED},
+    {"s_mov_b32", S_MOV_B32, SOP1, UNDEFINED},
+    {"s_mov_b64", S_MOV_B64, SOP1, UNDEFINED},
+    {"s_movreld_b32", S_MOVRELD_B32, SOP1, UNDEFINED},
+    {"s_movreld_b64", S_MOVRELD_B64, SOP1, UNDEFINED},
+    {"s_movrels_b32", S_MOVRELS_B32, SOP1, UNDEFINED},
+    {"s_movrels_b64", S_MOVRELS_B64, SOP1, UNDEFINED},
+    {"s_nand_saveexec_b64", S_NAND_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_nor_saveexec_b64", S_NOR_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_not_b32", S_NOT_B32, SOP1, UNDEFINED},
+    {"s_not_b64", S_NOT_B64, SOP1, UNDEFINED},
+    {"s_or_saveexec_b64", S_OR_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_orn2_saveexec_b64", S_ORN2_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_quadmask_b32", S_QUADMASK_B32, SOP1, UNDEFINED},
+    {"s_quadmask_b64", S_QUADMASK_B64, SOP1, UNDEFINED},
+    {"s_rfe_b64", S_RFE_B64, SOP1, UNDEFINED},
+    {"s_set_gpr_idx_idx", S_SET_GPR_IDX_IDX, SOP1, UNDEFINED},
+    {"s_setpc_b64", S_SETPC_B64, SOP1, UNDEFINED},
+    {"s_sext_i32_i8", S_SEXT_I32_I8, SOP1, UNDEFINED},
+    {"s_sext_i32_i16", S_SEXT_I32_I16, SOP1, UNDEFINED},
+    {"s_swappc_b64", S_SWAPPC_B64, SOP1, UNDEFINED},
+    {"s_wqm_b32", S_WQM_B32, SOP1, UNDEFINED},
+    {"s_wqm_b64", S_WQM_B64, SOP1, UNDEFINED},
+    {"s_xnor_saveexec_b64", S_XNOR_SAVEEXEC_B64, SOP1, UNDEFINED},
+    {"s_xor_saveexec_b64", S_XOR_SAVEEXEC_B64, SOP1, UNDEFINED},
 
-        // SOPK_FORMAT
-        {"s_addk_i32",                 S_ADDK_I32},
-        {"s_call_b64",                 S_CALL_B64},
-        {"s_cbranch_i_fork",           S_CBRANCH_I_FORK},
-        {"s_cmovk_i32",                S_CMOVK_I32},
-        {"s_cmpk_eq_i32",              S_CMPK_EQ_I32},
-        {"s_cmpk_eq_u32",              S_CMPK_EQ_U32},
-        {"s_cmpk_ge_i32",              S_CMPK_GE_I32},
-        {"s_cmpk_ge_u32",              S_CMPK_GE_U32},
-        {"s_cmpk_gt_i32",              S_CMPK_GT_I32},
-        {"s_cmpk_gt_u32",              S_CMPK_GT_U32},
-        {"s_cmpk_le_i32",              S_CMPK_LE_I32},
-        {"s_cmpk_le_u32",              S_CMPK_LE_U32},
-        {"s_cmpk_lg_i32",              S_CMPK_LG_I32},
-        {"s_cmpk_lg_u32",              S_CMPK_LG_U32},
-        {"s_cmpk_lt_i32",              S_CMPK_LT_I32},
-        {"s_cmpk_lt_u32",              S_CMPK_LT_U32},
-        {"s_getreg_b32",               S_GETREG_B32},
-        {"s_movk_i32",                 S_MOVK_I32},
-        {"s_mulk_i32",                 S_MULK_I32},
-        {"s_setreg_b32",               S_SETREG_B32},
-        {"s_setreg_imm32_b32",         S_SETREG_IMM32_B32},
+    // SOP2_FORMAT
+    {"s_absdiff_i32", S_ABSDIFF_I32, SOP2, UNDEFINED},
+    {"s_addc_u32", S_ADDC_U32, SOP2, UNDEFINED},
+    {"s_add_i32", S_ADD_I32, SOP2, UNDEFINED},
+    {"s_add_u32", S_ADD_U32, SOP2, UNDEFINED},
+    {"s_and_b32", S_AND_B32, SOP2, UNDEFINED},
+    {"s_and_b64", S_AND_B64, SOP2, UNDEFINED},
+    {"s_andn2_b32", S_ANDN2_B32, SOP2, UNDEFINED},
+    {"s_andn2_b64", S_ANDN2_B64, SOP2, UNDEFINED},
+    {"s_ashr_i32", S_ASHR_I32, SOP2, UNDEFINED},
+    {"s_ashr_i64", S_ASHR_I64, SOP2, UNDEFINED},
+    {"s_bfe_i32", S_BFE_I32, SOP2, UNDEFINED},
+    {"s_bfe_i64", S_BFE_I64, SOP2, UNDEFINED},
+    {"s_bfe_u32", S_BFE_U32, SOP2, UNDEFINED},
+    {"s_bfe_u64", S_BFE_U64, SOP2, UNDEFINED},
+    {"s_bfm_b32", S_BFM_B32, SOP2, UNDEFINED},
+    {"s_bfm_b64", S_BFM_B64, SOP2, UNDEFINED},
+    {"s_cbranch_g_fork", S_CBRANCH_G_FORK, SOP2, UNDEFINED},
+    {"s_cselect_b32", S_CSELECT_B32, SOP2, UNDEFINED},
+    {"s_cselect_b64", S_CSELECT_B64, SOP2, UNDEFINED},
+    {"s_lshl_b32", S_LSHL_B32, SOP2, UNDEFINED},
+    {"s_lshl_b64", S_LSHL_B64, SOP2, UNDEFINED},
+    {"s_lshl1_add_u32", S_LSHL1_ADD_U32, SOP2, UNDEFINED},
+    {"s_lshl2_add_u32", S_LSHL2_ADD_U32, SOP2, UNDEFINED},
+    {"s_lshl3_add_u32", S_LSHL3_ADD_U32, SOP2, UNDEFINED},
+    {"s_lshl4_add_u32", S_LSHL4_ADD_U32, SOP2, UNDEFINED},
+    {"s_lshr_b32", S_LSHR_B32, SOP2, UNDEFINED},
+    {"s_lshr_b64", S_LSHR_B64, SOP2, UNDEFINED},
+    {"s_max_i32", S_MAX_I32, SOP2, UNDEFINED},
+    {"s_max_u32", S_MAX_U32, SOP2, UNDEFINED},
+    {"s_min_i32", S_MIN_I32, SOP2, UNDEFINED},
+    {"s_min_u32", S_MIN_U32, SOP2, UNDEFINED},
+    {"s_mul_hi_i32", S_MUL_HI_I32, SOP2, UNDEFINED},
+    {"s_mul_hi_u32", S_MUL_HI_U32, SOP2, UNDEFINED},
+    {"s_mul_i32", S_MUL_I32, SOP2, UNDEFINED},
+    {"s_nand_b32", S_NAND_B32, SOP2, UNDEFINED},
+    {"s_nand_b64", S_NAND_B64, SOP2, UNDEFINED},
+    {"s_nor_b32", S_NOR_B32, SOP2, UNDEFINED},
+    {"s_nor_b64", S_NOR_B64, SOP2, UNDEFINED},
+    {"s_or_b32", S_OR_B32, SOP2, UNDEFINED},
+    {"s_or_b64", S_OR_B64, SOP2, UNDEFINED},
+    {"s_orn2_b32", S_ORN2_B32, SOP2, UNDEFINED},
+    {"s_orn2_b64", S_ORN2_B64, SOP2, UNDEFINED},
+    {"s_pack_hh_b32_b16", S_PACK_HH_B32_B16, SOP2, UNDEFINED},
+    {"s_pack_lh_b32_b16", S_PACK_LH_B32_B16, SOP2, UNDEFINED},
+    {"s_pack_ll_b32_b16", S_PACK_LL_B32_B16, SOP2, UNDEFINED},
+    {"s_rfe_restore_b64", S_RFE_RESTORE_B64, SOP2, UNDEFINED},
+    {"s_subb_u32", S_SUBB_U32, SOP2, UNDEFINED},
+    {"s_sub_i32", S_SUB_I32, SOP2, UNDEFINED},
+    {"s_sub_u32", S_SUB_U32, SOP2, UNDEFINED},
+    {"s_xnor_b32", S_XNOR_B32, SOP2, UNDEFINED},
+    {"s_xnor_b64", S_XNOR_B64, SOP2, UNDEFINED},
+    {"s_xor_b32", S_XOR_B32, SOP2, UNDEFINED},
+    {"s_xor_b64", S_XOR_B64, SOP2, UNDEFINED},
 
-        // SOPC
-        {"s_bitcmp0_b32",              S_BITCMP0_B32},
-        {"s_bitcmp0_b64",              S_BITCMP0_B64},
-        {"s_bitcmp1_b32",              S_BITCMP1_B32},
-        {"s_bitcmp1_b64",              S_BITCMP1_B64},
-        {"s_cmp_eq_i32",               S_CMP_EQ_I32},
-        {"s_cmp_eq_u32",               S_CMP_EQ_U32},
-        {"s_cmp_eq_u64",               S_CMP_EQ_U64},
-        {"s_cmp_ge_i32",               S_CMP_GE_I32},
-        {"s_cmp_ge_u32",               S_CMP_GE_U32},
-        {"s_cmp_gt_i32",               S_CMP_GT_I32},
-        {"s_cmp_gt_u32",               S_CMP_GT_U32},
-        {"s_cmp_le_i32",               S_CMP_LE_I32},
-        {"s_cmp_le_u32",               S_CMP_LE_U32},
-        {"s_cmp_lg_i32",               S_CMP_LG_I32},
-        {"s_cmp_lg_u32",               S_CMP_LG_U32},
-        {"s_cmp_lg_u64",               S_CMP_LG_U64},
-        {"s_cmp_ne_u64",               S_CMP_NE_U64},
-        {"s_cmp_lt_i32",               S_CMP_LT_I32},
-        {"s_cmp_lt_u32",               S_CMP_LT_U32},
-        {"s_set_gpr_idx_on",           S_SET_GPR_IDX_ON},
-        {"s_setvskip",                 S_SETVSKIP},
-        // END SOPC
+    // SOPK_FORMAT
+    {"s_addk_i32", S_ADDK_I32, SOPK, UNDEFINED},
+    {"s_call_b64", S_CALL_B64, SOPK, UNDEFINED},
+    {"s_cbranch_i_fork", S_CBRANCH_I_FORK, SOPK, UNDEFINED},
+    {"s_cmovk_i32", S_CMOVK_I32, SOPK, UNDEFINED},
+    {"s_cmpk_eq_i32", S_CMPK_EQ_I32, SOPK, UNDEFINED},
+    {"s_cmpk_eq_u32", S_CMPK_EQ_U32, SOPK, UNDEFINED},
+    {"s_cmpk_ge_i32", S_CMPK_GE_I32, SOPK, UNDEFINED},
+    {"s_cmpk_ge_u32", S_CMPK_GE_U32, SOPK, UNDEFINED},
+    {"s_cmpk_gt_i32", S_CMPK_GT_I32, SOPK, UNDEFINED},
+    {"s_cmpk_gt_u32", S_CMPK_GT_U32, SOPK, UNDEFINED},
+    {"s_cmpk_le_i32", S_CMPK_LE_I32, SOPK, UNDEFINED},
+    {"s_cmpk_le_u32", S_CMPK_LE_U32, SOPK, UNDEFINED},
+    {"s_cmpk_lg_i32", S_CMPK_LG_I32, SOPK, UNDEFINED},
+    {"s_cmpk_lg_u32", S_CMPK_LG_U32, SOPK, UNDEFINED},
+    {"s_cmpk_lt_i32", S_CMPK_LT_I32, SOPK, UNDEFINED},
+    {"s_cmpk_lt_u32", S_CMPK_LT_U32, SOPK, UNDEFINED},
+    {"s_getreg_b32", S_GETREG_B32, SOPK, UNDEFINED},
+    {"s_movk_i32", S_MOVK_I32, SOPK, UNDEFINED},
+    {"s_mulk_i32", S_MULK_I32, SOPK, UNDEFINED},
+    {"s_setreg_b32", S_SETREG_B32, SOPK, UNDEFINED},
+    {"s_setreg_imm32_b32", S_SETREG_IMM32_B32, SOPK, UNDEFINED},
 
-        // SOPP
-        {"s_barrier",                  S_BARRIER},
-        {"s_branch",                   S_BRANCH},
-        {"s_cbranch_cdbgsys",          S_CBRANCH_CDBGSYS},
-        {"s_cbranch_cdbgsys_and_user", S_CBRANCH_CDBGSYS_AND_USER},
-        {"s_cbranch_cdbgsys_or_user",  S_CBRANCH_CDBGSYS_OR_USER},
-        {"s_cbranch_cdbguser",         S_CBRANCH_CDBGUSER},
-        {"s_cbranch_execnz",           S_CBRANCH_EXECNZ},
-        {"s_cbranch_execz",            S_CBRANCH_EXECZ},
-        {"s_cbranch_scc0",             S_CBRANCH_SCC0},
-        {"s_cbranch_scc1",             S_CBRANCH_SCC1},
-        {"s_cbranch_vccnz",            S_CBRANCH_VCCNZ},
-        {"s_cbranch_vccz",             S_CBRANCH_VCCZ},
-        {"s_decperflevel",             S_DECPERFLEVEL},
-        {"s_endpgm",                   S_ENDPGM},
-        {"s_endpgm_ordered_ps_done",   S_ENDPGM_ORDERED_PS_DONE},
-        {"s_endpgm_saved",             S_ENDPGM_SAVED},
-        {"s_icache_inv",               S_ICACHE_INV},
-        {"s_incperflevel",             S_INCPERFLEVEL},
-        {"s_nop",                      S_NOP},
-        {"s_sendmsg",                  S_SENDMSG},
-        {"s_sendmsghalt",              S_SENDMSGHALT},
-        {"s_set_gpr_idx_mode",         S_SET_GPR_IDX_MODE},
-        {"s_set_gpr_idx_off",          S_SET_GPR_IDX_OFF},
-        {"s_sethalt",                  S_SETHALT},
-        {"s_setkill",                  S_SETKILL},
-        {"s_setprio",                  S_SETPRIO},
-        {"s_sleep",                    S_SLEEP},
-        {"s_trap",                     S_TRAP},
-        {"s_ttracedata",               S_TTRACEDATA},
-        {"s_waitcnt",                  S_WAITCNT},
+    // SOPC
+    {"s_bitcmp0_b32", S_BITCMP0_B32, SOPC, UNDEFINED},
+    {"s_bitcmp0_b64", S_BITCMP0_B64, SOPC, UNDEFINED},
+    {"s_bitcmp1_b32", S_BITCMP1_B32, SOPC, UNDEFINED},
+    {"s_bitcmp1_b64", S_BITCMP1_B64, SOPC, UNDEFINED},
+    {"s_cmp_eq_i32", S_CMP_EQ_I32, SOPC, UNDEFINED},
+    {"s_cmp_eq_u32", S_CMP_EQ_U32, SOPC, UNDEFINED},
+    {"s_cmp_eq_u64", S_CMP_EQ_U64, SOPC, UNDEFINED},
+    {"s_cmp_ge_i32", S_CMP_GE_I32, SOPC, UNDEFINED},
+    {"s_cmp_ge_u32", S_CMP_GE_U32, SOPC, UNDEFINED},
+    {"s_cmp_gt_i32", S_CMP_GT_I32, SOPC, UNDEFINED},
+    {"s_cmp_gt_u32", S_CMP_GT_U32, SOPC, UNDEFINED},
+    {"s_cmp_le_i32", S_CMP_LE_I32, SOPC, UNDEFINED},
+    {"s_cmp_le_u32", S_CMP_LE_U32, SOPC, UNDEFINED},
+    {"s_cmp_lg_i32", S_CMP_LG_I32, SOPC, UNDEFINED},
+    {"s_cmp_lg_u32", S_CMP_LG_U32, SOPC, UNDEFINED},
+    {"s_cmp_lg_u64", S_CMP_LG_U64, SOPC, UNDEFINED},
+    {"s_cmp_ne_u64", S_CMP_NE_U64, SOPC, UNDEFINED},
+    {"s_cmp_lt_i32", S_CMP_LT_I32, SOPC, UNDEFINED},
+    {"s_cmp_lt_u32", S_CMP_LT_U32, SOPC, UNDEFINED},
+    {"s_set_gpr_idx_on", S_SET_GPR_IDX_ON, SOPC, UNDEFINED},
+    {"s_setvskip", S_SETVSKIP, SOPC, UNDEFINED},
+    // END SOPC
 
-        // SMEM
-        {"s_atomic_add",               S_ATOMIC_ADD},
-        {"s_atomic_add_x2",            S_ATOMIC_ADD_X2},
-        {"s_atomic_and",               S_ATOMIC_AND},
-        {"s_atomic_and_x2",            S_ATOMIC_AND_X2},
-        {"s_atomic_cmpswap",           S_ATOMIC_CMPSWAP},
-        {"s_atomic_cmpswap_x2",        S_ATOMIC_CMPSWAP_X2},
-        {"s_atomic_dec",               S_ATOMIC_DEC},
-        {"s_atomic_dec_x2",            S_ATOMIC_DEC_X2},
-        {"s_atomic_inc",               S_ATOMIC_INC},
-        {"s_atomic_inc_x2",            S_ATOMIC_INC_X2},
-        {"s_atomic_or",                S_ATOMIC_OR},
-        {"s_atomic_or_x2",             S_ATOMIC_OR_X2},
-        {"s_atomic_smax",              S_ATOMIC_SMAX},
-        {"s_atomic_smax_x2",           S_ATOMIC_SMAX_X2},
-        {"s_atomic_smin",              S_ATOMIC_SMIN},
-        {"s_atomic_smin_x2",           S_ATOMIC_SMIN_X2},
-        {"s_atomic_sub",               S_ATOMIC_SUB},
-        {"s_atomic_sub_x2",            S_ATOMIC_SUB_X2},
-        {"s_atomic_swap",              S_ATOMIC_SWAP},
-        {"s_atomic_swap_x2",           S_ATOMIC_SWAP_X2},
-        {"s_atomic_umax",              S_ATOMIC_UMAX},
-        {"s_atomic_umax_x2",           S_ATOMIC_UMAX_X2},
-        {"s_atomic_umin",              S_ATOMIC_UMIN},
-        {"s_atomic_umin_x2",           S_ATOMIC_UMIN_X2},
-        {"s_atomic_xor",               S_ATOMIC_XOR},
-        {"s_atomic_xor_x2",            S_ATOMIC_XOR_X2},
-        {"s_buffer_atomic_add",        S_BUFFER_ATOMIC_ADD},
-        {"s_buffer_atomic_add_x2",     S_BUFFER_ATOMIC_ADD_X2},
-        {"s_buffer_atomic_and",        S_BUFFER_ATOMIC_AND},
-        {"s_buffer_atomic_and_x2",     S_BUFFER_ATOMIC_AND_X2},
-        {"s_buffer_atomic_cmpswap",    S_BUFFER_ATOMIC_CMPSWAP},
-        {"s_buffer_atomic_cmpswap_x2", S_BUFFER_ATOMIC_CMPSWAP_X2},
-        {"s_buffer_atomic_dec",        S_BUFFER_ATOMIC_DEC},
-        {"s_buffer_atomic_dec_x2",     S_BUFFER_ATOMIC_DEC_X2},
-        {"s_buffer_atomic_inc",        S_BUFFER_ATOMIC_INC},
-        {"s_buffer_atomic_inc_x2",     S_BUFFER_ATOMIC_INC_X2},
-        {"s_buffer_atomic_or",         S_BUFFER_ATOMIC_OR},
-        {"s_buffer_atomic_or_x2",      S_BUFFER_ATOMIC_OR_X2},
-        {"s_buffer_atomic_smax",       S_BUFFER_ATOMIC_SMAX},
-        {"s_buffer_atomic_smax_x2",    S_BUFFER_ATOMIC_SMAX_X2},
-        {"s_buffer_atomic_smin",       S_BUFFER_ATOMIC_SMIN},
-        {"s_buffer_atomic_smin_x2",    S_BUFFER_ATOMIC_SMIN_X2},
-        {"s_buffer_atomic_sub",        S_BUFFER_ATOMIC_SUB},
-        {"s_buffer_atomic_sub_x2",     S_BUFFER_ATOMIC_SUB_X2},
-        {"s_buffer_atomic_swap",       S_BUFFER_ATOMIC_SWAP},
-        {"s_buffer_atomic_swap_x2",    S_BUFFER_ATOMIC_SWAP_X2},
-        {"s_buffer_atomic_umax",       S_BUFFER_ATOMIC_UMAX},
-        {"s_buffer_atomic_umax_x2",    S_BUFFER_ATOMIC_UMAX_X2},
-        {"s_buffer_atomic_umin",       S_BUFFER_ATOMIC_UMIN},
-        {"s_buffer_atomic_umin_x2",    S_BUFFER_ATOMIC_UMIN_X2},
-        {"s_buffer_atomic_xor",        S_BUFFER_ATOMIC_XOR},
-        {"s_buffer_atomic_xor_x2",     S_BUFFER_ATOMIC_XOR_X2},
-        {"s_buffer_load_dword",        S_BUFFER_LOAD_DWORD},
-        {"s_buffer_load_dwordx16",     S_BUFFER_LOAD_DWORDX16},
-        {"s_buffer_load_dwordx2",      S_BUFFER_LOAD_DWORDX2},
-        {"s_buffer_load_dwordx4",      S_BUFFER_LOAD_DWORDX4},
-        {"s_buffer_load_dwordx8",      S_BUFFER_LOAD_DWORDX8},
-        {"s_buffer_store_dword",       S_BUFFER_STORE_DWORD},
-        {"s_buffer_store_dwordx2",     S_BUFFER_STORE_DWORDX2},
-        {"s_buffer_store_dwordx4",     S_BUFFER_STORE_DWORDX4},
-        {"s_dcache_discard",           S_DCACHE_DISCARD},
-        {"s_dcache_discard_x2",        S_DCACHE_DISCARD_X2},
-        {"s_dcache_inv",               S_DCACHE_INV},
-        {"s_dcache_inv_vol",           S_DCACHE_INV_VOL},
-        {"s_load_dword",               S_LOAD_DWORD},
-        {"s_load_dwordx16",            S_LOAD_DWORDX16},
-        {"s_load_dwordx2",             S_LOAD_DWORDX2},
-        {"s_load_dwordx4",             S_LOAD_DWORDX4},
-        {"s_load_dwordx8",             S_LOAD_DWORDX8},
-        {"s_memrealtime",              S_MEMREALTIME},
-        {"s_memtime",                  S_MEMTIME},
-        {"s_scratch_load_dword",       S_SCRATCH_LOAD_DWORD},
-        {"s_scratch_load_dwordx2",     S_SCRATCH_LOAD_DWORDX2},
-        {"s_scratch_load_dwordx4",     S_SCRATCH_LOAD_DWORDX4},
-        {"s_scratch_store_dword",      S_SCRATCH_STORE_DWORD},
-        {"s_scratch_store_dwordx2",    S_SCRATCH_STORE_DWORDX2},
-        {"s_scratch_store_dwordx4",    S_SCRATCH_STORE_DWORDX4},
-        {"s_store_dword",              S_STORE_DWORD},
-        {"s_store_dwordx2",            S_STORE_DWORDX2},
-        {"s_store_dwordx4",            S_STORE_DWORDX4},
-        // END SMEM
+    // SOPP
+    {"s_barrier", S_BARRIER, SOPP, UNDEFINED},
+    {"s_branch", S_BRANCH, SOPP, UNDEFINED},
+    {"s_cbranch_cdbgsys", S_CBRANCH_CDBGSYS, SOPP, UNDEFINED},
+    {"s_cbranch_cdbgsys_and_user", S_CBRANCH_CDBGSYS_AND_USER, SOPP, UNDEFINED},
+    {"s_cbranch_cdbgsys_or_user", S_CBRANCH_CDBGSYS_OR_USER, SOPP, UNDEFINED},
+    {"s_cbranch_cdbguser", S_CBRANCH_CDBGUSER, SOPP, UNDEFINED},
+    {"s_cbranch_execnz", S_CBRANCH_EXECNZ, SOPP, UNDEFINED},
+    {"s_cbranch_execz", S_CBRANCH_EXECZ, SOPP, UNDEFINED},
+    {"s_cbranch_scc0", S_CBRANCH_SCC0, SOPP, UNDEFINED},
+    {"s_cbranch_scc1", S_CBRANCH_SCC1, SOPP, UNDEFINED},
+    {"s_cbranch_vccnz", S_CBRANCH_VCCNZ, SOPP, UNDEFINED},
+    {"s_cbranch_vccz", S_CBRANCH_VCCZ, SOPP, UNDEFINED},
+    {"s_decperflevel", S_DECPERFLEVEL, SOPP, UNDEFINED},
+    {"s_endpgm", S_ENDPGM, SOPP, UNDEFINED},
+    {"s_endpgm_ordered_ps_done", S_ENDPGM_ORDERED_PS_DONE, SOPP, UNDEFINED},
+    {"s_endpgm_saved", S_ENDPGM_SAVED, SOPP, UNDEFINED},
+    {"s_icache_inv", S_ICACHE_INV, SOPP, UNDEFINED},
+    {"s_incperflevel", S_INCPERFLEVEL, SOPP, UNDEFINED},
+    {"s_nop", S_NOP, SOPP, UNDEFINED},
+    {"s_sendmsg", S_SENDMSG, SOPP, UNDEFINED},
+    {"s_sendmsghalt", S_SENDMSGHALT, SOPP, UNDEFINED},
+    {"s_set_gpr_idx_mode", S_SET_GPR_IDX_MODE, SOPP, UNDEFINED},
+    {"s_set_gpr_idx_off", S_SET_GPR_IDX_OFF, SOPP, UNDEFINED},
+    {"s_sethalt", S_SETHALT, SOPP, UNDEFINED},
+    {"s_setkill", S_SETKILL, SOPP, UNDEFINED},
+    {"s_setprio", S_SETPRIO, SOPP, UNDEFINED},
+    {"s_sleep", S_SLEEP, SOPP, UNDEFINED},
+    {"s_trap", S_TRAP, SOPP, UNDEFINED},
+    {"s_ttracedata", S_TTRACEDATA, SOPP, UNDEFINED},
+    {"s_waitcnt", S_WAITCNT, SOPP, UNDEFINED},
 
-        // VOP1
-        {"v_mov_b32",                  V_MOV_B32},
+    // SMEM
+    {"s_atomic_add", S_ATOMIC_ADD, UNDEFINED, SMEM},
+    {"s_atomic_add_x2", S_ATOMIC_ADD_X2, UNDEFINED, SMEM},
+    {"s_atomic_and", S_ATOMIC_AND, UNDEFINED, SMEM},
+    {"s_atomic_and_x2", S_ATOMIC_AND_X2, UNDEFINED, SMEM},
+    {"s_atomic_cmpswap", S_ATOMIC_CMPSWAP, UNDEFINED, SMEM},
+    {"s_atomic_cmpswap_x2", S_ATOMIC_CMPSWAP_X2, UNDEFINED, SMEM},
+    {"s_atomic_dec", S_ATOMIC_DEC, UNDEFINED, SMEM},
+    {"s_atomic_dec_x2", S_ATOMIC_DEC_X2, UNDEFINED, SMEM},
+    {"s_atomic_inc", S_ATOMIC_INC, UNDEFINED, SMEM},
+    {"s_atomic_inc_x2", S_ATOMIC_INC_X2, UNDEFINED, SMEM},
+    {"s_atomic_or", S_ATOMIC_OR, UNDEFINED, SMEM},
+    {"s_atomic_or_x2", S_ATOMIC_OR_X2, UNDEFINED, SMEM},
+    {"s_atomic_smax", S_ATOMIC_SMAX, UNDEFINED, SMEM},
+    {"s_atomic_smax_x2", S_ATOMIC_SMAX_X2, UNDEFINED, SMEM},
+    {"s_atomic_smin", S_ATOMIC_SMIN, UNDEFINED, SMEM},
+    {"s_atomic_smin_x2", S_ATOMIC_SMIN_X2, UNDEFINED, SMEM},
+    {"s_atomic_sub", S_ATOMIC_SUB, UNDEFINED, SMEM},
+    {"s_atomic_sub_x2", S_ATOMIC_SUB_X2, UNDEFINED, SMEM},
+    {"s_atomic_swap", S_ATOMIC_SWAP, UNDEFINED, SMEM},
+    {"s_atomic_swap_x2", S_ATOMIC_SWAP_X2, UNDEFINED, SMEM},
+    {"s_atomic_umax", S_ATOMIC_UMAX, UNDEFINED, SMEM},
+    {"s_atomic_umax_x2", S_ATOMIC_UMAX_X2, UNDEFINED, SMEM},
+    {"s_atomic_umin", S_ATOMIC_UMIN, UNDEFINED, SMEM},
+    {"s_atomic_umin_x2", S_ATOMIC_UMIN_X2, UNDEFINED, SMEM},
+    {"s_atomic_xor", S_ATOMIC_XOR, UNDEFINED, SMEM},
+    {"s_atomic_xor_x2", S_ATOMIC_XOR_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_add", S_BUFFER_ATOMIC_ADD, UNDEFINED, SMEM},
+    {"s_buffer_atomic_add_x2", S_BUFFER_ATOMIC_ADD_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_and", S_BUFFER_ATOMIC_AND, UNDEFINED, SMEM},
+    {"s_buffer_atomic_and_x2", S_BUFFER_ATOMIC_AND_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_cmpswap", S_BUFFER_ATOMIC_CMPSWAP, UNDEFINED, SMEM},
+    {"s_buffer_atomic_cmpswap_x2", S_BUFFER_ATOMIC_CMPSWAP_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_dec", S_BUFFER_ATOMIC_DEC, UNDEFINED, SMEM},
+    {"s_buffer_atomic_dec_x2", S_BUFFER_ATOMIC_DEC_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_inc", S_BUFFER_ATOMIC_INC, UNDEFINED, SMEM},
+    {"s_buffer_atomic_inc_x2", S_BUFFER_ATOMIC_INC_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_or", S_BUFFER_ATOMIC_OR, UNDEFINED, SMEM},
+    {"s_buffer_atomic_or_x2", S_BUFFER_ATOMIC_OR_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_smax", S_BUFFER_ATOMIC_SMAX, UNDEFINED, SMEM},
+    {"s_buffer_atomic_smax_x2", S_BUFFER_ATOMIC_SMAX_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_smin", S_BUFFER_ATOMIC_SMIN, UNDEFINED, SMEM},
+    {"s_buffer_atomic_smin_x2", S_BUFFER_ATOMIC_SMIN_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_sub", S_BUFFER_ATOMIC_SUB, UNDEFINED, SMEM},
+    {"s_buffer_atomic_sub_x2", S_BUFFER_ATOMIC_SUB_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_swap", S_BUFFER_ATOMIC_SWAP, UNDEFINED, SMEM},
+    {"s_buffer_atomic_swap_x2", S_BUFFER_ATOMIC_SWAP_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_umax", S_BUFFER_ATOMIC_UMAX, UNDEFINED, SMEM},
+    {"s_buffer_atomic_umax_x2", S_BUFFER_ATOMIC_UMAX_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_umin", S_BUFFER_ATOMIC_UMIN, UNDEFINED, SMEM},
+    {"s_buffer_atomic_umin_x2", S_BUFFER_ATOMIC_UMIN_X2, UNDEFINED, SMEM},
+    {"s_buffer_atomic_xor", S_BUFFER_ATOMIC_XOR, UNDEFINED, SMEM},
+    {"s_buffer_atomic_xor_x2", S_BUFFER_ATOMIC_XOR_X2, UNDEFINED, SMEM},
+    {"s_buffer_load_dword", S_BUFFER_LOAD_DWORD, UNDEFINED, SMEM},
+    {"s_buffer_load_dwordx16", S_BUFFER_LOAD_DWORDX16, UNDEFINED, SMEM},
+    {"s_buffer_load_dwordx2", S_BUFFER_LOAD_DWORDX2, UNDEFINED, SMEM},
+    {"s_buffer_load_dwordx4", S_BUFFER_LOAD_DWORDX4, UNDEFINED, SMEM},
+    {"s_buffer_load_dwordx8", S_BUFFER_LOAD_DWORDX8, UNDEFINED, SMEM},
+    {"s_buffer_store_dword", S_BUFFER_STORE_DWORD, UNDEFINED, SMEM},
+    {"s_buffer_store_dwordx2", S_BUFFER_STORE_DWORDX2, UNDEFINED, SMEM},
+    {"s_buffer_store_dwordx4", S_BUFFER_STORE_DWORDX4, UNDEFINED, SMEM},
+    {"s_dcache_discard", S_DCACHE_DISCARD, UNDEFINED, SMEM},
+    {"s_dcache_discard_x2", S_DCACHE_DISCARD_X2, UNDEFINED, SMEM},
+    {"s_dcache_inv", S_DCACHE_INV, UNDEFINED, SMEM},
+    {"s_dcache_inv_vol", S_DCACHE_INV_VOL, UNDEFINED, SMEM},
+    {"s_load_dword", S_LOAD_DWORD, UNDEFINED, SMEM},
+    {"s_load_dwordx16", S_LOAD_DWORDX16, UNDEFINED, SMEM},
+    {"s_load_dwordx2", S_LOAD_DWORDX2, UNDEFINED, SMEM},
+    {"s_load_dwordx4", S_LOAD_DWORDX4, UNDEFINED, SMEM},
+    {"s_load_dwordx8", S_LOAD_DWORDX8, UNDEFINED, SMEM},
+    {"s_memrealtime", S_MEMREALTIME, UNDEFINED, SMEM},
+    {"s_memtime", S_MEMTIME, UNDEFINED, SMEM},
+    {"s_scratch_load_dword", S_SCRATCH_LOAD_DWORD, UNDEFINED, SMEM},
+    {"s_scratch_load_dwordx2", S_SCRATCH_LOAD_DWORDX2, UNDEFINED, SMEM},
+    {"s_scratch_load_dwordx4", S_SCRATCH_LOAD_DWORDX4, UNDEFINED, SMEM},
+    {"s_scratch_store_dword", S_SCRATCH_STORE_DWORD, UNDEFINED, SMEM},
+    {"s_scratch_store_dwordx2", S_SCRATCH_STORE_DWORDX2, UNDEFINED, SMEM},
+    {"s_scratch_store_dwordx4", S_SCRATCH_STORE_DWORDX4, UNDEFINED, SMEM},
+    {"s_store_dword", S_STORE_DWORD, UNDEFINED, SMEM},
+    {"s_store_dwordx2", S_STORE_DWORDX2, UNDEFINED, SMEM},
+    {"s_store_dwordx4", S_STORE_DWORDX4, UNDEFINED, SMEM},
+    // END SMEM
 
-        // VOP2
-        {"v_add_u32",                  V_ADD_U32},
-        {"v_addc_u32",                 V_ADDC_U32},
+    // VOP1
+    {"v_mov_b32", V_MOV_B32, VOP1, UNDEFINED},
+    {"v_bfrev_b32", V_BFREV_B32, VOP1, UNDEFINED},
+    {"v_ffbh_u32", V_FFBH_U32, VOP1, UNDEFINED},
+    {"v_ffbh_i32", V_FFBH_I32, VOP1, UNDEFINED},
+    {"v_ffbl_b32", V_FFBL_B32, VOP1, UNDEFINED},
+    {"v_swap_b32", V_SWAP_B32, VOP1, UNDEFINED},
+    {"v_movreld_b32", V_MOVRELD_B32, VOP1, UNDEFINED},
+    {"v_movrels_b32", V_MOVRELS_B32, VOP1, UNDEFINED},
+    {"v_movrelsd_b32", V_MOVRELSD_B32, VOP1, UNDEFINED},
+    {"v_not_b32", V_NOT_B32, VOP1, UNDEFINED},
+    {"v_readfirstlane_b32", V_READFIRSTLANE_B32, VOP1, UNDEFINED},
+    {"v_sat_pk_u8_i16", V_SAT_PK_U8_I16, VOP1, UNDEFINED},
+    {"v_screen_partition_4se_b32", V_SCREEN_PARTITION_4SE_B32, VOP1, UNDEFINED},
+    {"v_nop", V_NOP, VOP1, UNDEFINED},
+    {"v_cvt_i32_f64", V_CVT_I32_F64, VOP1, UNDEFINED},
+    {"v_cvt_f64_i32", V_CVT_F64_I32, VOP1, UNDEFINED},
+    {"v_cvt_f32_i32", V_CVT_F32_I32, VOP1, UNDEFINED},
+    {"v_cvt_f32_u32", V_CVT_F32_U32, VOP1, UNDEFINED},
+    {"v_cvt_u32_f32", V_CVT_U32_F32, VOP1, UNDEFINED},
+    {"v_cvt_i32_f32", V_CVT_I32_F32, VOP1, UNDEFINED},
+    {"v_cvt_f16_f32", V_CVT_F16_F32, VOP1, UNDEFINED},
+    {"v_cvt_f32_f16", V_CVT_F32_F16, VOP1, UNDEFINED},
+    {"v_cvt_rpi_i32_f32", V_CVT_RPI_I32_F32, VOP1, UNDEFINED},
+    {"v_cvt_flr_i32_f32", V_CVT_FLR_I32_F32, VOP1, UNDEFINED},
+    {"v_cvt_off_f32_i4", V_CVT_OFF_F32_I4, VOP1, UNDEFINED},
+    {"v_cvt_f32_f64", V_CVT_F32_F64, VOP1, UNDEFINED},
+    {"v_cvt_f64_f32", V_CVT_F64_F32, VOP1, UNDEFINED},
+    {"v_cvt_f32_ubyte0", V_CVT_F32_UBYTE0, VOP1, UNDEFINED},
+    {"v_cvt_f32_ubyte1", V_CVT_F32_UBYTE1, VOP1, UNDEFINED},
+    {"v_cvt_f32_ubyte2", V_CVT_F32_UBYTE2, VOP1, UNDEFINED},
+    {"v_cvt_f32_ubyte3", V_CVT_F32_UBYTE3, VOP1, UNDEFINED},
+    {"v_cvt_u32_f64", V_CVT_U32_F64, VOP1, UNDEFINED},
+    {"v_cvt_f64_u32", V_CVT_F64_U32, VOP1, UNDEFINED},
+    {"v_trunc_f64", V_TRUNC_F64, VOP1, UNDEFINED},
+    {"v_ceil_f64", V_CEIL_F64, VOP1, UNDEFINED},
+    {"v_rndne_f64", V_RNDNE_F64, VOP1, UNDEFINED},
+    {"v_floor_f64", V_FLOOR_F64, VOP1, UNDEFINED},
+    {"v_fract_f32", V_FRACT_F32, VOP1, UNDEFINED},
+    {"v_trunc_f32", V_TRUNC_F32, VOP1, UNDEFINED},
+    {"v_ceil_f32", V_CEIL_F32, VOP1, UNDEFINED},
+    {"v_rndne_f32", V_RNDNE_F32, VOP1, UNDEFINED},
+    {"v_floor_f32", V_FLOOR_F32, VOP1, UNDEFINED},
+    {"v_exp_f32", V_EXP_F32, VOP1, UNDEFINED},
+    {"v_log_f32", V_LOG_F32, VOP1, UNDEFINED},
+    {"v_rcp_f32", V_RCP_F32, VOP1, UNDEFINED},
+    {"v_rcp_iflag_f32", V_RCP_IFLAG_F32, VOP1, UNDEFINED},
+    {"v_rsq_f32", V_RSQ_F32, VOP1, UNDEFINED},
+    {"v_rcp_f64", V_RCP_F64, VOP1, UNDEFINED},
+    {"v_rsq_f64", V_RSQ_F64, VOP1, UNDEFINED},
+    {"v_sqrt_f32", V_SQRT_F32, VOP1, UNDEFINED},
+    {"v_sqrt_f64", V_SQRT_F64, VOP1, UNDEFINED},
+    {"v_sin_f32", V_SIN_F32, VOP1, UNDEFINED},
+    {"v_cos_f32", V_COS_F32, VOP1, UNDEFINED},
+    {"v_frexp_exp_i32_f64", V_FREXP_EXP_I32_F64, VOP1, UNDEFINED},
+    {"v_frexp_mant_f64", V_FREXP_MANT_F64, VOP1, UNDEFINED},
+    {"v_fract_f64", V_FRACT_F64, VOP1, UNDEFINED},
+    {"v_frexp_exp_i32_f32", V_FREXP_EXP_I32_F32, VOP1, UNDEFINED},
+    {"v_frexp_mant_f32", V_FREXP_MANT_F32, VOP1, UNDEFINED},
+    {"v_clrexcp", V_CLREXCP, VOP1, UNDEFINED},
+    {"v_cvt_f16_u16", V_CVT_F16_U16, VOP1, UNDEFINED},
+    {"v_cvt_f16_i16", V_CVT_F16_I16, VOP1, UNDEFINED},
+    {"v_cvt_u16_f16", V_CVT_U16_F16, VOP1, UNDEFINED},
+    {"v_cvt_i16_f16", V_CVT_I16_F16, VOP1, UNDEFINED},
+    {"v_rcp_f16", V_RCP_F16, VOP1, UNDEFINED},
+    {"v_sqrt_f16", V_SQRT_F16, VOP1, UNDEFINED},
+    {"v_rsq_f16", V_RSQ_F16, VOP1, UNDEFINED},
+    {"v_log_f16", V_LOG_F16, VOP1, UNDEFINED},
+    {"v_exp_f16", V_EXP_F16, VOP1, UNDEFINED},
+    {"v_frexp_mant_f16", V_FREXP_MANT_F16, VOP1, UNDEFINED},
+    {"v_frexp_exp_i16_f16", V_FREXP_EXP_I16_F16, VOP1, UNDEFINED},
+    {"v_floor_f16", V_FLOOR_F16, VOP1, UNDEFINED},
+    {"v_ceil_f16", V_CEIL_F16, VOP1, UNDEFINED},
+    {"v_trunc_f16", V_TRUNC_F16, VOP1, UNDEFINED},
+    {"v_rndne_f16", V_RNDNE_F16, VOP1, UNDEFINED},
+    {"v_fract_f16", V_FRACT_F16, VOP1, UNDEFINED},
+    {"v_sin_f16", V_SIN_F16, VOP1, UNDEFINED},
+    {"v_cos_f16", V_COS_F16, VOP1, UNDEFINED},
+    {"v_exp_legacy_f32", V_EXP_LEGACY_F32, VOP1, UNDEFINED},
+    {"v_log_legacy_f32", V_LOG_LEGACY_F32, VOP1, UNDEFINED},
+    {"v_cvt_norm_i16_f16", V_CVT_NORM_I16_F16, VOP1, UNDEFINED},
+    {"v_cvt_norm_u16_f16", V_CVT_NORM_U16_F16, VOP1, UNDEFINED},
 
-        // VOP3A
-        {"v_lshlrev_b64",              V_LSHLREV_B64},
+    // VOP2
+    {"v_cndmask_b32", V_CNDMASK_B32, VOP2, UNDEFINED},
+    {"v_add_f32", V_ADD_F32, VOP2, UNDEFINED},
+    {"v_sub_f32", V_SUB_F32, VOP2, UNDEFINED},
+    {"v_subrev_f32", V_SUBREV_F32, VOP2, UNDEFINED},
+    {"v_mul_legacy_f32", V_MUL_LEGACY_F32, VOP2, UNDEFINED},
+    {"v_mul_f32", V_MUL_F32, VOP2, UNDEFINED},
+    {"v_mul_i32_i24", V_MUL_I32_I24, VOP2, UNDEFINED},
+    {"v_mul_hi_i32_i24", V_MUL_HI_I32_I24, VOP2, UNDEFINED},
+    {"v_mul_u32_u24", V_MUL_U32_U24, VOP2, UNDEFINED},
+    {"v_mul_hi_u32_u24", V_MUL_HI_U32_U24, VOP2, UNDEFINED},
+    {"v_min_f32", V_MIN_F32, VOP2, UNDEFINED},
+    {"v_max_f32", V_MAX_F32, VOP2, UNDEFINED},
+    {"v_min_i32", V_MIN_I32, VOP2, UNDEFINED},
+    {"v_max_i32", V_MAX_I32, VOP2, UNDEFINED},
+    {"v_min_u32", V_MIN_U32, VOP2, UNDEFINED},
+    {"v_max_u32", V_MAX_U32, VOP2, UNDEFINED},
+    {"v_lshrrev_b32", V_LSHRREV_B32, VOP2, UNDEFINED},
+    {"v_and_b32", V_AND_B32, VOP2, UNDEFINED},
+    {"v_or_b32", V_OR_B32, VOP2, UNDEFINED},
+    {"v_xor_b32", V_XOR_B32, VOP2, UNDEFINED},
+    {"v_mac_f32", V_MAC_F32, VOP2, UNDEFINED},
+    {"v_madmk_f32", V_MADMK_F32, VOP2, UNDEFINED},
+    {"v_madak_f32", V_MADAK_F32, VOP2, UNDEFINED},
+    {"v_add_co_u32", V_ADD_CO_U32, VOP2, UNDEFINED},
+    {"v_subrev_co_u32", V_SUBREV_CO_U32, VOP2, UNDEFINED},
+    {"v_subb_co_u32", V_SUBB_CO_U32, VOP2, UNDEFINED},
+    {"v_subbrev_co_u32", V_SUBBREV_CO_U32, VOP2, UNDEFINED},
+    {"v_add_f16", V_ADD_F16, VOP2, UNDEFINED},
+    {"v_sub_f16", V_SUB_F16, VOP2, UNDEFINED},
+    {"v_subrev_f16", V_SUBREV_F16, VOP2, UNDEFINED},
+    {"v_mul_f16", V_MUL_F16, VOP2, UNDEFINED},
+    {"v_mac_f16", V_MAC_F16, VOP2, UNDEFINED},
+    {"v_madmk_f16", V_MADMK_F16, VOP2, UNDEFINED},
+    {"v_madak_f16", V_MADAK_F16, VOP2, UNDEFINED},
+    {"v_add_u16", V_ADD_U16, VOP2, UNDEFINED},
+    {"v_mul_lo_u16", V_MUL_LO_U16, VOP2, UNDEFINED},
+    {"v_lshlrev_b16", V_LSHLREV_B16, VOP2, UNDEFINED},
+    {"v_lshrrev_b16", V_LSHRREV_B16, VOP2, UNDEFINED},
+    {"v_ashrrev_i16", V_ASHRREV_I16, VOP2, UNDEFINED},
+    {"v_max_f16", V_MAX_F16, VOP2, UNDEFINED},
+    {"v_min_f16", V_MIN_F16, VOP2, UNDEFINED},
+    {"v_max_u16", V_MAX_U16, VOP2, UNDEFINED},
+    {"v_max_i16", V_MAX_I16, VOP2, UNDEFINED},
+    {"v_min_u16", V_MIN_U16, VOP2, UNDEFINED},
+    {"v_min_i16", V_MIN_I16, VOP2, UNDEFINED},
+    {"v_ldexp_f16", V_LDEXP_F16, VOP2, UNDEFINED},
+    //VOP2: extended VOP3A
+    {"v_subrev_u16", V_SUBREV_U16, VOP2, VOP3A},
+    {"v_sub_u16", V_SUB_U16, VOP2, VOP3A},
+    {"v_ashr_i32", V_ASHR_I32, VOP2, VOP3A},
+    {"v_ashrrev_b16", V_ASHRREV_B16, VOP2, VOP3A},
+    {"v_ashrrev_i32", V_ASHRREV_I32, VOP2, VOP3A},
+    {"v_lshlrev_b32", V_LSHLREV_B32, VOP2, VOP3A},
+    {"v_lshr_b32", V_LSHR_B32, VOP2, VOP3A},
+    //VOP2: extended VOP3B
+    {"v_addc_co_u32", V_ADDC_CO_U32, VOP2, VOP3B},
+    {"v_addc_u32", V_ADDC_U32, VOP2, VOP3B},
+    {"v_add_u32", V_ADD_U32, VOP2, VOP3B},
+    {"v_subrev_u32", V_SUBREV_U32, VOP2, VOP3B},
+    {"v_sub_u32", V_SUB_U32, VOP2, VOP3B},
+    {"v_sub_co_u32", V_SUB_CO_U32, VOP2, VOP3B},
+    {"v_add_i16", V_ADD_I16, VOP2, VOP3B},
+    {"v_add_i32", V_ADD_I32, VOP2, VOP3B},
 
-        // VOPC
-        {"v_cmp_eq_i32",               V_CMP_EQ_I32},
+    // VOP3A
+    {"v_lshlrev_b64", V_LSHLREV_B64, UNDEFINED, VOP3A},
+    {"v_mul_lo_u32", V_MUL_LO_U32, UNDEFINED, VOP3A},
+    // VOP3B
+    {"v_div_scale_f32", V_DIV_SCALE_F32, UNDEFINED, VOP3B},
+    {"v_div_scale_f64", V_DIV_SCALE_F64, UNDEFINED, VOP3B},
+    {"v_mad_u64_u32", V_MAD_U64_U32, UNDEFINED, VOP3B},
+    {"v_mad_i64_i32", V_MAD_I64_I32, UNDEFINED, VOP3B},
 
-        // FLAT
-        {"flat_store_dword",           FLAT_STORE_DWORD},
-        {"flat_store_dwordx2",         FLAT_STORE_DWORDX2},
-        {"flat_store_dwordx3",         FLAT_STORE_DWORDX3},
-        {"flat_store_dwordx4",         FLAT_STORE_DWORDX4},
-        {"flat_store_short",           FLAT_STORE_SHORT},
-    };
+    // VOPC
+    {"v_cmp_f_i16", V_CMP_F_I16, VOPC, VOP3A},
+    {"v_cmp_lt_i16", V_CMP_LT_I16, VOPC, VOP3A},
+    {"v_cmp_eq_i16", V_CMP_EQ_I16, VOPC, VOP3A},
+    {"v_cmp_le_i16", V_CMP_LE_I16, VOPC, VOP3A},
+    {"v_cmp_gt_i16", V_CMP_GT_I16, VOPC, VOP3A},
+    {"v_cmp_lg_i16", V_CMP_LG_I16, VOPC, VOP3A},
+    {"v_cmp_ge_i16", V_CMP_GE_I16, VOPC, VOP3A},
+    {"v_cmp_tru_i16", V_CMP_TRU_I16, VOPC, VOP3A},
+    {"v_cmp_f_u16", V_CMP_F_U16, VOPC, VOP3A},
+    {"v_cmp_lt_u16", V_CMP_LT_U16, VOPC, VOP3A},
+    {"v_cmp_eq_u16", V_CMP_EQ_U16, VOPC, VOP3A},
+    {"v_cmp_le_u16", V_CMP_LE_U16, VOPC, VOP3A},
+    {"v_cmp_gt_u16", V_CMP_GT_U16, VOPC, VOP3A},
+    {"v_cmp_lg_u16", V_CMP_LG_U16, VOPC, VOP3A},
+    {"v_cmp_ge_u16", V_CMP_GE_U16, VOPC, VOP3A},
+    {"v_cmp_tru_u16", V_CMP_TRU_U16, VOPC, VOP3A},
+    {"v_cmpx_f_i16", V_CMPX_F_I16, VOPC, VOP3A},
+    {"v_cmpx_lt_i16", V_CMPX_LT_I16, VOPC, VOP3A},
+    {"v_cmpx_eq_i16", V_CMPX_EQ_I16, VOPC, VOP3A},
+    {"v_cmpx_le_i16", V_CMPX_LE_I16, VOPC, VOP3A},
+    {"v_cmpx_gt_i16", V_CMPX_GT_I16, VOPC, VOP3A},
+    {"v_cmpx_lg_i16", V_CMPX_LG_I16, VOPC, VOP3A},
+    {"v_cmpx_ge_i16", V_CMPX_GE_I16, VOPC, VOP3A},
+    {"v_cmpx_tru_i16", V_CMPX_TRU_I16, VOPC, VOP3A},
+    {"v_cmpx_f_u16", V_CMPX_F_U16, VOPC, VOP3A},
+    {"v_cmpx_lt_u16", V_CMPX_LT_U16, VOPC, VOP3A},
+    {"v_cmpx_eq_u16", V_CMPX_EQ_U16, VOPC, VOP3A},
+    {"v_cmpx_le_u16", V_CMPX_LE_U16, VOPC, VOP3A},
+    {"v_cmpx_gt_u16", V_CMPX_GT_U16, VOPC, VOP3A},
+    {"v_cmpx_lg_u16", V_CMPX_LG_U16, VOPC, VOP3A},
+    {"v_cmpx_ge_u16", V_CMPX_GE_U16, VOPC, VOP3A},
+    {"v_cmpx_tru_u16", V_CMPX_TRU_U16, VOPC, VOP3A},
+    {"v_cmp_f_i32", V_CMP_F_I32, VOPC, VOP3A},
+    {"v_cmp_lt_i32", V_CMP_LT_I32, VOPC, VOP3A},
+    {"v_cmp_eq_i32", V_CMP_EQ_I32, VOPC, VOP3A},
+    {"v_cmp_le_i32", V_CMP_LE_I32, VOPC, VOP3A},
+    {"v_cmp_gt_i32", V_CMP_GT_I32, VOPC, VOP3A},
+    {"v_cmp_lg_i32", V_CMP_LG_I32, VOPC, VOP3A},
+    {"v_cmp_ge_i32", V_CMP_GE_I32, VOPC, VOP3A},
+    {"v_cmp_tru_i32", V_CMP_TRU_I32, VOPC, VOP3A},
+    {"v_cmp_f_u32", V_CMP_F_U32, VOPC, VOP3A},
+    {"v_cmp_lt_u32", V_CMP_LT_U32, VOPC, VOP3A},
+    {"v_cmp_eq_u32", V_CMP_EQ_U32, VOPC, VOP3A},
+    {"v_cmp_le_u32", V_CMP_LE_U32, VOPC, VOP3A},
+    {"v_cmp_gt_u32", V_CMP_GT_U32, VOPC, VOP3A},
+    {"v_cmp_lg_u32", V_CMP_LG_U32, VOPC, VOP3A},
+    {"v_cmp_ge_u32", V_CMP_GE_U32, VOPC, VOP3A},
+    {"v_cmp_tru_u32", V_CMP_TRU_U32, VOPC, VOP3A},
+    {"v_cmpx_f_i32", V_CMPX_F_I32, VOPC, VOP3A},
+    {"v_cmpx_lt_i32", V_CMPX_LT_I32, VOPC, VOP3A},
+    {"v_cmpx_eq_i32", V_CMPX_EQ_I32, VOPC, VOP3A},
+    {"v_cmpx_le_i32", V_CMPX_LE_I32, VOPC, VOP3A},
+    {"v_cmpx_gt_i32", V_CMPX_GT_I32, VOPC, VOP3A},
+    {"v_cmpx_lg_i32", V_CMPX_LG_I32, VOPC, VOP3A},
+    {"v_cmpx_ge_i32", V_CMPX_GE_I32, VOPC, VOP3A},
+    {"v_cmpx_tru_i32", V_CMPX_TRU_I32, VOPC, VOP3A},
+    {"v_cmpx_f_u32", V_CMPX_F_U32, VOPC, VOP3A},
+    {"v_cmpx_lt_u32", V_CMPX_LT_U32, VOPC, VOP3A},
+    {"v_cmpx_eq_u32", V_CMPX_EQ_U32, VOPC, VOP3A},
+    {"v_cmpx_le_u32", V_CMPX_LE_U32, VOPC, VOP3A},
+    {"v_cmpx_gt_u32", V_CMPX_GT_U32, VOPC, VOP3A},
+    {"v_cmpx_lg_u32", V_CMPX_LG_U32, VOPC, VOP3A},
+    {"v_cmpx_ge_u32", V_CMPX_GE_U32, VOPC, VOP3A},
+    {"v_cmpx_tru_u32", V_CMPX_TRU_U32, VOPC, VOP3A},
+    {"v_cmp_f_i64", V_CMP_F_I64, VOPC, VOP3A},
+    {"v_cmp_lt_i64", V_CMP_LT_I64, VOPC, VOP3A},
+    {"v_cmp_eq_i64", V_CMP_EQ_I64, VOPC, VOP3A},
+    {"v_cmp_le_i64", V_CMP_LE_I64, VOPC, VOP3A},
+    {"v_cmp_gt_i64", V_CMP_GT_I64, VOPC, VOP3A},
+    {"v_cmp_lg_i64", V_CMP_LG_I64, VOPC, VOP3A},
+    {"v_cmp_ge_i64", V_CMP_GE_I64, VOPC, VOP3A},
+    {"v_cmp_tru_i64", V_CMP_TRU_I64, VOPC, VOP3A},
+    {"v_cmp_f_u64", V_CMP_F_U64, VOPC, VOP3A},
+    {"v_cmp_lt_u64", V_CMP_LT_U64, VOPC, VOP3A},
+    {"v_cmp_eq_u64", V_CMP_EQ_U64, VOPC, VOP3A},
+    {"v_cmp_le_u64", V_CMP_LE_U64, VOPC, VOP3A},
+    {"v_cmp_gt_u64", V_CMP_GT_U64, VOPC, VOP3A},
+    {"v_cmp_lg_u64", V_CMP_LG_U64, VOPC, VOP3A},
+    {"v_cmp_ge_u64", V_CMP_GE_U64, VOPC, VOP3A},
+    {"v_cmp_tru_u64", V_CMP_TRU_U64, VOPC, VOP3A},
+    {"v_cmpx_f_i64", V_CMPX_F_I64, VOPC, VOP3A},
+    {"v_cmpx_lt_i64", V_CMPX_LT_I64, VOPC, VOP3A},
+    {"v_cmpx_eq_i64", V_CMPX_EQ_I64, VOPC, VOP3A},
+    {"v_cmpx_le_i64", V_CMPX_LE_I64, VOPC, VOP3A},
+    {"v_cmpx_gt_i64", V_CMPX_GT_I64, VOPC, VOP3A},
+    {"v_cmpx_lg_i64", V_CMPX_LG_I64, VOPC, VOP3A},
+    {"v_cmpx_ge_i64", V_CMPX_GE_I64, VOPC, VOP3A},
+    {"v_cmpx_tru_i64", V_CMPX_TRU_I64, VOPC, VOP3A},
+    {"v_cmpx_f_u64", V_CMPX_F_U64, VOPC, VOP3A},
+    {"v_cmpx_lt_u64", V_CMPX_LT_U64, VOPC, VOP3A},
+    {"v_cmpx_eq_u64", V_CMPX_EQ_U64, VOPC, VOP3A},
+    {"v_cmpx_le_u64", V_CMPX_LE_U64, VOPC, VOP3A},
+    {"v_cmpx_gt_u64", V_CMPX_GT_U64, VOPC, VOP3A},
+    {"v_cmpx_lg_u64", V_CMPX_LG_U64, VOPC, VOP3A},
+    {"v_cmpx_ge_u64", V_CMPX_GE_U64, VOPC, VOP3A},
+    {"v_cmpx_tru_u64", V_CMPX_TRU_U64, VOPC, VOP3A},
 
-    auto it = instruction_repo.find(instruction.data());
+    // FLAT
+    {"flat_store_dword", FLAT_STORE_DWORD, UNDEFINED, FLAT},
+    {"flat_store_dwordx2", FLAT_STORE_DWORDX2, UNDEFINED, FLAT},
+    {"flat_store_dwordx3", FLAT_STORE_DWORDX3, UNDEFINED, FLAT},
+    {"flat_store_dwordx4", FLAT_STORE_DWORDX4, UNDEFINED, FLAT},
+    {"flat_store_short", FLAT_STORE_SHORT, UNDEFINED, FLAT},
+    {"flat_load_dword", FLAT_LOAD_DWORD, UNDEFINED, FLAT},
+    {"flat_load_dwordx2", FLAT_LOAD_DWORDX2, UNDEFINED, FLAT},
+    {"flat_load_dwordx3", FLAT_LOAD_DWORDX3, UNDEFINED, FLAT},
+    {"flat_load_dwordx4", FLAT_LOAD_DWORDX4, UNDEFINED, FLAT}
+};
 
-    if (it == instruction_repo.end()) {
-        throw std::runtime_error("Undefined instruction!");
+InstrKey get_instr_key(const std::string& instruction) {
+    auto it =
+        std::find_if(std::begin(instructionRepo), std::end(instructionRepo),
+                     [&instruction](const InstructionView& curInstr) {
+                         return std::strcmp(instruction.c_str(), curInstr.mnemonic) == 0;
+                     });
+
+    if (it == std::end(instructionRepo)) {
+        throw std::runtime_error(std::string("Undefined mnemonic: ") + instruction);
     }
 
-    return it->second;
+    return it->key;
 }
 
-char const *get_instr_str(InstrKey instr) noexcept {
-    switch (instr) {
-        case S_ATOMIC_ADD:
-            return "s_atomic_add";
-        case S_ATOMIC_ADD_X2:
-            return "s_atomic_add_x2";
-        case S_ATOMIC_AND:
-            return "s_atomic_and";
-        case S_ATOMIC_AND_X2:
-            return "s_atomic_and_x2";
-        case S_ATOMIC_CMPSWAP:
-            return "s_atomic_cmpswap";
-        case S_ATOMIC_CMPSWAP_X2:
-            return "s_atomic_cmpswap_x2";
-        case S_ATOMIC_DEC:
-            return "s_atomic_dec";
-        case S_ATOMIC_DEC_X2:
-            return "s_atomic_dec_x2";
-        case S_ATOMIC_INC:
-            return "s_atomic_inc";
-        case S_ATOMIC_INC_X2:
-            return "s_atomic_inc_x2";
-        case S_ATOMIC_OR:
-            return "s_atomic_or";
-        case S_ATOMIC_OR_X2:
-            return "s_atomic_or_x2";
-        case S_ATOMIC_SMAX:
-            return "s_atomic_smax";
-        case S_ATOMIC_SMAX_X2:
-            return "s_atomic_smax_x2";
-        case S_ATOMIC_SMIN:
-            return "s_atomic_smin";
-        case S_ATOMIC_SMIN_X2:
-            return "s_atomic_smin_x2";
-        case S_ATOMIC_SUB:
-            return "s_atomic_sub";
-        case S_ATOMIC_SUB_X2:
-            return "s_atomic_sub_x2";
-        case S_ATOMIC_SWAP:
-            return "s_atomic_swap";
-        case S_ATOMIC_SWAP_X2:
-            return "s_atomic_swap_x2";
-        case S_ATOMIC_UMAX:
-            return "s_atomic_umax";
-        case S_ATOMIC_UMAX_X2:
-            return "s_atomic_umax_x2";
-        case S_ATOMIC_UMIN:
-            return "s_atomic_umin";
-        case S_ATOMIC_UMIN_X2:
-            return "s_atomic_umin_x2";
-        case S_ATOMIC_XOR:
-            return "s_atomic_xor";
-        case S_ATOMIC_XOR_X2:
-            return "s_atomic_xor_x2";
-        case S_BUFFER_ATOMIC_ADD:
-            return "s_buffer_atomic_add";
-        case S_BUFFER_ATOMIC_ADD_X2:
-            return "s_buffer_atomic_add_x2";
-        case S_BUFFER_ATOMIC_AND:
-            return "s_buffer_atomic_and";
-        case S_BUFFER_ATOMIC_AND_X2:
-            return "s_buffer_atomic_and_x2";
-        case S_BUFFER_ATOMIC_CMPSWAP:
-            return "s_buffer_atomic_cmpswap";
-        case S_BUFFER_ATOMIC_CMPSWAP_X2:
-            return "s_buffer_atomic_cmpswap_x2";
-        case S_BUFFER_ATOMIC_DEC:
-            return "s_buffer_atomic_dec";
-        case S_BUFFER_ATOMIC_DEC_X2:
-            return "s_buffer_atomic_dec_x2";
-        case S_BUFFER_ATOMIC_INC:
-            return "s_buffer_atomic_inc";
-        case S_BUFFER_ATOMIC_INC_X2:
-            return "s_buffer_atomic_inc_x2";
-        case S_BUFFER_ATOMIC_OR:
-            return "s_buffer_atomic_or";
-        case S_BUFFER_ATOMIC_OR_X2:
-            return "s_buffer_atomic_or_x2";
-        case S_BUFFER_ATOMIC_SMAX:
-            return "s_buffer_atomic_smax";
-        case S_BUFFER_ATOMIC_SMAX_X2:
-            return "s_buffer_atomic_smax_x2";
-        case S_BUFFER_ATOMIC_SMIN:
-            return "s_buffer_atomic_smin";
-        case S_BUFFER_ATOMIC_SMIN_X2:
-            return "s_buffer_atomic_smin_x2";
-        case S_BUFFER_ATOMIC_SUB:
-            return "s_buffer_atomic_sub";
-        case S_BUFFER_ATOMIC_SUB_X2:
-            return "s_buffer_atomic_sub_x2";
-        case S_BUFFER_ATOMIC_SWAP:
-            return "s_buffer_atomic_swap";
-        case S_BUFFER_ATOMIC_SWAP_X2:
-            return "s_buffer_atomic_swap_x2";
-        case S_BUFFER_ATOMIC_UMAX:
-            return "s_buffer_atomic_umax";
-        case S_BUFFER_ATOMIC_UMAX_X2:
-            return "s_buffer_atomic_umax_x2";
-        case S_BUFFER_ATOMIC_UMIN:
-            return "s_buffer_atomic_umin";
-        case S_BUFFER_ATOMIC_UMIN_X2:
-            return "s_buffer_atomic_umin_x2";
-        case S_BUFFER_ATOMIC_XOR:
-            return "s_buffer_atomic_xor";
-        case S_BUFFER_ATOMIC_XOR_X2:
-            return "s_buffer_atomic_xor_x2";
-        case S_BUFFER_LOAD_DWORD:
-            return "s_buffer_load_dword";
-        case S_BUFFER_LOAD_DWORDX16:
-            return "s_buffer_load_dwordx16";
-        case S_BUFFER_LOAD_DWORDX2:
-            return "s_buffer_load_dwordx2";
-        case S_BUFFER_LOAD_DWORDX4:
-            return "s_buffer_load_dwordx4";
-        case S_BUFFER_LOAD_DWORDX8:
-            return "s_buffer_load_dwordx8";
-        case S_BUFFER_STORE_DWORD:
-            return "s_buffer_store_dword";
-        case S_BUFFER_STORE_DWORDX2:
-            return "s_buffer_store_dwordx2";
-        case S_BUFFER_STORE_DWORDX4:
-            return "s_buffer_store_dwordx4";
-        case S_DCACHE_DISCARD:
-            return "s_dcache_discard";
-        case S_DCACHE_DISCARD_X2:
-            return "s_dcache_discard_x2";
-        case S_DCACHE_INV:
-            return "s_dcache_inv";
-        case S_DCACHE_INV_VOL:
-            return "s_dcache_inv_vol";
-        case S_LOAD_DWORD:
-            return "s_load_dword";
-        case S_LOAD_DWORDX16:
-            return "s_load_dwordx16";
-        case S_LOAD_DWORDX2:
-            return "s_load_dwordx2";
-        case S_LOAD_DWORDX4:
-            return "s_load_dwordx4";
-        case S_LOAD_DWORDX8:
-            return "s_load_dwordx8";
-        case S_MEMREALTIME:
-            return "s_memrealtime";
-        case S_MEMTIME:
-            return "s_memtime";
-        case S_SCRATCH_LOAD_DWORD:
-            return "s_scratch_load_dword";
-        case S_SCRATCH_LOAD_DWORDX2:
-            return "s_scratch_load_dwordx2";
-        case S_SCRATCH_LOAD_DWORDX4:
-            return "s_scratch_load_dwordx4";
-        case S_SCRATCH_STORE_DWORD:
-            return "s_scratch_store_dword";
-        case S_SCRATCH_STORE_DWORDX2:
-            return "s_scratch_store_dwordx2";
-        case S_SCRATCH_STORE_DWORDX4:
-            return "s_scratch_store_dwordx4";
-        case S_STORE_DWORD:
-            return "s_store_dword";
-        case S_STORE_DWORDX2:
-            return "s_store_dwordx2";
-        case S_STORE_DWORDX4:
-            return "s_store_dwordx4";
-        case S_BITCMP0_B32:
-            return "s_bitcmp0_b32";
-        case S_BITCMP0_B64:
-            return "s_bitcmp0_b64";
-        case S_BITCMP1_B32:
-            return "s_bitcmp1_b32";
-        case S_BITCMP1_B64:
-            return "s_bitcmp1_b64";
-        case S_CMP_EQ_I32:
-            return "s_cmp_eq_i32";
-        case S_CMP_EQ_U32:
-            return "s_cmp_eq_u32";
-        case S_CMP_EQ_U64:
-            return "s_cmp_eq_u64";
-        case S_CMP_GE_I32:
-            return "s_cmp_ge_i32";
-        case S_CMP_GE_U32:
-            return "s_cmp_ge_u32";
-        case S_CMP_GT_I32:
-            return "s_cmp_gt_i32";
-        case S_CMP_GT_U32:
-            return "s_cmp_gt_u32";
-        case S_CMP_LE_I32:
-            return "s_cmp_le_i32";
-        case S_CMP_LE_U32:
-            return "s_cmp_le_u32";
-        case S_CMP_LG_I32:
-            return "s_cmp_lg_i32";
-        case S_CMP_LG_U32:
-            return "s_cmp_lg_u32";
-        case S_CMP_LG_U64:
-            return "s_cmp_lg_u64";
-        case S_CMP_NE_U64:
-            return "s_cmp_ne_u64";
-        case S_CMP_LT_I32:
-            return "s_cmp_lt_i32";
-        case S_CMP_LT_U32:
-            return "s_cmp_lt_u32";
-        case S_SET_GPR_IDX_ON:
-            return "s_set_gpr_idx_on";
-        case S_SETVSKIP:
-            return "s_setvskip";
-        case S_BARRIER:
-            return "s_barrier";
-        case S_BRANCH:
-            return "s_branch";
-        case S_CBRANCH_CDBGSYS:
-            return "s_cbranch_cdbgsys";
-        case S_CBRANCH_CDBGSYS_AND_USER:
-            return "s_cbranch_cdbgsys_and_user";
-        case S_CBRANCH_CDBGSYS_OR_USER:
-            return "s_cbranch_cdbgsys_or_user";
-        case S_CBRANCH_CDBGUSER:
-            return "s_cbranch_cdbguser";
-        case S_CBRANCH_EXECNZ:
-            return "s_cbranch_execnz";
-        case S_CBRANCH_EXECZ:
-            return "s_cbranch_execz";
-        case S_CBRANCH_SCC0:
-            return "s_cbranch_scc0";
-        case S_CBRANCH_SCC1:
-            return "s_cbranch_scc1";
-        case S_CBRANCH_VCCNZ:
-            return "s_cbranch_vccnz";
-        case S_CBRANCH_VCCZ:
-            return "s_cbranch_vccz";
-        case S_DECPERFLEVEL:
-            return "s_decperflevel";
-        case S_ENDPGM:
-            return "s_endpgm";
-        case S_ENDPGM_ORDERED_PS_DONE:
-            return "s_endpgm_ordered_ps_done";
-        case S_ENDPGM_SAVED:
-            return "s_endpgm_saved";
-        case S_ICACHE_INV:
-            return "s_icache_inv";
-        case S_INCPERFLEVEL:
-            return "s_incperflevel";
-        case S_NOP:
-            return "s_nop";
-        case S_SENDMSG:
-            return "s_sendmsg";
-        case S_SENDMSGHALT:
-            return "s_sendmsghalt";
-        case S_SET_GPR_IDX_MODE:
-            return "s_set_gpr_idx_mode";
-        case S_SET_GPR_IDX_OFF:
-            return "s_set_gpr_idx_off";
-        case S_SETHALT:
-            return "s_sethalt";
-        case S_SETKILL:
-            return "s_setkill";
-        case S_SETPRIO:
-            return "s_setprio";
-        case S_SLEEP:
-            return "s_sleep";
-        case S_TRAP:
-            return "s_trap";
-        case S_TTRACEDATA:
-            return "s_ttracedata";
-        case S_WAITCNT:
-            return "s_waitcnt";
-        case S_ABS_I32:
-            return "s_abs_i32";
-        case S_AND_SAVEEXEC_B64:
-            return "s_and_saveexec_b64";
-        case S_ANDN1_SAVEEXEC_B64:
-            return "s_andn1_saveexec_b64";
-        case S_ANDN1_WREXEC_B64:
-            return "s_andn1_wrexec_b64";
-        case S_ANDN2_SAVEEXEC_B64:
-            return "s_andn2_saveexec_b64";
-        case S_ANDN2_WREXEC_B64:
-            return "s_andn2_wrexec_b64";
-        case S_BCNT0_I32_B32:
-            return "s_bcnt0_i32_b32";
-        case S_BCNT0_I32_B64:
-            return "s_bcnt0_i32_b64";
-        case S_BCNT1_I32_B32:
-            return "s_bcnt1_i32_b32";
-        case S_BCNT1_I32_B64:
-            return "s_bcnt1_i32_b64";
-        case S_BITREPLICATE_B64_B32:
-            return "s_bitreplicate_b64_b32";
-        case S_BITSET0_B32:
-            return "s_bitset0_b32";
-        case S_BITSET0_B64:
-            return "s_bitset0_b64";
-        case S_BITSET1_B32:
-            return "s_bitset1_b32";
-        case S_BITSET1_B64:
-            return "s_bitset1_b64";
-        case S_BREV_B32:
-            return "s_brev_b32";
-        case S_BREV_B64:
-            return "s_brev_b64";
-        case S_CBRANCH_JOIN:
-            return "s_cbranch_join";
-        case S_CMOV_B32:
-            return "s_cmov_b32";
-        case S_CMOV_B64:
-            return "s_cmov_b64";
-        case S_FF0_I32_B32:
-            return "s_ff0_i32_b32";
-        case S_FF0_I32_B64:
-            return "s_ff0_i32_b64";
-        case S_FF1_I32_B32:
-            return "s_ff1_i32_b32";
-        case S_FF1_I32_B64:
-            return "s_ff1_i32_b64";
-        case S_FLBIT_I32_B32:
-            return "s_flbit_i32_b32";
-        case S_FLBIT_I32_B64:
-            return "s_flbit_i32_b64";
-        case S_FLBIT_I32:
-            return "s_flbit_i32";
-        case S_FLBIT_I32_I64:
-            return "s_flbit_i32_i64";
-        case S_GETPC_B64:
-            return "s_getpc_b64";
-        case S_MOV_B32:
-            return "s_mov_b32";
-        case S_MOV_B64:
-            return "s_mov_b64";
-        case S_MOVRELD_B32:
-            return "s_movreld_b32";
-        case S_MOVRELD_B64:
-            return "s_movreld_b64";
-        case S_MOVRELS_B32:
-            return "s_movrels_b32";
-        case S_MOVRELS_B64:
-            return "s_movrels_b64";
-        case S_NAND_SAVEEXEC_B64:
-            return "s_nand_saveexec_b64";
-        case S_NOR_SAVEEXEC_B64:
-            return "s_nor_saveexec_b64";
-        case S_NOT_B32:
-            return "s_not_b32";
-        case S_NOT_B64:
-            return "s_not_b64";
-        case S_OR_SAVEEXEC_B64:
-            return "s_or_saveexec_b64";
-        case S_ORN2_SAVEEXEC_B64:
-            return "s_orn2_saveexec_b64";
-        case S_QUADMASK_B32:
-            return "s_quadmask_b32";
-        case S_QUADMASK_B64:
-            return "s_quadmask_b64";
-        case S_RFE_B64:
-            return "s_rfe_b64";
-        case S_SET_GPR_IDX_IDX:
-            return "s_set_gpr_idx_idx";
-        case S_SETPC_B64:
-            return "s_setpc_b64";
-        case S_SEXT_I32_I8:
-            return "s_sext_i32_i8";
-        case S_SEXT_I32_I16:
-            return "s_sext_i32_i16";
-        case S_SWAPPC_B64:
-            return "s_swappc_b64";
-        case S_WQM_B32:
-            return "s_wqm_b32";
-        case S_WQM_B64:
-            return "s_wqm_b64";
-        case S_XNOR_SAVEEXEC_B64:
-            return "s_xnor_saveexec_b64";
-        case S_XOR_SAVEEXEC_B64:
-            return "s_xor_saveexec_b64";
-        case S_ABSDIFF_I32:
-            return "s_absdiff_i32";
-        case S_ADDC_U32:
-            return "s_addc_u32";
-        case S_ADD_I32:
-            return "s_add_i32";
-        case S_ADD_U32:
-            return "s_add_u32";
-        case S_AND_B32:
-            return "s_and_b32";
-        case S_AND_B64:
-            return "s_and_b64";
-        case S_ANDN2_B32:
-            return "s_andn2_b32";
-        case S_ANDN2_B64:
-            return "s_andn2_b64";
-        case S_ASHR_I32:
-            return "s_ashr_i32";
-        case S_ASHR_I64:
-            return "s_ashr_i64";
-        case S_BFE_I32:
-            return "s_bfe_i32";
-        case S_BFE_I64:
-            return "s_bfe_i64";
-        case S_BFE_U32:
-            return "s_bfe_u32";
-        case S_BFE_U64:
-            return "s_bfe_u64";
-        case S_BFM_B32:
-            return "s_bfm_b32";
-        case S_BFM_B64:
-            return "s_bfm_b64";
-        case S_CBRANCH_G_FORK:
-            return "s_cbranch_g_fork";
-        case S_CSELECT_B32:
-            return "s_cselect_b32";
-        case S_CSELECT_B64:
-            return "s_cselect_b64";
-        case S_LSHL_B32:
-            return "s_lshl_b32";
-        case S_LSHL_B64:
-            return "s_lshl_b64";
-        case S_LSHL1_ADD_U32:
-            return "s_lshl1_add_u32";
-        case S_LSHL2_ADD_U32:
-            return "s_lshl2_add_u32";
-        case S_LSHL3_ADD_U32:
-            return "s_lshl3_add_u32";
-        case S_LSHL4_ADD_U32:
-            return "s_lshl4_add_u32";
-        case S_LSHR_B32:
-            return "s_lshr_b32";
-        case S_LSHR_B64:
-            return "s_lshr_b64";
-        case S_MAX_I32:
-            return "s_max_i32";
-        case S_MAX_U32:
-            return "s_max_u32";
-        case S_MIN_I32:
-            return "s_min_i32";
-        case S_MIN_U32:
-            return "s_min_u32";
-        case S_MUL_HI_I32:
-            return "s_mul_hi_i32";
-        case S_MUL_HI_U32:
-            return "s_mul_hi_u32";
-        case S_MUL_I32:
-            return "s_mul_i32";
-        case S_NAND_B32:
-            return "s_nand_b32";
-        case S_NAND_B64:
-            return "s_nand_b64";
-        case S_NOR_B32:
-            return "s_nor_b32";
-        case S_NOR_B64:
-            return "s_nor_b64";
-        case S_OR_B32:
-            return "s_or_b32";
-        case S_OR_B64:
-            return "s_or_b64";
-        case S_ORN2_B32:
-            return "s_orn2_b32";
-        case S_ORN2_B64:
-            return "s_orn2_b64";
-        case S_PACK_HH_B32_B16:
-            return "s_pack_hh_b32_b16";
-        case S_PACK_LH_B32_B16:
-            return "s_pack_lh_b32_b16";
-        case S_PACK_LL_B32_B16:
-            return "s_pack_ll_b32_b16";
-        case S_RFE_RESTORE_B64:
-            return "s_rfe_restore_b64";
-        case S_SUBB_U32:
-            return "s_subb_u32";
-        case S_SUB_I32:
-            return "s_sub_i32";
-        case S_SUB_U32:
-            return "s_sub_u32";
-        case S_XNOR_B32:
-            return "s_xnor_b32";
-        case S_XNOR_B64:
-            return "s_xnor_b64";
-        case S_XOR_B32:
-            return "s_xor_b32";
-        case S_XOR_B64:
-            return "s_xor_b64";
-        case S_ADDK_I32:
-            return "s_addk_i32";
-        case S_CALL_B64:
-            return "s_call_b64";
-        case S_CBRANCH_I_FORK:
-            return "s_cbranch_i_fork";
-        case S_CMOVK_I32:
-            return "s_cmovk_i32";
-        case S_CMPK_EQ_I32:
-            return "s_cmpk_eq_i32";
-        case S_CMPK_EQ_U32:
-            return "s_cmpk_eq_u32";
-        case S_CMPK_GE_I32:
-            return "s_cmpk_ge_i32";
-        case S_CMPK_GE_U32:
-            return "s_cmpk_ge_u32";
-        case S_CMPK_GT_I32:
-            return "s_cmpk_gt_i32";
-        case S_CMPK_GT_U32:
-            return "s_cmpk_gt_u32";
-        case S_CMPK_LE_I32:
-            return "s_cmpk_le_i32";
-        case S_CMPK_LE_U32:
-            return "s_cmpk_le_u32";
-        case S_CMPK_LG_I32:
-            return "s_cmpk_lg_i32";
-        case S_CMPK_LG_U32:
-            return "s_cmpk_lg_u32";
-        case S_CMPK_LT_I32:
-            return "s_cmpk_lt_i32";
-        case S_CMPK_LT_U32:
-            return "s_cmpk_lt_u32";
-        case S_GETREG_B32:
-            return "s_getreg_b32";
-        case S_MOVK_I32:
-            return "s_movk_i32";
-        case S_MULK_I32:
-            return "s_mulk_i32";
-        case S_SETREG_B32:
-            return "s_setreg_b32";
-        case S_SETREG_IMM32_B32:
-            return "s_setreg_imm32_b32";
-        case V_MOV_B32:
-            return "v_mov_b32";
-        case V_ADD_U32:
-            return "v_add_u32";
-        case V_ADDC_U32:
-            return "v_addc_u32";
-        case V_LSHLREV_B64:
-            return "v_lshlrev_b64";
-        case V_CMP_EQ_I32:
-            return "v_cmp_eq_i32";
-        case FLAT_STORE_DWORD:
-            return "s_flat_store_dword";
-        case V_SUB_U32:
-            return "v_sub_u32";
-        case V_MUL_LO_U32:
-            return "v_mul_lo_u32";
-        case FLAT_STORE_DWORDX2:
-            return "flat_store_dwordx2";
-        case FLAT_STORE_DWORDX3:
-            return "flat_store_dwordx3";
-        case FLAT_STORE_DWORDX4:
-            return "flat_store_dwordx4";
-        case FLAT_STORE_SHORT:
-            return "flat_store_short";
-        case V_BFREV_B32:
-            return "v_bfrev_b32";
-        case V_FFBH_U32:
-            return "v_ffbh_u32";
-        case V_FFBH_I32:
-            return "v_ffbh_i32";
-        case V_FFBL_B32:
-            return "v_ffbl_b32";
+char const* get_mnemonic(InstrKey key) {
+    auto it = std::find_if(std::begin(instructionRepo), std::end(instructionRepo),
+                           [&key](const InstructionView& curInstr) {
+                               return key == curInstr.key;
+                           });
+    if (it == std::end(instructionRepo)) {
+        throw std::runtime_error(
+            std::string("No instruction mnemonic was found for key: ") +
+            std::to_string(key));
     }
-    assert(false && "Unknown command");
-    return "(unknown instruction)";
+
+    return it->mnemonic;
 }
 
-InstrFormat get_instr_format(InstrKey instrKey) {
-    switch (instrKey) {
-        case S_ABS_I32:
-        case S_AND_SAVEEXEC_B64:
-        case S_ANDN1_SAVEEXEC_B64:
-        case S_ANDN1_WREXEC_B64:
-        case S_ANDN2_SAVEEXEC_B64:
-        case S_ANDN2_WREXEC_B64:
-        case S_BCNT0_I32_B32:
-        case S_BCNT0_I32_B64:
-        case S_BCNT1_I32_B32:
-        case S_BCNT1_I32_B64:
-        case S_BITREPLICATE_B64_B32:
-        case S_BITSET0_B32:
-        case S_BITSET0_B64:
-        case S_BITSET1_B32:
-        case S_BITSET1_B64:
-        case S_BREV_B32:
-        case S_BREV_B64:
-        case S_CBRANCH_JOIN:
-        case S_CMOV_B32:
-        case S_CMOV_B64:
-        case S_FF0_I32_B32:
-        case S_FF0_I32_B64:
-        case S_FF1_I32_B32:
-        case S_FF1_I32_B64:
-        case S_FLBIT_I32_B32:
-        case S_FLBIT_I32_B64:
-        case S_FLBIT_I32:
-        case S_FLBIT_I32_I64:
-        case S_GETPC_B64:
-        case S_MOV_B32:
-        case S_MOV_B64:
-        case S_MOVRELD_B32:
-        case S_MOVRELD_B64:
-        case S_MOVRELS_B32:
-        case S_MOVRELS_B64:
-        case S_NAND_SAVEEXEC_B64:
-        case S_NOR_SAVEEXEC_B64:
-        case S_NOT_B32:
-        case S_NOT_B64:
-        case S_OR_SAVEEXEC_B64:
-        case S_ORN2_SAVEEXEC_B64:
-        case S_QUADMASK_B32:
-        case S_QUADMASK_B64:
-        case S_RFE_B64:
-        case S_SET_GPR_IDX_IDX:
-        case S_SETPC_B64:
-        case S_SEXT_I32_I8:
-        case S_SEXT_I32_I16:
-        case S_SWAPPC_B64:
-        case S_WQM_B32:
-        case S_WQM_B64:
-        case S_XNOR_SAVEEXEC_B64:
-        case S_XOR_SAVEEXEC_B64:
-            return SOP1;
-        case S_ABSDIFF_I32:
-        case S_ADDC_U32:
-        case S_ADD_I32:
-        case S_ADD_U32:
-        case S_AND_B32:
-        case S_AND_B64:
-        case S_ANDN2_B32:
-        case S_ANDN2_B64:
-        case S_ASHR_I32:
-        case S_ASHR_I64:
-        case S_BFE_I32:
-        case S_BFE_I64:
-        case S_BFE_U32:
-        case S_BFE_U64:
-        case S_BFM_B32:
-        case S_BFM_B64:
-        case S_CBRANCH_G_FORK:
-        case S_CSELECT_B32:
-        case S_CSELECT_B64:
-        case S_LSHL_B32:
-        case S_LSHL_B64:
-        case S_LSHL1_ADD_U32:
-        case S_LSHL2_ADD_U32:
-        case S_LSHL3_ADD_U32:
-        case S_LSHL4_ADD_U32:
-        case S_LSHR_B32:
-        case S_LSHR_B64:
-        case S_MAX_I32:
-        case S_MAX_U32:
-        case S_MIN_I32:
-        case S_MIN_U32:
-        case S_MUL_HI_I32:
-        case S_MUL_HI_U32:
-        case S_MUL_I32:
-        case S_NAND_B32:
-        case S_NAND_B64:
-        case S_NOR_B32:
-        case S_NOR_B64:
-        case S_OR_B32:
-        case S_OR_B64:
-        case S_ORN2_B32:
-        case S_ORN2_B64:
-        case S_PACK_HH_B32_B16:
-        case S_PACK_LH_B32_B16:
-        case S_PACK_LL_B32_B16:
-        case S_RFE_RESTORE_B64:
-        case S_SUBB_U32:
-        case S_SUB_I32:
-        case S_SUB_U32:
-        case S_XNOR_B32:
-        case S_XNOR_B64:
-        case S_XOR_B32:
-        case S_XOR_B64:
-            return SOP2;
-        case S_ADDK_I32:
-        case S_CALL_B64:
-        case S_CBRANCH_I_FORK:
-        case S_CMOVK_I32:
-        case S_CMPK_EQ_I32:
-        case S_CMPK_EQ_U32:
-        case S_CMPK_GE_I32:
-        case S_CMPK_GE_U32:
-        case S_CMPK_GT_I32:
-        case S_CMPK_GT_U32:
-        case S_CMPK_LE_I32:
-        case S_CMPK_LE_U32:
-        case S_CMPK_LG_I32:
-        case S_CMPK_LG_U32:
-        case S_CMPK_LT_I32:
-        case S_CMPK_LT_U32:
-        case S_GETREG_B32:
-        case S_MOVK_I32:
-        case S_MULK_I32:
-        case S_SETREG_B32:
-        case S_SETREG_IMM32_B32:
-            return SOPK;
-        case S_BITCMP0_B32:
-        case S_BITCMP0_B64:
-        case S_BITCMP1_B32:
-        case S_BITCMP1_B64:
-        case S_CMP_EQ_I32:
-        case S_CMP_EQ_U32:
-        case S_CMP_EQ_U64:
-        case S_CMP_GE_I32:
-        case S_CMP_GE_U32:
-        case S_CMP_GT_I32:
-        case S_CMP_GT_U32:
-        case S_CMP_LE_I32:
-        case S_CMP_LE_U32:
-        case S_CMP_LG_I32:
-        case S_CMP_LG_U32:
-        case S_CMP_LG_U64:
-        case S_CMP_NE_U64:
-        case S_CMP_LT_I32:
-        case S_CMP_LT_U32:
-        case S_SET_GPR_IDX_ON:
-        case S_SETVSKIP:
-            return SOPC;
-        case S_BARRIER:
-        case S_BRANCH:
-        case S_CBRANCH_CDBGSYS:
-        case S_CBRANCH_CDBGSYS_AND_USER:
-        case S_CBRANCH_CDBGSYS_OR_USER:
-        case S_CBRANCH_CDBGUSER:
-        case S_CBRANCH_EXECNZ:
-        case S_CBRANCH_EXECZ:
-        case S_CBRANCH_SCC0:
-        case S_CBRANCH_SCC1:
-        case S_CBRANCH_VCCNZ:
-        case S_CBRANCH_VCCZ:
-        case S_DECPERFLEVEL:
-        case S_ENDPGM:
-        case S_ENDPGM_ORDERED_PS_DONE:
-        case S_ENDPGM_SAVED:
-        case S_ICACHE_INV:
-        case S_INCPERFLEVEL:
-        case S_NOP:
-        case S_SENDMSG:
-        case S_SENDMSGHALT:
-        case S_SET_GPR_IDX_MODE:
-        case S_SET_GPR_IDX_OFF:
-        case S_SETHALT:
-        case S_SETKILL:
-        case S_SETPRIO:
-        case S_SLEEP:
-        case S_TRAP:
-        case S_TTRACEDATA:
-        case S_WAITCNT:
-            return SOPP;
-        case S_ATOMIC_ADD:
-        case S_ATOMIC_ADD_X2:
-        case S_ATOMIC_AND:
-        case S_ATOMIC_AND_X2:
-        case S_ATOMIC_CMPSWAP:
-        case S_ATOMIC_CMPSWAP_X2:
-        case S_ATOMIC_DEC:
-        case S_ATOMIC_DEC_X2:
-        case S_ATOMIC_INC:
-        case S_ATOMIC_INC_X2:
-        case S_ATOMIC_OR:
-        case S_ATOMIC_OR_X2:
-        case S_ATOMIC_SMAX:
-        case S_ATOMIC_SMAX_X2:
-        case S_ATOMIC_SMIN:
-        case S_ATOMIC_SMIN_X2:
-        case S_ATOMIC_SUB:
-        case S_ATOMIC_SUB_X2:
-        case S_ATOMIC_SWAP:
-        case S_ATOMIC_SWAP_X2:
-        case S_ATOMIC_UMAX:
-        case S_ATOMIC_UMAX_X2:
-        case S_ATOMIC_UMIN:
-        case S_ATOMIC_UMIN_X2:
-        case S_ATOMIC_XOR:
-        case S_ATOMIC_XOR_X2:
-        case S_BUFFER_ATOMIC_ADD:
-        case S_BUFFER_ATOMIC_ADD_X2:
-        case S_BUFFER_ATOMIC_AND:
-        case S_BUFFER_ATOMIC_AND_X2:
-        case S_BUFFER_ATOMIC_CMPSWAP:
-        case S_BUFFER_ATOMIC_CMPSWAP_X2:
-        case S_BUFFER_ATOMIC_DEC:
-        case S_BUFFER_ATOMIC_DEC_X2:
-        case S_BUFFER_ATOMIC_INC:
-        case S_BUFFER_ATOMIC_INC_X2:
-        case S_BUFFER_ATOMIC_OR:
-        case S_BUFFER_ATOMIC_OR_X2:
-        case S_BUFFER_ATOMIC_SMAX:
-        case S_BUFFER_ATOMIC_SMAX_X2:
-        case S_BUFFER_ATOMIC_SMIN:
-        case S_BUFFER_ATOMIC_SMIN_X2:
-        case S_BUFFER_ATOMIC_SUB:
-        case S_BUFFER_ATOMIC_SUB_X2:
-        case S_BUFFER_ATOMIC_SWAP:
-        case S_BUFFER_ATOMIC_SWAP_X2:
-        case S_BUFFER_ATOMIC_UMAX:
-        case S_BUFFER_ATOMIC_UMAX_X2:
-        case S_BUFFER_ATOMIC_UMIN:
-        case S_BUFFER_ATOMIC_UMIN_X2:
-        case S_BUFFER_ATOMIC_XOR:
-        case S_BUFFER_ATOMIC_XOR_X2:
-        case S_BUFFER_LOAD_DWORD:
-        case S_BUFFER_LOAD_DWORDX16:
-        case S_BUFFER_LOAD_DWORDX2:
-        case S_BUFFER_LOAD_DWORDX4:
-        case S_BUFFER_LOAD_DWORDX8:
-        case S_BUFFER_STORE_DWORD:
-        case S_BUFFER_STORE_DWORDX2:
-        case S_BUFFER_STORE_DWORDX4:
-        case S_DCACHE_DISCARD:
-        case S_DCACHE_DISCARD_X2:
-        case S_DCACHE_INV:
-        case S_DCACHE_INV_VOL:
-        case S_LOAD_DWORD:
-        case S_LOAD_DWORDX16:
-        case S_LOAD_DWORDX2:
-        case S_LOAD_DWORDX4:
-        case S_LOAD_DWORDX8:
-        case S_MEMREALTIME:
-        case S_MEMTIME:
-        case S_SCRATCH_LOAD_DWORD:
-        case S_SCRATCH_LOAD_DWORDX2:
-        case S_SCRATCH_LOAD_DWORDX4:
-        case S_SCRATCH_STORE_DWORD:
-        case S_SCRATCH_STORE_DWORDX2:
-        case S_SCRATCH_STORE_DWORDX4:
-        case S_STORE_DWORD:
-        case S_STORE_DWORDX2:
-        case S_STORE_DWORDX4:
-            return SMEM;
-        case V_MOV_B32:
-        case V_BFREV_B32:
-        case V_FFBH_U32:
-        case V_FFBH_I32:
-        case V_FFBL_B32:
-        case V_SWAP_B32:
-        case V_MOVRELD_B32:
-        case V_MOVRELS_B32:
-        case V_MOVRELSD_B32:
-        case V_NOT_B32:
-        case V_READFIRSTLANE_B32:
-        case V_SAT_PK_U8_I16:
-        case V_SCREEN_PARTITION_4SE_B32:
-        case V_NOP:
-        case V_CVT_I32_F64:
-        case V_CVT_F64_I32:
-        case V_CVT_F32_I32:
-        case V_CVT_F32_U32:
-        case V_CVT_U32_F32:
-        case V_CVT_I32_F32:
-        case V_CVT_F16_F32:
-        case V_CVT_F32_F16:
-        case V_CVT_RPI_I32_F32:
-        case V_CVT_FLR_I32_F32:
-        case V_CVT_OFF_F32_I4:
-        case V_CVT_F32_F64:
-        case V_CVT_F64_F32:
-        case V_CVT_F32_UBYTE0:
-        case V_CVT_F32_UBYTE1:
-        case V_CVT_F32_UBYTE2:
-        case V_CVT_F32_UBYTE3:
-        case V_CVT_U32_F64:
-        case V_CVT_F64_U32:
-        case V_TRUNC_F64:
-        case V_CEIL_F64:
-        case V_RNDNE_F64:
-        case V_FLOOR_F64:
-        case V_FRACT_F32:
-        case V_TRUNC_F32:
-        case V_CEIL_F32:
-        case V_RNDNE_F32:
-        case V_FLOOR_F32:
-        case V_EXP_F32:
-        case V_LOG_F32:
-        case V_RCP_F32:
-        case V_RCP_IFLAG_F32:
-        case V_RSQ_F32:
-        case V_RCP_F64:
-        case V_RSQ_F64:
-        case V_SQRT_F32:
-        case V_SQRT_F64:
-        case V_SIN_F32:
-        case V_COS_F32:
-        case V_FREXP_EXP_I32_F64:
-        case V_FREXP_MANT_F64:
-        case V_FRACT_F64:
-        case V_FREXP_EXP_I32_F32:
-        case V_FREXP_MANT_F32:
-        case V_CLREXCP:
-        case V_CVT_F16_U16:
-        case V_CVT_F16_I16:
-        case V_CVT_U16_F16:
-        case V_CVT_I16_F16:
-        case V_RCP_F16:
-        case V_SQRT_F16:
-        case V_RSQ_F16:
-        case V_LOG_F16:
-        case V_EXP_F16:
-        case V_FREXP_MANT_F16:
-        case V_FREXP_EXP_I16_F16:
-        case V_FLOOR_F16:
-        case V_CEIL_F16:
-        case V_TRUNC_F16:
-        case V_RNDNE_F16:
-        case V_FRACT_F16:
-        case V_SIN_F16:
-        case V_COS_F16:
-        case V_EXP_LEGACY_F32:
-        case V_LOG_LEGACY_F32:
-        case V_CVT_NORM_I16_F16:
-        case V_CVT_NORM_U16_F16:
-            return VOP1;
-        case V_ADD_U32:
-        case V_ADDC_U32:
-        case V_SUB_U32:
-        case V_CNDMASK_B32:
-        case V_ADD_F32:
-        case V_SUB_F32:
-        case V_SUBREV_F32:
-        case V_MUL_LEGACY_F32:
-        case V_MUL_F32:
-        case V_MUL_I32_I24:
-        case V_MUL_HI_I32_I24:
-        case V_MUL_U32_U24:
-        case V_MUL_HI_U32_U24:
-        case V_MIN_F32:
-        case V_MAX_F32:
-        case V_MIN_I32:
-        case V_MAX_I32:
-        case V_MIN_U32:
-        case V_MAX_U32:
-        case V_LSHRREV_B32:
-        case V_ASHRREV_I32:
-        case V_LSHLREV_B32:
-        case V_AND_B32:
-        case V_OR_B32:
-        case V_XOR_B32:
-        case V_MAC_F32:
-        case V_MADMK_F32:
-        case V_MADAK_F32:
-        case V_ADD_CO_U32:
-        case V_SUB_CO_U32:
-        case V_SUBREV_CO_U32:
-        case V_ADDC_CO_U32:
-        case V_SUBB_CO_U32:
-        case V_SUBBREV_CO_U32:
-        case V_ADD_F16:
-        case V_SUB_F16:
-        case V_SUBREV_F16:
-        case V_MUL_F16:
-        case V_MAC_F16:
-        case V_MADMK_F16:
-        case V_MADAK_F16:
-        case V_ADD_U16:
-        case V_SUB_U16:
-        case V_SUBREV_U16:
-        case V_MUL_LO_U16:
-        case V_LSHLREV_B16:
-        case V_LSHRREV_B16:
-        case V_ASHRREV_I16:
-        case V_MAX_F16:
-        case V_MIN_F16:
-        case V_MAX_U16:
-        case V_MAX_I16:
-        case V_MIN_U16:
-        case V_MIN_I16:
-        case V_LDEXP_F16:
-        case V_SUBREV_U32:
-            return VOP2;
-        case V_MUL_LO_U32:
-        case V_LSHLREV_B64:
-            return VOP3A;
-        case V_DIV_SCALE_F32:
-        case V_DIV_SCALE_F64:
-        case V_MAD_U64_U32:
-        case V_MAD_I64_I32:
-            return VOP3B;
-        case V_CMP_EQ_I32:
-            return VOPC;
-        case FLAT_STORE_DWORD:
-        case FLAT_STORE_DWORDX2:
-        case FLAT_STORE_DWORDX3:
-        case FLAT_STORE_DWORDX4:
-        case FLAT_STORE_SHORT:
-            return FLAT;
-        default:
-            //todo
-            assert(false);
+InstrFormat get_instr_format(InstrKey instrKey, size_t widthBytes) {
+    auto it = std::find_if(std::begin(instructionRepo), std::end(instructionRepo),
+                           [&instrKey](const InstructionView& curInstr) {
+                               return instrKey == curInstr.key;
+                           });
+    if (it == std::end(instructionRepo)) {
+        throw std::runtime_error(
+            std::string("Can't find InstructionView for ") +
+            get_mnemonic(instrKey));
     }
-}
 
-uint8_t get_instr_width(InstrKey instrKey) {
-    auto instr_format = get_instr_format(instrKey);
-    switch (instr_format) {
-        case SOP1:
-        case SOP2:
-        case SOPK:
-        case SOPP:
-        case SOPC:
-        case VOP1:
-        case VOP2:
-        case VOPC:
-        case VINTRP:
-            return 32;
-        case SMEM:
-        case VOP3B:
-        case VOP3A:
-        case VOP3P:
-        case FLAT:
-            return 64;
+    InstrFormat format = UNDEFINED;
+    if (widthBytes == 4) {
+        format = it->format;
+    } else if (widthBytes == 8) {
+        format = it->extendedFormat;
     }
+    if (format != UNDEFINED) return format;
+
+    logger.warn(std::string("Can not resolve instruction format for ") +
+                                 get_mnemonic(instrKey) + " with width in bytes " + std::to_string(widthBytes));
+    format = it->format != UNDEFINED ? it->format : it->extendedFormat;
+
+    if (format != UNDEFINED) return format;
+    throw std::runtime_error(std::string("Undefined format for instruction ") + it->mnemonic);
 }
