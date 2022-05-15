@@ -414,7 +414,7 @@ static inline const InstructionView instructionRepo[] = {
     {"v_min_u16", V_MIN_U16, VOP2, UNDEFINED},
     {"v_min_i16", V_MIN_I16, VOP2, UNDEFINED},
     {"v_ldexp_f16", V_LDEXP_F16, VOP2, UNDEFINED},
-    //VOP2: extended VOP3A
+    // VOP2: extended VOP3A
     {"v_subrev_u16", V_SUBREV_U16, VOP2, VOP3A},
     {"v_sub_u16", V_SUB_U16, VOP2, VOP3A},
     {"v_ashr_i32", V_ASHR_I32, VOP2, VOP3A},
@@ -422,7 +422,7 @@ static inline const InstructionView instructionRepo[] = {
     {"v_ashrrev_i32", V_ASHRREV_I32, VOP2, VOP3A},
     {"v_lshlrev_b32", V_LSHLREV_B32, VOP2, VOP3A},
     {"v_lshr_b32", V_LSHR_B32, VOP2, VOP3A},
-    //VOP2: extended VOP3B
+    // VOP2: extended VOP3B
     {"v_addc_co_u32", V_ADDC_CO_U32, VOP2, VOP3B},
     {"v_addc_u32", V_ADDC_U32, VOP2, VOP3B},
     {"v_add_u32", V_ADD_U32, VOP2, VOP3B},
@@ -538,6 +538,70 @@ static inline const InstructionView instructionRepo[] = {
     {"v_cmpx_lg_u64", V_CMPX_LG_U64, VOPC, VOP3A},
     {"v_cmpx_ge_u64", V_CMPX_GE_U64, VOPC, VOP3A},
     {"v_cmpx_tru_u64", V_CMPX_TRU_U64, VOPC, VOP3A},
+    {"v_cmp_f_f32" , V_CMP_F_F32, VOPC, VOP3A},
+    {"v_cmp_lt_f32" , V_CMP_LT_F32, VOPC, VOP3A},
+    {"v_cmp_eq_f32" , V_CMP_EQ_F32, VOPC, VOP3A},
+    {"v_cmp_le_f32" , V_CMP_LE_F32, VOPC, VOP3A},
+    {"v_cmp_gt_f32" , V_CMP_GT_F32, VOPC, VOP3A},
+    {"v_cmp_lg_f32" , V_CMP_LG_F32, VOPC, VOP3A},
+    {"v_cmp_ge_f32" , V_CMP_GE_F32, VOPC, VOP3A},
+    {"v_cmp_o_f32" , V_CMP_O_F32, VOPC, VOP3A},
+    {"v_cmp_u_f32" , V_CMP_U_F32, VOPC, VOP3A},
+    {"v_cmp_nge_f32" , V_CMP_NGE_F32, VOPC, VOP3A},
+    {"v_cmp_nlg_f32" , V_CMP_NLG_F32, VOPC, VOP3A},
+    {"v_cmp_ngt_f32" , V_CMP_NGT_F32, VOPC, VOP3A},
+    {"v_cmp_nle_f32" , V_CMP_NLE_F32, VOPC, VOP3A},
+    {"v_cmp_neq_f32" , V_CMP_NEQ_F32, VOPC, VOP3A},
+    {"v_cmp_nlt_f32" , V_CMP_NLT_F32, VOPC, VOP3A},
+    {"v_cmp_tru_f32" , V_CMP_TRU_F32, VOPC, VOP3A},
+    {"v_cmpx_f_f32" , V_CMPX_F_F32, VOPC, VOP3A},
+    {"v_cmpx_lt_f32" , V_CMPX_LT_F32, VOPC, VOP3A},
+    {"v_cmpx_eq_f32" , V_CMPX_EQ_F32, VOPC, VOP3A},
+    {"v_cmpx_le_f32" , V_CMPX_LE_F32, VOPC, VOP3A},
+    {"v_cmpx_gt_f32" , V_CMPX_GT_F32, VOPC, VOP3A},
+    {"v_cmpx_lg_f32" , V_CMPX_LG_F32, VOPC, VOP3A},
+    {"v_cmpx_ge_f32" , V_CMPX_GE_F32, VOPC, VOP3A},
+    {"v_cmpx_o_f32" , V_CMPX_O_F32, VOPC, VOP3A},
+    {"v_cmpx_u_f32" , V_CMPX_U_F32, VOPC, VOP3A},
+    {"v_cmpx_nge_f32" , V_CMPX_NGE_F32, VOPC, VOP3A},
+    {"v_cmpx_nlg_f32" , V_CMPX_NLG_F32, VOPC, VOP3A},
+    {"v_cmpx_ngt_f32" , V_CMPX_NGT_F32, VOPC, VOP3A},
+    {"v_cmpx_nle_f32" , V_CMPX_NLE_F32, VOPC, VOP3A},
+    {"v_cmpx_neq_f32" , V_CMPX_NEQ_F32, VOPC, VOP3A},
+    {"v_cmpx_nlt_f32" , V_CMPX_NLT_F32, VOPC, VOP3A},
+    {"v_cmpx_tru_f32" , V_CMPX_TRU_F32, VOPC, VOP3A},
+    {"v_cmps_f_f64" , V_CMPS_F_F64, VOPC, VOP3A},
+    {"v_cmps_lt_f64" , V_CMPS_LT_F64, VOPC, VOP3A},
+    {"v_cmps_eq_f64" , V_CMPS_EQ_F64, VOPC, VOP3A},
+    {"v_cmps_le_f64" , V_CMPS_LE_F64, VOPC, VOP3A},
+    {"v_cmps_gt_f64" , V_CMPS_GT_F64, VOPC, VOP3A},
+    {"v_cmps_lg_f64" , V_CMPS_LG_F64, VOPC, VOP3A},
+    {"v_cmps_ge_f64" , V_CMPS_GE_F64, VOPC, VOP3A},
+    {"v_cmps_o_f64" , V_CMPS_O_F64, VOPC, VOP3A},
+    {"v_cmps_u_f64" , V_CMPS_U_F64, VOPC, VOP3A},
+    {"v_cmps_nge_f64" , V_CMPS_NGE_F64, VOPC, VOP3A},
+    {"v_cmps_nlg_f64" , V_CMPS_NLG_F64, VOPC, VOP3A},
+    {"v_cmps_ngt_f64" , V_CMPS_NGT_F64, VOPC, VOP3A},
+    {"v_cmps_nle_f64" , V_CMPS_NLE_F64, VOPC, VOP3A},
+    {"v_cmps_neq_f64" , V_CMPS_NEQ_F64, VOPC, VOP3A},
+    {"v_cmps_nlt_f64" , V_CMPS_NLT_F64, VOPC, VOP3A},
+    {"v_cmps_tru_f64" , V_CMPS_TRU_F64, VOPC, VOP3A},
+    {"v_cmpx_f_f64" , V_CMPX_F_F64, VOPC, VOP3A},
+    {"v_cmpx_lt_f64" , V_CMPX_LT_F64, VOPC, VOP3A},
+    {"v_cmpx_eq_f64" , V_CMPX_EQ_F64, VOPC, VOP3A},
+    {"v_cmpx_le_f64" , V_CMPX_LE_F64, VOPC, VOP3A},
+    {"v_cmpx_gt_f64" , V_CMPX_GT_F64, VOPC, VOP3A},
+    {"v_cmpx_lg_f64" , V_CMPX_LG_F64, VOPC, VOP3A},
+    {"v_cmpx_ge_f64" , V_CMPX_GE_F64, VOPC, VOP3A},
+    {"v_cmpx_o_f64" , V_CMPX_O_F64, VOPC, VOP3A},
+    {"v_cmpx_u_f64" , V_CMPX_U_F64, VOPC, VOP3A},
+    {"v_cmpx_nge_f64" , V_CMPX_NGE_F64, VOPC, VOP3A},
+    {"v_cmpx_nlg_f64" , V_CMPX_NLG_F64, VOPC, VOP3A},
+    {"v_cmpx_ngt_f64" , V_CMPX_NGT_F64, VOPC, VOP3A},
+    {"v_cmpx_nle_f64" , V_CMPX_NLE_F64, VOPC, VOP3A},
+    {"v_cmpx_neq_f64" , V_CMPX_NEQ_F64, VOPC, VOP3A},
+    {"v_cmpx_nlt_f64" , V_CMPX_NLT_F64, VOPC, VOP3A},
+    {"v_cmpx_tru_f64" , V_CMPX_TRU_F64, VOPC, VOP3A},
 
     // FLAT
     {"flat_store_dword", FLAT_STORE_DWORD, UNDEFINED, FLAT},
@@ -548,8 +612,7 @@ static inline const InstructionView instructionRepo[] = {
     {"flat_load_dword", FLAT_LOAD_DWORD, UNDEFINED, FLAT},
     {"flat_load_dwordx2", FLAT_LOAD_DWORDX2, UNDEFINED, FLAT},
     {"flat_load_dwordx3", FLAT_LOAD_DWORDX3, UNDEFINED, FLAT},
-    {"flat_load_dwordx4", FLAT_LOAD_DWORDX4, UNDEFINED, FLAT}
-};
+    {"flat_load_dwordx4", FLAT_LOAD_DWORDX4, UNDEFINED, FLAT}};
 
 InstrKey get_instr_key(const std::string& instruction) {
     auto it =
@@ -585,9 +648,8 @@ InstrFormat get_instr_format(InstrKey instrKey, size_t widthBytes) {
                                return instrKey == curInstr.key;
                            });
     if (it == std::end(instructionRepo)) {
-        throw std::runtime_error(
-            std::string("Can't find InstructionView for ") +
-            get_mnemonic(instrKey));
+        throw std::runtime_error(std::string("Can't find InstructionView for ") +
+                                 get_mnemonic(instrKey));
     }
 
     InstrFormat format = UNDEFINED;
@@ -599,9 +661,11 @@ InstrFormat get_instr_format(InstrKey instrKey, size_t widthBytes) {
     if (format != UNDEFINED) return format;
 
     logger.warn(std::string("Can not resolve instruction format for ") +
-                                 get_mnemonic(instrKey) + " with width in bytes " + std::to_string(widthBytes));
+                get_mnemonic(instrKey) + " with width in bytes " +
+                std::to_string(widthBytes));
     format = it->format != UNDEFINED ? it->format : it->extendedFormat;
 
     if (format != UNDEFINED) return format;
-    throw std::runtime_error(std::string("Undefined format for instruction ") + it->mnemonic);
+    throw std::runtime_error(std::string("Undefined format for instruction ") +
+                             it->mnemonic);
 }

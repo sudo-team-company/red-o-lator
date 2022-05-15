@@ -1,19 +1,22 @@
 #include "instruction.h"
 
-KernelCode::KernelCode(const std::vector<std::string> &instruction) {
+KernelCode::KernelCode(const std::vector<std::string>& instruction) {
     int prevInstrAddr = -1;
-    for (auto &instr: instruction) {
+    for (auto& instr : instruction) {
         if (Operand::is_label(instr)) {
             continue;
         }
-        auto dividedInstr = utils::split(instr, ' ', 2);
+        auto dividedInstr = utils::splitMap<std::string>(instr, ' ', 2, [](auto arg) {
+            return utils::trim(arg);
+        });
         assert(dividedInstr.size() >= 2 && "Unsupported asm instruction format");
-        auto addressStr = utils::trim(dividedInstr[0].substr(2));
+        auto addressStr = dividedInstr[0].substr(2);
         auto address = stoul(addressStr, nullptr, 16);
-        auto mnemonic = utils::trim(dividedInstr[1]);
+        auto mnemonic = dividedInstr[1];
         if (dividedInstr.size() == 3) {
-            auto args = utils::split(dividedInstr[2], ',');
-            std::for_each(args.begin(), args.end(), utils::trimInplace);
+            auto args = utils::splitMap<std::string>(dividedInstr[2], ',', -1, [](auto arg) {
+                return utils::trim(arg);
+            });
             add_instr(address, mnemonic, args);
         } else {
             add_instr(address, mnemonic);
@@ -32,7 +35,7 @@ KernelCode::KernelCode(const std::vector<std::string> &instruction) {
     }
 }
 
-Instruction *KernelCode::get_instr(uint64_t address) const {
+Instruction* KernelCode::get_instr(uint64_t address) const {
     assert(address % 4 == 0 && "Wrong instr address: not a multiple of 4");
     auto instrIter = code.find(address);
     assert(instrIter != code.end() && "Wrong instruction address: instr is nullptr");
@@ -40,15 +43,15 @@ Instruction *KernelCode::get_instr(uint64_t address) const {
 }
 
 void KernelCode::add_instr(uint32_t addr,
-                           std::string &instr,
-                           const std::vector<std::string> &args) {
+                           std::string& instr,
+                           const std::vector<std::string>& args) {
     code[addr] = std::make_unique<Instruction>(Instruction{addr, instr, args});
 }
 
 std::set<std::string> Operand::float_values = {"0.5", "-0.5", "1.0", "-1.0",
                                                "2.0", "-2.0", "4.0", "-4.0"};
 
-Operand::Operand(const std::string &arg) {
+Operand::Operand(const std::string& arg) {
     if (is_float(arg)) {
         type = FLOAT;
         value = stof(arg);
@@ -70,26 +73,26 @@ Operand::Operand(const std::string &arg) {
     }
 }
 
-bool Operand::is_float(const std::string &arg) {
+bool Operand::is_float(const std::string& arg) {
     // todo 1.0 / (2.0 * PI) unsupported
     return float_values.find(arg) != float_values.end();
 }
 
-bool Operand::is_scalar(const std::string &arg) {
+bool Operand::is_scalar(const std::string& arg) {
     if (arg.size() < 2) return false;
     return (arg[0] == 'S' || arg[0] == 's') && !std::isalpha(arg[1]);
 }
 
-bool Operand::is_vector(const std::string &arg) {
+bool Operand::is_vector(const std::string& arg) {
     if (arg.size() < 2) return false;
     return (arg[0] == 'v' || arg[0] == 'V') && !std::isalpha(arg[1]);
 }
 
-bool Operand::is_label(const std::string &arg) {
+bool Operand::is_label(const std::string& arg) {
     return utils::startsWith(arg, ".L");
 }
 
-std::pair<RegisterType, size_t> Operand::get_register(const std::string &arg) {
+std::pair<RegisterType, size_t> Operand::get_register(const std::string& arg) {
     if (arg == "vcc") {
         return std::make_pair(VCC, 1);
     }
@@ -134,12 +137,12 @@ std::pair<RegisterType, size_t> Operand::get_register(const std::string &arg) {
 }
 
 Instruction::Instruction(uint32_t addr,
-                         std::string &instr,
-                         const std::vector<std::string> &args)
-                         : addr(addr), rawInstruction(std::move(instr)) {
+                         std::string instr,
+                         const std::vector<std::string>& args)
+    : addr(addr), rawInstruction(std::move(instr)) {
     instrKey = get_instr_key(rawInstruction);
     operands = std::vector<std::unique_ptr<Operand>>();
-    for (auto &arg: args) {
+    for (auto& arg : args) {
         assert(!args.empty() && "Instruction argument can not be empty");
         operands.push_back(std::make_unique<Operand>(arg));
     }

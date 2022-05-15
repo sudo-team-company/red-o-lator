@@ -1,6 +1,8 @@
 #include "kernel_config.h"
 
 
+void validateSizes(size_t dims, const std::array<size_t, 3>& sizes, const char *name);
+
 KernelConfig::KernelConfig(uint32_t dims,
                            const size_t *globalWorkOffset,
                            const size_t *globalWorkSize,
@@ -13,9 +15,11 @@ KernelConfig::KernelConfig(uint32_t dims,
     if (!globalWorkSize) {
         throw std::runtime_error("Global work size parameter can not be empty!");
     }
+    validateSizes(dims, this->globalWorkSize, "Global work size");
     std::copy_n(globalWorkSize, dims, this->globalWorkSize.begin());
     if (localWorkSize) {
         std::copy_n(localWorkSize, dims, this->localWorkSize.begin());
+        validateSizes(dims, this->localWorkSize, "Local work size");
     }
     for (auto &param: configParams) {
         auto dividedParam = utils::split(param.substr(1), ' ', 1);
@@ -51,5 +55,14 @@ KernelConfig::KernelConfig(uint32_t dims,
     }
     if (sgprsnum == 0 || vgprsnum == 0) {
         throw std::runtime_error("SGPRs and VGPRs amount should be specified");
+    }
+}
+
+void validateSizes(size_t dims, const std::array<size_t, 3>& sizes, const char *name) {
+    const char * dimsLetters = "XYZ";
+    for (size_t i = 0; i < dims; ++i) {
+        if (sizes[i] == 0) {
+            throw std::runtime_error(std::string("Invalid ") + name + " for " + dimsLetters[i]);
+        }
     }
 }

@@ -1,16 +1,16 @@
 #pragma once
 
+#include <common/logger/Logger.h>
 #include <array>
 #include <cassert>
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include <common/logger/Logger.h>
-#include "instr/instruction.h"
-#include "reg/register.h"
-#include "kernel_config.h"
-#include "wf_state.h"
 #include "commons/commons.h"
+#include "instr/instruction.h"
+#include "kernel_config.h"
+#include "register.h"
+#include "wf_state.h"
 
 struct Wavefront;
 struct WorkItem;

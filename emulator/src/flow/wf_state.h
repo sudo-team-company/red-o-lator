@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reg/register.h"
+#include "register.h"
 
 struct WfStateSOP1 {
     uint64_t SDST = 0;

@@ -81,6 +81,7 @@ void throwParseError(const std::string& argumentType,
 
 void KernelArgumentInfoParser::parse(
     const std::shared_ptr<ScalarKernelArgumentInfo>& outInfo) {
+    outInfo->kind = SCALAR;
     for (auto it = restParametersBeginIter; it < restParametersEndIter; ++it) {
         const auto param = *it;
 
@@ -96,6 +97,7 @@ void KernelArgumentInfoParser::parse(
 
 void KernelArgumentInfoParser::parse(
     const std::shared_ptr<VectorKernelArgumentInfo>& outInfo) {
+    outInfo->kind = VECTOR;
     for (auto it = restParametersBeginIter; it < restParametersEndIter; ++it) {
         const auto param = *it;
 
@@ -111,6 +113,7 @@ void KernelArgumentInfoParser::parse(
 
 void KernelArgumentInfoParser::parse(
     const std::shared_ptr<StructureKernelArgumentInfo>& outInfo) {
+    outInfo->kind = STRUCT;
     for (auto it = restParametersBeginIter; it < restParametersEndIter; ++it) {
         const auto param = *it;
 
@@ -128,6 +131,7 @@ void KernelArgumentInfoParser::parse(
 
 void KernelArgumentInfoParser::parse(
     const std::shared_ptr<ImageKernelArgumentInfo>& outInfo) {
+    outInfo->kind = IMAGE;
     for (auto it = restParametersBeginIter; it < restParametersEndIter; ++it) {
         const auto param = *it;
 
@@ -155,6 +159,7 @@ void KernelArgumentInfoParser::parse(
 
 void KernelArgumentInfoParser::parse(
     const std::shared_ptr<SamplerKernelArgumentInfo>& outInfo) {
+    outInfo->kind = SAMPLER;
     for (auto it = restParametersBeginIter; it < restParametersEndIter; ++it) {
         const auto param = *it;
 
@@ -200,6 +205,7 @@ void KernelArgumentInfoParser::parse(
 
 void KernelArgumentInfoParser::parse(
     const std::shared_ptr<PointerKernelArgumentInfo>& outInfo) {
+    outInfo->kind = POINTER;
     for (auto it = restParametersBeginIter; it < restParametersEndIter; ++it) {
         const auto param = *it;
 

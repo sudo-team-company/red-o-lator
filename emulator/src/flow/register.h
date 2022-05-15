@@ -2,7 +2,7 @@
 
 #include <bitset>
 #include <unordered_map>
-#include "reg_info.h"
+#include "instr/reg_info.h"
 
 constexpr bool is_s_reg(RegisterType type) {
     return type >= S0 && type <= S103;

@@ -1,78 +1,84 @@
 #include "alu.h"
 
-void set_reladdr_and_exec(const Instruction& instruction,
-                          Wavefront* wf,
-                          WfStateSOPP& state,
-                          void (*exec)(WfStateSOPP&));
-
-static inline void run_s_branch(WfStateSOPP& state) {
+namespace {
+void run_s_branch(WfStateSOPP& state) {
     state.PC->set_value(state.RELADDR);
 }
 
-static inline void run_s_cbranch_cdbgsys(WfStateSOPP& state) {
+void run_s_cbranch_cdbgsys(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys()) {
         state.PC->set_value(state.RELADDR);
     }
 }
 
-static inline void run_s_cbranch_cdbgsys_and_user(WfStateSOPP& state) {
+void run_s_cbranch_cdbgsys_and_user(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys() && state.STATUS->cond_dbg_user()) {
         state.PC->set_value(state.RELADDR);
     }
 }
 
-static inline void run_s_cbranch_cdbgsys_or_user(WfStateSOPP& state) {
+void run_s_cbranch_cdbgsys_or_user(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_sys() || state.STATUS->cond_dbg_user()) {
         state.PC->set_value(state.RELADDR);
     }
 }
 
-static inline void run_s_cbranch_cdbguser(WfStateSOPP& state) {
+void run_s_cbranch_cdbguser(WfStateSOPP& state) {
     if (state.STATUS->cond_dbg_user()) {
         state.PC->set_value(state.RELADDR);
     }
 }
 
-static inline void run_s_cbranch_execnz(WfStateSOPP& state) {
+void run_s_cbranch_execnz(WfStateSOPP& state) {
     if (state.EXEC != 0) state.PC->set_value(state.RELADDR);
 }
 
-static inline void run_s_cbranch_execz(WfStateSOPP& state) {
+void run_s_cbranch_execz(WfStateSOPP& state) {
     if (state.EXEC == 0) state.PC->set_value(state.RELADDR);
 }
 
-static inline void run_s_cbranch_scc0(WfStateSOPP& state) {
+void run_s_cbranch_scc0(WfStateSOPP& state) {
     if (state.SCC == 0) state.PC->set_value(state.RELADDR);
 }
 
-static inline void run_s_cbranch_scc1(WfStateSOPP& state) {
+void run_s_cbranch_scc1(WfStateSOPP& state) {
     if (state.SCC) state.PC->set_value(state.RELADDR);
 }
-static inline void run_s_cbranch_vccnz(WfStateSOPP& state) {
+void run_s_cbranch_vccnz(WfStateSOPP& state) {
     if (state.VCC != 0) state.PC->set_value(state.RELADDR);
 }
-static inline void run_s_cbranch_vccz(WfStateSOPP& state) {
+void run_s_cbranch_vccz(WfStateSOPP& state) {
     if (state.VCC == 0) state.PC->set_value(state.RELADDR);
 }
 
-static inline void run_s_nop(WfStateSOPP& state) {
-    //do nothing
+void run_s_nop(WfStateSOPP& state) {
+    // do nothing
 }
 
-static inline void run_s_set_gpr_idx_mode(WfStateSOPP& state) {
+void run_s_set_gpr_idx_mode(WfStateSOPP& state) {
     state.M0 = (state.M0 & 0xffff0fff) | ((state.SIMM16 & 15) << 12);
 }
 
-static inline void run_s_set_gpr_idx_off(WfStateSOPP& state) {
+void run_s_set_gpr_idx_off(WfStateSOPP& state) {
     state.MODE->gpr_idx_en(0);
 }
 
-static inline void run_s_sethalt(WfStateSOPP& state) {
+void run_s_sethalt(WfStateSOPP& state) {
     state.STATUS->halt(state.SIMM16 & 1);
 }
 
-static inline void run_s_waitcnt(WfStateSOPP& state) {
-    //do nothing
+void run_s_waitcnt(WfStateSOPP& state) {
+    // do nothing
+}
+}
+
+void set_reladdr_and_exec(const Instruction& instruction,
+                          Wavefront* wf,
+                          WfStateSOPP& state,
+                          void (*exec)(WfStateSOPP&)) {
+
+    state.RELADDR = to_uin64_t(wf->read_operand(*instruction[0]));
+    exec(state);
 }
 
 void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
@@ -137,13 +143,4 @@ void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
             UNSUPPORTED_INSTRUCTION("SOPP", get_mnemonic(instrKey));
     }
     wavefront->update_with_common_sopp_state(instruction, state);
-}
-
-void set_reladdr_and_exec(const Instruction& instruction,
-                          Wavefront* wf,
-                          WfStateSOPP& state,
-                          void (*exec)(WfStateSOPP&)) {
-
-    state.RELADDR = to_uin64_t(wf->read_operand(*instruction[0]));
-    exec(state);
 }

@@ -76,7 +76,7 @@ static inline void run_s_cmp_lt_u32(WfStateSOPC& state) {
 }
 
 static inline void run_s_set_gpr_idx_on(WfStateSOPC& state) {
-    state.MODE->gpr_idx_en(1);
+    state.MODE->gpr_idx_en(true);
     //SRC1 -> IMM8
     state.M0 = ((state.SSRC1 & 15) << 12) | (state.SSRC0 & 0xff);
 }

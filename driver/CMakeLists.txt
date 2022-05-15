@@ -24,6 +24,7 @@ pkg_check_modules(LIB_CLRX_UTILS REQUIRED IMPORTED_TARGET clrxutils)
 ## Main library ##
 ##################
 include_directories(src)
+include_directories(../emulator/src)
 
 set(SOURCES
         src/runtime/CLObjectInfoParameterValue.hpp
@@ -73,6 +74,7 @@ set(SOURCES
         src/runtime/runtime-sampler.cpp
         src/runtime/icd/CLMem.cpp
         src/runtime/command/KernelExecutionCommand.cpp
+        src/emulator/command_executor.cpp
         )
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
@@ -80,6 +82,7 @@ set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 add_library(red-o-lator-icd SHARED ${SOURCES})
 target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
         OpenCL::OpenCL
+        red-o-lator-emulator
         )
 target_link_libraries(red-o-lator-icd PRIVATE
         red-o-lator-common

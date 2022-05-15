@@ -1,16 +1,16 @@
 #pragma once
 
+#include <common/utils/common.hpp>
 #include <memory>
 #include <set>
 #include <string>
 #include <string_view>
 #include <variant>
 #include <vector>
-#include <common/utils/common.hpp>
 #include "commons/commons.h"
-#include "reg/reg_info.h"
+#include "commons/util.h"
 #include "instr_info.h"
-#include "util/util.h"
+#include "reg_info.h"
 
 enum OperandType { REGISTER, FLOAT, INT_CONST, LITERAL_CONST, LABEL };
 
@@ -32,7 +32,7 @@ struct Operand {
 
 struct Instruction {
     Instruction(uint32_t addr,
-                std::string& instr,
+                std::string instr,
                 const std::vector<std::string>& args);
 
     InstrKey get_key() const { return instrKey; }

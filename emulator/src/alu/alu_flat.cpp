@@ -28,10 +28,10 @@ std::function<void(WfStateFLATStore&, size_t)> execute_flat_store(
     const Instruction& instr) {
     using namespace std::placeholders;
     switch (instr.get_key()) {
-        case FLAT_STORE_DWORD: return std::bind(run_flat_store_dwordxn, _1, _2, 1);
-        case FLAT_STORE_DWORDX2: return std::bind(run_flat_store_dwordxn, _1, _2, 2);
-        case FLAT_STORE_DWORDX3: return std::bind(run_flat_store_dwordxn, _1, _2, 3);
-        case FLAT_STORE_DWORDX4: return std::bind(run_flat_store_dwordxn, _1, _2, 4);
+        case FLAT_STORE_DWORD: return std::bind(run_flat_store_dwordxn, _1, _2, 1); //NOLINT
+        case FLAT_STORE_DWORDX2: return std::bind(run_flat_store_dwordxn, _1, _2, 2); //NOLINT
+        case FLAT_STORE_DWORDX3: return std::bind(run_flat_store_dwordxn, _1, _2, 3); //NOLINT
+        case FLAT_STORE_DWORDX4: return std::bind(run_flat_store_dwordxn, _1, _2, 4); //NOLINT
         case FLAT_STORE_SHORT: return run_flat_store_short;
         default: UNSUPPORTED_INSTRUCTION("FLAT", get_mnemonic(instr.get_key()));
     }
@@ -41,10 +41,10 @@ std::function<void(WfStateFLATLoad&, size_t)> execute_flat_load(
     const Instruction& instr) {
     using namespace std::placeholders;
     switch (instr.get_key()) {
-        case FLAT_LOAD_DWORD: return std::bind(run_flat_load_dwordxn, _1, _2, 1);
-        case FLAT_LOAD_DWORDX2: return std::bind(run_flat_load_dwordxn, _1, _2, 2);
-        case FLAT_LOAD_DWORDX3: return std::bind(run_flat_load_dwordxn, _1, _2, 3);
-        case FLAT_LOAD_DWORDX4: return std::bind(run_flat_load_dwordxn, _1, _2, 4);
+        case FLAT_LOAD_DWORD: return std::bind(run_flat_load_dwordxn, _1, _2, 1); //NOLINT
+        case FLAT_LOAD_DWORDX2: return std::bind(run_flat_load_dwordxn, _1, _2, 2); //NOLINT
+        case FLAT_LOAD_DWORDX3: return std::bind(run_flat_load_dwordxn, _1, _2, 3); //NOLINT
+        case FLAT_LOAD_DWORDX4: return std::bind(run_flat_load_dwordxn, _1, _2, 4); //NOLINT
         default: UNSUPPORTED_INSTRUCTION("FLAT", get_mnemonic(instr.get_key()));
     }
 }

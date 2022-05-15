@@ -133,7 +133,7 @@ void KernelLoader::executeKernel(const std::string& kernelPath) {
     globalWorkSize[0] = arraySizeBytes;
 
     size_t localWorkSize[1];
-    localWorkSize[0] = 0;
+    localWorkSize[0] = 1;
 
     error =
         clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr, globalWorkSize,

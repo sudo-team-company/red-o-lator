@@ -1,11 +1,11 @@
 #pragma once
 
+#include "commons/commons.h"
+#include "commons/util.h"
 #include "flow/wavefront.h"
 #include "flow/wf_state.h"
-#include "instr/instr_info.h"
-#include "util/util.h"
 #include "gpu/storage.h"
-#include "commons/commons.h"
+#include "instr/instr_info.h"
 
 void run_instr(const Instruction& instr, Wavefront* wf);
 

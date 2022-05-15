@@ -1,11 +1,11 @@
 #pragma once
 
 #include <memory>
-#include <common/utils/common.hpp>
-
-#include "src/util/util.h"
-#include "commons/commons.h"
 #include <array>
+
+#include <common/utils/common.hpp>
+#include "commons/util.h"
+#include "commons/commons.h"
 
 struct KernelConfig {
 public:
@@ -97,6 +97,18 @@ public:
 
     size_t get_wg_Z_size() const {
         return dims > 2 ? localWorkSize[2] : 1;
+    }
+
+    size_t get_X_offset() const {
+        return globalWorkOffset[0];
+    }
+
+    size_t get_Y_offset() const {
+        return dims > 1 ? globalWorkOffset[1] : 1;
+    }
+
+    size_t get_Z_offset() const {
+        return dims > 2 ? globalWorkOffset[2] : 1;
     }
 
 private:
