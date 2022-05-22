@@ -1,6 +1,7 @@
 #include <cstring>
 #include "Command.h"
 #include "icd/CLKernel.h"
+#include "emulator/command_executor.h"
 
 KernelExecutionCommand::KernelExecutionCommand(CLCommandQueue* commandQueue,
                                                CLKernel* kernel,

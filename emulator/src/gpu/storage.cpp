@@ -1,5 +1,6 @@
 #include "storage.h"
 #include <string>
+#include <exception>
 
 std::vector<uint8_t> Storage::read_data(uint64_t address,
                                         uint32_t offset,

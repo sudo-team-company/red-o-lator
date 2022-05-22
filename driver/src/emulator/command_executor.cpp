@@ -6,7 +6,8 @@
 #include "gpu/dispatcher.h"
 #include "gpu/storage.h"
 #include "instr/instruction.h"
-#include "runtime/icd/kernel/CLKernel.h"
+#include "kernel/KernelArgument.hpp"
+#include "icd/CLKernel.h"
 
 void writeArg(uint64_t&, size_t&, const KernelArgument&);
 void readArgs(size_t, const KernelArgument&);

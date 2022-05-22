@@ -3,7 +3,7 @@
 
 uint32_t to_uint32_t(float f) {
     uint32_t value = 0;
-    memcpy(&value, &f, sizeof value);
+    std::memcpy(&value, &f, sizeof value);
     return value;
 }
 
@@ -39,18 +39,18 @@ std::vector<uint32_t> to_uint32_v(const std::vector<uint8_t> &data) {
 
 float to_float(uint32_t n) {
     float result = 0.0f;
-    memcpy(&result, &n, sizeof(n));
+    std::memcpy(&result, &n, sizeof(n));
     return result;
 }
 float to_float(uint64_t n) {
     if (n >> 32) {
-        logger.error(std::string("Lose information during conversion u64 to f32: ") + std::bitset<64>(n).to_string());
+        logger.error(std::string("Lose information during conversion u64 to f32: ") + (std::bitset<64>(n)).to_string());
     }
     return to_float(uint32_t(n));
 }
 uint64_t to_uint64(float f) {
     uint64_t result = 0ull;
-    memcpy(&result, &f, sizeof(f));
+    std::memcpy(&result, &f, sizeof(f));
     return result;
 }
 

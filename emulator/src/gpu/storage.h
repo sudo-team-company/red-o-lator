@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <memory>
 
 struct Storage {
 
@@ -23,8 +24,10 @@ struct Storage {
    private:
     size_t _size;
     std::unique_ptr<uint8_t[]> _data;
-    Storage() {}
+
     static Storage* storage_;
+
+    Storage() {}
 
     void validate_addr(uint64_t);
 };

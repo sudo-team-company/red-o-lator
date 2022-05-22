@@ -44,24 +44,18 @@ set(SOURCES
         src/runtime/icd/CLProgram.hpp
         src/runtime/icd/CLSampler.hpp
         src/runtime/icd/IcdDispatchTable.cpp
-        src/runtime/icd/IcdDispatchTable.h
         src/runtime/icd/icd.h
         src/runtime/icd/CLKernel.cpp
         src/runtime/icd/CLKernel.h
         src/runtime/kernel/KernelArgument.hpp
         src/runtime/kernel/KernelArgumentInfo.cpp
-        src/runtime/kernel/KernelArgumentInfo.h
         src/runtime/kernel/KernelArgumentValue.hpp
         src/runtime/program/BinaryAsmParser.cpp
-        src/runtime/program/BinaryAsmParser.h
         src/runtime/program/BinaryDisassembler.cpp
-        src/runtime/program/BinaryDisassembler.h
         src/runtime/program/KernelArgumentInfoParser.cpp
-        src/runtime/program/KernelArgumentInfoParser.h
         src/runtime/runtime-command-queue.cpp
         src/runtime/runtime-command.cpp
         src/runtime/common/runtime-commons.cpp
-        src/runtime/common/runtime-commons.h
         src/runtime/runtime-context.cpp
         src/runtime/runtime-device.cpp
         src/runtime/runtime-event.cpp
@@ -79,7 +73,7 @@ set(SOURCES
         src/emulator/command_executor.cpp
         src/runtime/command/BufferFillCommand.cpp
         src/runtime/command/BufferCopyCommand.cpp
-        src/runtime/common/logger.h src/runtime/common/logger.cpp
+        src/runtime/common/logger.cpp
         )
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)

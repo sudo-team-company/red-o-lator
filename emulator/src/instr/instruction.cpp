@@ -6,15 +6,15 @@ KernelCode::KernelCode(const std::vector<std::string>& instruction) {
         if (Operand::is_label(instr)) {
             continue;
         }
-        auto dividedInstr = utils::splitMap<std::string>(instr, ' ', 2, [](auto arg) {
+        auto dividedInstr = utils::splitMap<std::string>(instr, ' ',[](auto arg) {
             return utils::trim(arg);
-        });
+        }, 2);
         assert(dividedInstr.size() >= 2 && "Unsupported asm instruction format");
         auto addressStr = dividedInstr[0].substr(2);
         auto address = stoul(addressStr, nullptr, 16);
         auto mnemonic = dividedInstr[1];
         if (dividedInstr.size() == 3) {
-            auto args = utils::splitMap<std::string>(dividedInstr[2], ',', -1, [](auto arg) {
+            auto args = utils::splitMap<std::string>(dividedInstr[2], ',', [](auto arg) {
                 return utils::trim(arg);
             });
             add_instr(address, mnemonic, args);

@@ -1,7 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
-#include <string>
+#include <cstring>
 #include <unordered_map>
 
 enum InstrKey {

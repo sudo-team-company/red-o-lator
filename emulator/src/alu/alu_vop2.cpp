@@ -4,7 +4,7 @@ namespace {
 void run_v_addc_u32(WfStateVOP2& state, size_t wiInd) {
     uint64_t mask = 1ull << wiInd;
     uint8_t CC = (state.VCC & mask) ? 1 : 0;
-    uint64_t temp = (uint64_t) state.SRC0[wiInd] + (uint64_t) state.SRC1[wiInd] + CC;
+    uint64_t temp = uint64_t(state.SRC0[wiInd]) + uint64_t(state.SRC1[wiInd]) + CC;
     state.VDST[wiInd] = temp & 0xffffffff;
     if (temp >= 0x100000000ULL) {
         state.VCC |= mask;
@@ -15,7 +15,7 @@ void run_v_addc_u32(WfStateVOP2& state, size_t wiInd) {
 
 void run_v_add_u32(WfStateVOP2& state, size_t wiInd) {
     auto TEMP = state.SRC0[wiInd] + state.SRC1[wiInd];
-    state.VDST[wiInd] = state.CLAMP ? std::min(TEMP, 0xffffffffull) : TEMP;
+    state.VDST[wiInd] = state.CLAMP ? std::min(TEMP, uint64_t(0xffffffff)) : TEMP;
 }
 
 void run_v_ashr_i32(WfStateVOP2& state, size_t wiInd) {
@@ -45,14 +45,14 @@ void run_v_cndmask_b32(WfStateVOP2& state, size_t i) {
 }
 
 void run_v_cvt_pk_i16_i32(WfStateVOP2& state, size_t i) {
-    int16_t D0 = std::max(std::min(int32_t(state.SRC0[i]), int32_t(0x7fff)), -0x8000);
-    int16_t D1 = std::max(std::min(int32_t(state.SRC1[i]), int32_t(0x7fff)), -0x8000);
+    int16_t D0 = std::max(std::min(int32_t(state.SRC0[i]), int32_t(0x7fff)), int32_t(-0x8000));
+    int16_t D1 = std::max(std::min(int32_t(state.SRC1[i]), int32_t(0x7fff)), int32_t(-0x8000));
     state.VDST[i] = D0 | (((uint32_t) D1) << 16);
 }
 
 void run_v_cvt_pk_u16_u32(WfStateVOP2& state, size_t i) {
-    uint16_t D0 = std::min(state.SRC0[i], 0xffffull);
-    uint16_t D1 = std::min(state.SRC1[i], 0xffffull);
+    uint16_t D0 = std::min(state.SRC0[i], uint64_t(0xffff));
+    uint16_t D1 = std::min(state.SRC1[i], uint64_t(0xffff));
     state.VDST[i] = D0 | (((uint32_t) D1) << 16);
 }
 
@@ -77,11 +77,11 @@ void run_v_max_i16(WfStateVOP2& state, size_t i) {
 }
 
 void run_v_max_i32(WfStateVOP2& state, size_t i) {
-    state.VDST[i] = std::max((int32_t) state.SRC0[i], (int32_t) state.SRC1[i]);
+    state.VDST[i] = std::max(int32_t(state.SRC0[i]), int32_t(state.SRC1[i]));
 }
 
 void run_v_max_u16(WfStateVOP2& state, size_t i) {
-    state.VDST[i] = std::max(state.SRC0[i] & 0xffff, state.SRC1[i] & 0xffff);
+    state.VDST[i] = std::max(state.SRC0[i] & uint64_t(0xffff), state.SRC1[i] & uint64_t(0xffff));
 }
 
 void run_v_max_u32(WfStateVOP2& state, size_t i) {
@@ -141,7 +141,7 @@ void run_v_or_b32(WfStateVOP2& state, size_t i) {
 
 void run_v_sub_u16(WfStateVOP2& state, size_t i) {
     auto temp = int32_t((state.SRC0[i] & 0xffffull) - (state.SRC1[i] & 0xffffull));
-    state.VDST[i] = state.CLAMP ? std::max(temp, 0) : temp;
+    state.VDST[i] = state.CLAMP ? std::max(temp, int32_t(0)) : temp;
 }
 
 void run_v_sub_u32(WfStateVOP2& state, size_t i) {
@@ -150,8 +150,8 @@ void run_v_sub_u32(WfStateVOP2& state, size_t i) {
 }
 
 void run_v_subrev_u16(WfStateVOP2& state, size_t i) {
-    auto temp = int32_t((state.SRC1[i] & 0xffffull) - (state.SRC0[i] & 0xffffull));
-    state.VDST[i] = state.CLAMP ? std::max(0, temp) : temp;
+    auto temp = int32_t((state.SRC1[i] & uint64_t(0xffff)) - (state.SRC0[i] & uint64_t(0xffff)));
+    state.VDST[i] = state.CLAMP ? std::max(int32_t(0), temp) : temp;
 }
 
 void run_v_subrev_u32(WfStateVOP2& state, size_t i) {
