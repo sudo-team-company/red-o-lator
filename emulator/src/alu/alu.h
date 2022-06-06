@@ -6,7 +6,7 @@
 #include "flow/wavefront.h"
 #include "flow/wf_state.h"
 #include "gpu/storage.h"
-#include "instr/instr_info.h"
+#include "model/instr/instr_info.h"
 
 void run_instr(const Instruction& instr, Wavefront* wf);
 

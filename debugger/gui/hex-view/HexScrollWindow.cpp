@@ -38,7 +38,7 @@ void HexScrollWindow::OnDraw(wxDC& dc) {
 
     for (size_t line = lineFrom; line <= lineTo; line++) {
         dc.DrawText(
-            drawLine(memory + line * 16 - (originalAddress - startAddress),
+            drawLine(line * 16 - (originalAddress - startAddress),
                      getLineAddress(startAddress, line)),
             0, y);
         y += lineHeight;
@@ -51,18 +51,18 @@ void HexScrollWindow::ScrollWindow(int dx, int dy, const wxRect* rect) {
     columns->Scroll(GetViewStart());
 }
 
-void HexScrollWindow::setHex(const void* memory, uint64_t size, uint64_t address) {
+void HexScrollWindow::setHex(const std::vector<uint8_t>& memory, uint64_t address) {
     startAddress = getStartAddress(address);
-    endAddress = getEndAddress(address, size);
+    endAddress = getEndAddress(address, memory.size());
     originalAddress = address;
-    this->memory = reinterpret_cast<const uint8_t*>(memory);
-    this->memorySize = size;
+    this->memory = memory;
+    this->memorySize = memory.size();
     lineCount = getLineCount(startAddress, endAddress);
 
     SetVirtualSize(lineWidth, static_cast<int>(lineCount) * lineHeight);
 }
 
-wxString HexScrollWindow::drawLine(const uint8_t* mem, uint64_t lineAddr) const {
+wxString HexScrollWindow::drawLine(size_t start, uint64_t lineAddr) const {
     auto hexArray = wxString();
     auto charArray = wxString();
     for (int i = 0; i < 16; i++) {
@@ -72,8 +72,8 @@ wxString HexScrollWindow::drawLine(const uint8_t* mem, uint64_t lineAddr) const 
             hexArray.Append(" ..");
             charArray.Append('.');
         } else {
-            hexArray.Append(wxString::Format(" %.2X", mem[i]));
-            charArray.Append(mem[i]);
+            hexArray.Append(wxString::Format(" %.2X", memory[start + i]));
+            charArray.Append(memory[start + i]);
         }
         if (i == 7) {
             hexArray.Append(' ');

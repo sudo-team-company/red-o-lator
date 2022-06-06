@@ -1,7 +1,7 @@
 #include <stdexcept>
+#include <string>
 #include <vector>
 
-#include "commons/commons.h"
 #include "instr_info.h"
 
 struct InstructionView {
@@ -660,9 +660,9 @@ InstrFormat get_instr_format(InstrKey instrKey, size_t widthBytes) {
     }
     if (format != UNDEFINED) return format;
 
-    logger.warn(std::string("Can not resolve instruction format for ") +
-                get_mnemonic(instrKey) + " with width in bytes " +
-                std::to_string(widthBytes));
+//    logger.warn(std::string("Can not resolve instruction format for ") +
+//                get_mnemonic(instrKey) + " with width in bytes " +
+//                std::to_string(widthBytes));
     format = it->format != UNDEFINED ? it->format : it->extendedFormat;
 
     if (format != UNDEFINED) return format;

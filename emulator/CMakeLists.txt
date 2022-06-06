@@ -6,7 +6,6 @@ include_directories(src)
 add_library(red-o-lator-emulator
         SHARED
         src/flow/wavefront.cpp
-        src/flow/kernel_config.cpp
         src/alu/alu_sop1.cpp
         src/alu/alu.cpp
         src/alu/alu_sop2.cpp
@@ -20,14 +19,12 @@ add_library(red-o-lator-emulator
         src/alu/alu_vopc.cpp
         src/alu/alu_flat.cpp
         src/flow/register.cpp
-        src/instr/instruction.cpp
-        src/instr/instr_info.cpp
         src/gpu/dispatcher.cpp
         src/gpu/compute_unit.cpp
         src/gpu/storage.cpp
         src/commons/util.cpp
         src/commons/commons.cpp
-        )
+        src/Executor.cpp src/Executor.h src/commons/parser.h src/commons/parser.cpp src/flow/debug_context.cpp src/flow/debug_context.h)
 target_link_libraries(red-o-lator-emulator PRIVATE red-o-lator-common)
 target_include_directories(red-o-lator-emulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -62,8 +59,6 @@ add_executable(red-o-lator-emulator-alu-test
         test/alu/alu_test.cpp
         src/flow/wavefront.cpp
         src/flow/register.cpp
-        src/instr/instruction.cpp
-        src/instr/instr_info.cpp
         src/commons/commons.cpp
         )
 target_link_libraries(red-o-lator-emulator-alu-test PRIVATE
@@ -97,8 +92,6 @@ add_executable(red-o-lator-emulator-wf-test
         src/commons/util.cpp
         src/flow/wavefront.cpp
         src/flow/register.cpp
-        src/instr/instruction.cpp
-        src/instr/instr_info.cpp
         src/commons/commons.cpp
         )
 

@@ -2,6 +2,7 @@
 
 #include "common/test/doctest.h"
 
+#include "commons/parser.h"
 #include "gpu/compute_unit.h"
 #include "gpu/dispatcher.h"
 
@@ -15,7 +16,7 @@
  */
 TEST_CASE("c = a + b") {
     auto kernArgAddr = 0;
-    size_t globalWorkSize[3] = {64, 1, 1};
+    std::vector<size_t> globalWorkSize{64, 1, 1};
     const std::vector<std::string>& config = {
         ".dims  x",
         ".sgprsnum 12",
@@ -37,7 +38,7 @@ TEST_CASE("c = a + b") {
         ".arg b, \"int*\", int*, global, const, rdonly",
         ".arg c, \"int*\", int*, global"};
     KernelConfig kernelConfig =
-        KernelConfig(1, nullptr, globalWorkSize, globalWorkSize, config);
+        KernelParser::parseKernelConfig(1, std::vector<size_t>(), globalWorkSize, globalWorkSize, config);
     kernelConfig.kernArgAddr = kernArgAddr;
     const std::vector<std::string>& instructions = {
         "/*000000000000*/ s_load_dwordx4  s[0:3], s[4:5], 0x30",
@@ -52,7 +53,7 @@ TEST_CASE("c = a + b") {
         "/*000000000034*/ v_mov_b32       v2, s3",
         "/*000000000038*/ flat_store_dword v[1:2], v0",
         "/*000000000040*/ s_endpgm"};
-    KernelCode kernelCode = KernelCode(instructions);
+    KernelCode kernelCode = KernelParser::parseKernelCode(instructions);
 
     auto storage = Storage::get_instance();
     storage->init(
@@ -82,8 +83,8 @@ TEST_CASE("c = a + b") {
  */
 TEST_CASE("data[global_id(0)] = x + x") {
     auto kernArgAddr = 0;
-    size_t globalWorkSize[3] = {1024, 1, 1};
-    size_t localWorkSize[3] = {64, 1, 1};
+    std::vector<size_t> globalWorkSize{1024, 1, 1};
+    std::vector<size_t> localWorkSize{64, 1, 1};
     const std::vector<std::string>& config = {
         ".dims x",
         ".cws 64, 1, 1",
@@ -105,7 +106,7 @@ TEST_CASE("data[global_id(0)] = x + x") {
         ".arg data, \"int*\", int*, global, ",
         ".arg x, \"int\", int"};
     KernelConfig kernelConfig =
-        KernelConfig(1, nullptr, globalWorkSize, localWorkSize, config);
+        KernelParser::parseKernelConfig(1, std::vector<size_t>(), globalWorkSize, localWorkSize, config);
     kernelConfig.kernArgAddr = kernArgAddr;
     const std::vector<std::string>& instructions = {
         "/*000000000000*/ s_load_dwordx2  s[0:1], s[4:5], 0x0",
@@ -125,7 +126,7 @@ TEST_CASE("data[global_id(0)] = x + x") {
         "/*000000000048*/ v_mov_b32       v2, s0",
         "/*00000000004c*/ flat_store_dword v[0:1], v2",
         "/*000000000054*/ s_endpgm"};
-    KernelCode kernelCode = KernelCode(instructions);
+    KernelCode kernelCode = KernelParser::parseKernelCode(instructions);
 
     int x = 50;
     uint64_t dataAddress = 60;
@@ -162,10 +163,10 @@ TEST_CASE("data[global_id(0)] = x + x") {
 TEST_CASE("data[global_id(i)] = global_offset(i) + x") {
     // todo test offset
     auto kernArgAddr = 0;
-    size_t globalWorkSize[3] = {6 * 5, 16 * 5, 2 * 5};
+    std::vector<size_t> globalWorkSize{6 * 5, 16 * 5, 2 * 5};
     size_t dataSize =
         std::max(globalWorkSize[0], std::max(globalWorkSize[1], globalWorkSize[2]));
-    size_t localWorkSize[3] = {6, 15, 2};
+    std::vector<size_t> localWorkSize{6, 15, 2};
     const std::vector<std::string>& config = {
         ".dims xyz",
         ".cws 4, 16, 2",
@@ -187,7 +188,7 @@ TEST_CASE("data[global_id(i)] = global_offset(i) + x") {
         ".arg x, \"int\", int",
         ".arg data, \"int*\", int*, global,"};
     KernelConfig kernelConfig =
-        KernelConfig(3, nullptr, globalWorkSize, localWorkSize, config);
+        KernelParser::parseKernelConfig(3, std::vector<size_t>(), globalWorkSize, localWorkSize, config);
     kernelConfig.kernArgAddr = kernArgAddr;
     const std::vector<std::string>& instructions = {
         "/*000000000000*/ s_load_dwordx4  s[0:3], s[4:5], 0x0",
@@ -228,7 +229,7 @@ TEST_CASE("data[global_id(i)] = global_offset(i) + x") {
         "/*0000000000ac*/ flat_store_dword v[1:2], v7",
         "/*0000000000b4*/ flat_store_dword v[12:13], v8",
         "/*0000000000bc*/ s_endpgm"};
-    KernelCode kernelCode = KernelCode(instructions);
+    KernelCode kernelCode = KernelParser::parseKernelCode(instructions);
 
     uint64_t dataAddress = 64;
     auto storage = Storage::get_instance();
@@ -265,10 +266,10 @@ float *s, __global float *c)
 TEST_CASE("weighted_sum_kernel") {
     // todo test offset
     auto kernArgAddr = 0;
-    size_t globalWorkSize[3] = {6 * 5, 16 * 5, 2 * 5};
+    std::vector<size_t> globalWorkSize{6 * 5, 16 * 5, 2 * 5};
     size_t dataSize =
         std::max(globalWorkSize[0], std::max(globalWorkSize[1], globalWorkSize[2]));
-    size_t localWorkSize[3] = {6, 15, 2};
+    std::vector<size_t> localWorkSize{6, 15, 2};
     const std::vector<std::string>& config = {
         ".dims xyz",
         ".sgprsnum 21",
@@ -293,7 +294,7 @@ TEST_CASE("weighted_sum_kernel") {
         ".arg s, \"float*\", float*, global, , rdonly",
         ".arg c, \"float*\", float*, global"};
     KernelConfig kernelConfig =
-        KernelConfig(3, nullptr, globalWorkSize, localWorkSize, config);
+        KernelParser::parseKernelConfig(3, std::vector<size_t>(), globalWorkSize, localWorkSize, config);
     kernelConfig.kernArgAddr = kernArgAddr;
     const std::vector<std::string>& instructions = {
         "/*000000000000*/ s_load_dwordx4  s[0:3], s[4:5], 0x4",
@@ -359,7 +360,7 @@ TEST_CASE("weighted_sum_kernel") {
         "/*00000000012c*/ flat_store_dword v[0:1], v3",
         ".L308_0:",
         "/*000000000134*/ s_endpgm"};
-    KernelCode kernelCode = KernelCode(instructions);
+    KernelCode kernelCode = KernelParser::parseKernelCode(instructions);
 
     uint64_t dataAddress = 64;
     auto storage = Storage::get_instance();

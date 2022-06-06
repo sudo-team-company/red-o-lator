@@ -5,7 +5,7 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "../data/Instruction.h"
+#include "../data/InstructionView.h"
 #include "../data/Preferences.h"
 #include "wx.h"
 
@@ -58,7 +58,7 @@ class CodeViewer : public wxStyledTextCtrl {
     void setAddress(int line, uint64_t value);
     void setLabel(int line, const wxString& name);
 
-    void setInstructions(const std::vector<Instruction>& instructions);
+    void setInstructions(const std::vector<InstructionView>& instructions);
     void setExecutionMarker(uint64_t address);
 
     void clearExecutionMarker();

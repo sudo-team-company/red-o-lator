@@ -4,20 +4,11 @@
 #include <array>
 
 #include <common/utils/common.hpp>
-#include "commons/util.h"
-#include "commons/commons.h"
 
 struct KernelConfig {
-public:
     uint64_t kernArgAddr = 0;
 
-    explicit KernelConfig(
-        uint32_t dims,
-        const size_t *globalWorkOffset,
-        const size_t *globalWorkSize,
-        const size_t *localWorkSize,
-        const std::vector<std::string> &configParams
-    );
+    explicit KernelConfig() = default;
 
     size_t get_sgpr_size() const {
         return sgprsnum;
@@ -111,11 +102,10 @@ public:
         return dims > 2 ? globalWorkOffset[2] : 1;
     }
 
-private:
     uint32_t dims;
-    std::array<size_t, 3> globalWorkOffset{0, 0, 0};
-    std::array<size_t, 3> globalWorkSize{1, 1, 1};
-    std::array<size_t, 3> localWorkSize{1, 1, 1};
+    std::vector<size_t> globalWorkOffset{0, 0, 0};
+    std::vector<size_t> globalWorkSize{1, 1, 1};
+    std::vector<size_t> localWorkSize{1, 1, 1};
     size_t sgprsnum = 0;
     size_t vgprsnum = 0;
     uint32_t pgmrsrc2 = 0;

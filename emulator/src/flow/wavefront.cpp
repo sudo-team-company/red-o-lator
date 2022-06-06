@@ -1,4 +1,5 @@
 #include "wavefront.h"
+#include "commons/util.h"
 
 bool WorkGroup::all_wf_completed() {
     for (auto &wavefront: wavefronts) {
@@ -227,7 +228,7 @@ void Wavefront::update_with_sopc_state(const WfStateSOPC &state) {
     m0Reg = state.M0;
 }
 
-WfStateSOPP Wavefront::get_common_sopp_state(const Instruction &instruction) const {
+WfStateSOPP Wavefront::get_common_sopp_state() const {
 
     return WfStateSOPP{programCounter.get(), execReg, vccReg, m0Reg,
                        statusReg.get(), modeReg.get(), sccReg};

@@ -4,16 +4,13 @@
 #include <set>
 #include <string>
 
+#include "model/kernel/arg/KernelArgumentKind.h"
 #include "runtime/icd/icd.h"
-
-enum ArgKind {
-    SCALAR, VECTOR, STRUCT, IMAGE, SAMPLER, EVENT, POINTER
-};
 
 struct KernelArgumentInfo {
     virtual ~KernelArgumentInfo() = default;
 
-    ArgKind kind;
+    KernelArgumentKind kind;
     cl_uint index;
     std::string typeName;
     std::string type;

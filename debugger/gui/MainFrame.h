@@ -4,7 +4,7 @@
 #include <wx/aui/aui.h>
 #include <string>
 #include <vector>
-#include "../data/Instruction.h"
+#include "../data/InstructionView.h"
 #include "../data/Parameter.h"
 #include "../data/Preferences.h"
 #include "CodeViewer.h"
@@ -13,7 +13,9 @@
 #include "ParametersTable.h"
 #include "RegistersTable.h"
 #include "Toolbar.h"
+#include "debugger/exec/ExecutionContext.h"
 #include "hex-view/MemoryView.h"
+#include "model/reg/RegData.h"
 #include "wx.h"
 
 class EmulatorApp;
@@ -54,23 +56,24 @@ class MainFrame : public wxFrame {
     void selectKernel(int kernelIdx);
     void updateKernelList(const std::vector<std::string>& kernels);
     void enableKernelList(bool state);
-    void enableModelList(bool state);
+    void enableWorkGroupList(bool state);
     void enableMemoryPanel(bool state);
 
     void setParameters(const ParametersCategory& category,
                        const std::vector<Parameter>& parameters);
 
-    void setInstructions(const std::vector<Instruction>& instructions);
+    void setInstructions(const std::vector<InstructionView>& instructions);
     void setExecutionMarker(uint64_t address);
     void removeExecutionMarker();
 
     void onSetBreakpoint(uint64_t address) const;
     void onRemoveBreakpoint(uint64_t address) const;
 
-    void setMemoryView(const void* memory, uint64_t size, uint64_t address);
+    void setMemoryView(const std::vector<uint8_t>& memory, uint64_t address);
 
-    void setModelChoice(const std::vector<std::string>& models,
-                        size_t currentIdx = 0);
+    void setExecutionContext(const ExecutionContext& context);
+
+    void setRegisters(const RegData& data);
 };
 
 #endif  // RED_O_LATOR_MAINFRAME_H

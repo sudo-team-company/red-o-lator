@@ -13,7 +13,7 @@ class HexScrollWindow : public wxScrolledWindow {
 
     void ScrollWindow(int dx, int dy, const wxRect* rect) override;
 
-    void setHex(const void* memory, uint64_t size, uint64_t address);
+    void setHex(const std::vector<uint8_t>& memory, uint64_t address);
 
    private:
     int lineHeight;
@@ -22,7 +22,7 @@ class HexScrollWindow : public wxScrolledWindow {
     uint64_t startAddress;
     uint64_t endAddress;
     uint64_t originalAddress;
-    const uint8_t* memory;
+    std::vector<uint8_t> memory;
     uint64_t memorySize;
 
     AddressRows* rows;
@@ -30,7 +30,7 @@ class HexScrollWindow : public wxScrolledWindow {
 
     void OnDraw(wxDC& dc) override;
 
-    wxString drawLine(const uint8_t* mem, uint64_t lineAddr) const;
+    wxString drawLine(size_t start, uint64_t lineAddr) const;
 };
 
 #endif  // RED_O_LATOR_HEXSCROLLWINDOW_H

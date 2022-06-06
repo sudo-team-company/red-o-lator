@@ -9,5 +9,6 @@ ParametersTable::ParametersTable(wxWindow* parent)
     SetExtraStyle(wxPG_EX_HELP_AS_TOOLTIPS);
 
     globalCategory = Append(new wxPropertyCategory("Global Parameters"));
+    globalCategory->Hide(true);
     kernelCategory = Append(new wxPropertyCategory("Kernel Parameters"));
 }

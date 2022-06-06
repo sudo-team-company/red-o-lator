@@ -7,8 +7,8 @@
 #include <memory>
 #include <vector>
 #include "commons/commons.h"
-#include "instr/instruction.h"
-#include "kernel_config.h"
+#include "model/instr/instruction.h"
+#include "model/kernel/KernelConfig.h"
 #include "register.h"
 #include "wf_state.h"
 
@@ -16,7 +16,9 @@ struct Wavefront;
 struct WorkItem;
 
 struct WorkGroup {
-public:
+    friend class DebugContext;
+
+   public:
     const KernelCode *const kernelCode;
     size_t sizeX, sizeY, sizeZ;
     size_t idX, idY, idZ;
@@ -36,13 +38,15 @@ public:
 
     WorkItem &get_workitem_for_wf(size_t wiId, size_t wfId) const;
 
-private:
+   private:
     std::vector<std::unique_ptr<WorkItem>> workItems;
 
     void init_wf_regs(Wavefront &, const KernelConfig &) const ;
 };
 
 struct Wavefront {
+    friend class DebugContext;
+
     constexpr static auto WAVEFRONT_SIZE = 64u;
 
 public:
@@ -89,7 +93,7 @@ public:
 
     void update_with_sopc_state(const WfStateSOPC &);
 
-    WfStateSOPP get_common_sopp_state(const Instruction &) const;
+    WfStateSOPP get_common_sopp_state() const;
 
     void update_with_common_sopp_state(const Instruction &, const WfStateSOPP &);
 

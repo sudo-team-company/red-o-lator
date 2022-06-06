@@ -9,6 +9,7 @@
 #include "../data/Parameter.h"
 #include "../data/Preferences.h"
 #include "MainFrame.h"
+#include "model/reg/RegData.h"
 #include "wx/wx.h"
 
 class EmulatorApp : public wxApp {
@@ -26,12 +27,13 @@ class EmulatorApp : public wxApp {
     void onStep(wxCommandEvent& event);
     void onStop(wxCommandEvent& event);
     void onKernelSelected(wxCommandEvent& event);
-    void onModelSelected(wxCommandEvent& event);
+    void onWavefrontSelected(wxCommandEvent& event);
 
    public:
     void startExecution();
-    void pauseExecution(uint64_t address, int workGroupId);
+    void pauseExecution(const ExecutionContext& context);
     void stopExecution();
+    void setException(const std::string& what);
 
     void setKernelList(const std::vector<std::string>& kernels,
                        int currentIdx = 0);
@@ -39,16 +41,15 @@ class EmulatorApp : public wxApp {
     void setGlobalParameters(const std::vector<Parameter>& parameters);
     void setKernelParameters(const std::vector<Parameter>& parameters);
 
-    void setInstructions(const std::vector<Instruction>& instructions);
+    void setInstructions(const std::vector<InstructionView>& instructions);
 
     void onSetBreakpoint(uint64_t address) const;
     void onRemoveBreakpoint(uint64_t address) const;
     void onRequestMemory(uint64_t address) const;
 
-    void setMemoryView(const void* memory, uint64_t size, uint64_t address);
+    void setMemoryView(const std::vector<uint8_t>& memory, uint64_t address);
+    void EmulatorApp::setRegisters(const RegData& data);
 
-    void setModelChoice(const std::vector<std::string>& models,
-                        size_t currentIdx = 0);
 };
 
 #endif  // RED_O_LATOR_EMULATORAPP_H

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "flow/kernel_config.h"
 #include "flow/wavefront.h"
 
 struct Dispatcher {

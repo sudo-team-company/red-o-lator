@@ -59,14 +59,13 @@ MemoryView::MemoryView(wxWindow* parent)
     SetSizer(mainSizer);
 }
 
-void MemoryView::setMemoryView(const void* memory,
-                               uint64_t size,
+void MemoryView::setMemoryView(const std::vector<uint8_t>& memory,
                                uint64_t address) {
     auto startAddress = getStartAddress(address);
-    auto endAddress = getEndAddress(address, size);
+    auto endAddress = getEndAddress(address, memory.size());
     auto lineCount = getLineCount(startAddress, endAddress);
     rows->setState(address, static_cast<int>(lineCount));
-    hexView->setHex(memory, size, address);
+    hexView->setHex(memory,  address);
     rows->Refresh();
     hexView->Refresh();
 }

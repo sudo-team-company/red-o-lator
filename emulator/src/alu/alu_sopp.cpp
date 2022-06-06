@@ -84,7 +84,7 @@ void set_reladdr_and_exec(const Instruction& instruction,
 void run_sopp(const Instruction& instruction, Wavefront* wavefront) {
     auto instrKey = instruction.get_key();
 
-    auto state = wavefront->get_common_sopp_state(instruction);
+    auto state = wavefront->get_common_sopp_state();
 
     switch (instrKey) {
         case S_BRANCH:

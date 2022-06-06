@@ -53,18 +53,3 @@ uint64_t to_uint64(float f) {
     std::memcpy(&result, &f, sizeof(f));
     return result;
 }
-
-bool is_hex(const std::string &str) {
-    if (utils::startsWith(str, "0x")) {
-        return str.size() > 2 && std::all_of(str.begin() + 2, str.end(), ::isxdigit);
-    }
-    return std::all_of(str.begin(), str.end(), ::isxdigit);
-}
-
-bool is_integer(const std::string &str) {
-    return !str.empty() &&
-    utils::startsWith(str, "-")
-        ? std::all_of(str.begin() + 1, str.end(), ::isdigit)
-        : std::all_of(str.begin(), str.end(), ::isdigit);
-}
-

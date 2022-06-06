@@ -9,7 +9,7 @@ bool EmulatorApp::OnInit() {
     wxIcon icon;
     icon.CopyFromBitmap(bitmap);
 
-    frame = new MainFrame(this, "AMD Emulator", wxSize(1440, 900), preferences);
+    frame = new MainFrame(this, "AMD GPU Emulator", wxSize(1440, 900), preferences);
 
     frame->Center();
     frame->SetIcon(icon);
@@ -24,8 +24,10 @@ bool EmulatorApp::OnInit() {
 
 void EmulatorApp::bindEvents() {
     Bind(wxEVT_LISTBOX, &EmulatorApp::onKernelSelected, this, SELECT_KERNEL);
-    Bind(wxEVT_COMMAND_CHOICE_SELECTED, &EmulatorApp::onModelSelected, this,
-         SELECT_MODEL);
+    Bind(wxEVT_COMMAND_CHOICE_SELECTED, &EmulatorApp::onWavefrontSelected, this,
+         SELECT_WAVEFRONT);
+    Bind(wxEVT_COMMAND_CHOICE_SELECTED, &EmulatorApp::onWavefrontSelected, this,
+         SELECT_WORK_ITEM_X);
 
     Bind(wxEVT_MENU, &EmulatorApp::onAttach, this, ATTACH);
     Bind(wxEVT_MENU, &EmulatorApp::onPause, this, PAUSE);
@@ -39,7 +41,7 @@ void EmulatorApp::onAttach(wxCommandEvent& event) {
 }
 
 void EmulatorApp::onPause(wxCommandEvent& event) {
-    debugger->onPause();
+//    debugger->onPause();
 }
 
 void EmulatorApp::onResume(wxCommandEvent& event) {
@@ -59,9 +61,24 @@ void EmulatorApp::onKernelSelected(wxCommandEvent& event) {
     debugger->onSelectKernel(selection);
 }
 
-void EmulatorApp::onModelSelected(wxCommandEvent& event) {
+void EmulatorApp::onWavefrontSelected(wxCommandEvent& event) {
     int selection = event.GetSelection();
-    debugger->onSelectModel(selection);
+    ExecutionContext context = debugger->currentExecutionContext;
+    switch (event.GetId()) {
+        case SELECT_WAVEFRONT:
+            context.wavefrontId = selection;
+            break;
+        case SELECT_WORK_ITEM_X:
+            context.workItemX = selection;
+            break;
+        case SELECT_WORK_ITEM_Y:
+            context.workItemY = selection;
+            break;
+        case SELECT_WORK_ITEM_Z:
+            context.workItemZ = selection;
+            break;
+    }
+    debugger->onSelectExecutionContext(context);
 }
 
 void EmulatorApp::startExecution() {
@@ -71,15 +88,13 @@ void EmulatorApp::startExecution() {
     frame->enableTool(STEP, false);
     frame->enableTool(STOP, true);
     frame->enableKernelList(false);
-    frame->enableModelList(false);
     frame->enableMemoryPanel(false);
 
     frame->SetStatusText("Waiting for kernel", 0);
     frame->SetStatusText("", 1);
 }
 
-void EmulatorApp::pauseExecution(uint64_t address,
-                                 int workGroupId) {
+void EmulatorApp::pauseExecution(const ExecutionContext& context) {
     frame->enableTool(ATTACH, false);
     frame->enableTool(PAUSE, false);
     frame->enableTool(RESUME, true);
@@ -87,11 +102,12 @@ void EmulatorApp::pauseExecution(uint64_t address,
     frame->enableTool(STOP, true);
 
     frame->enableMemoryPanel(true);
-    frame->setExecutionMarker(address);
+    frame->setExecutionMarker(context.address);
+    frame->setExecutionContext(context);
 
     frame->SetStatusText(
-        wxString::Format("Paused at address: 0x%.6llX", address), 0);
-    frame->SetStatusText(wxString::Format("Work Group: %i", workGroupId),
+        wxString::Format("Paused at address: 0x%.6llX", context.address), 0);
+    frame->SetStatusText(wxString::Format("Wavefront: %i", context.wavefrontId),
                          1);
 }
 
@@ -102,13 +118,27 @@ void EmulatorApp::stopExecution() {
     frame->enableTool(STEP, false);
     frame->enableTool(STOP, false);
     frame->enableKernelList(true);
-    frame->enableModelList(true);
     frame->enableMemoryPanel(true);
 
     frame->removeExecutionMarker();
 
     frame->SetStatusText("Execution has stopped", 0);
     frame->SetStatusText("", 1);
+}
+
+void EmulatorApp::setException(const std::string& what) {
+    frame->enableTool(ATTACH, true);
+    frame->enableTool(PAUSE, false);
+    frame->enableTool(RESUME, false);
+    frame->enableTool(STEP, false);
+    frame->enableTool(STOP, false);
+    frame->enableKernelList(true);
+    frame->enableMemoryPanel(true);
+
+    frame->removeExecutionMarker();
+
+    frame->SetStatusText("Exception encountered", 0);
+    frame->SetStatusText(what, 1);
 }
 
 void EmulatorApp::setKernelList(const std::vector<std::string>& kernels,
@@ -128,7 +158,7 @@ void EmulatorApp::setKernelParameters(
 }
 
 void EmulatorApp::setInstructions(
-    const std::vector<Instruction>& instructions) {
+    const std::vector<InstructionView>& instructions) {
     frame->setInstructions(instructions);
 }
 
@@ -144,13 +174,11 @@ void EmulatorApp::onRequestMemory(uint64_t address) const {
     debugger->onRequestMemory(address);
 }
 
-void EmulatorApp::setMemoryView(const void* memory,
-                                uint64_t size,
+void EmulatorApp::setMemoryView(const std::vector<uint8_t>& memory,
                                 uint64_t address) {
-    frame->setMemoryView(memory, size, address);
+    frame->setMemoryView(memory, address);
 }
 
-void EmulatorApp::setModelChoice(const std::vector<std::string>& models,
-                                 size_t currentIdx) {
-    frame->setModelChoice(models, currentIdx);
+void EmulatorApp::setRegisters(const RegData& data) {
+    frame->setRegisters(data);
 }

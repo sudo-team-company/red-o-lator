@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package control;
+
+message Response {
+  required bool success = 1;
+  optional string error = 2;
+  optional Data data = 3;
+}
+
+message Data {
+  optional Execution execution = 1;
+  optional string exception = 2;
+}
+
+message Execution {
+  required int32 address = 1;
+  required int32 workGroup = 2;
+}

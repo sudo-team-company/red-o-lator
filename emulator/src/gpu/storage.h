@@ -12,7 +12,10 @@ struct Storage {
     static Storage* get_instance();
 
     void init(size_t bufferSize);
-    std::vector<uint8_t> read_data(uint64_t, uint32_t, uint32_t);
+    std::vector<uint8_t> read_data(uint64_t address,
+                                   uint32_t offset,
+                                   uint32_t byteSize,
+                                   bool safe = false);
     uint32_t read_4_bytes(uint64_t, uint32_t);
     uint64_t read_8_bytes(uint64_t);
     void write_data(uint64_t addr, uint32_t offset, uint8_t value);
@@ -30,4 +33,5 @@ struct Storage {
     Storage() {}
 
     void validate_addr(uint64_t);
+    bool validate_addr_safe(uint64_t);
 };

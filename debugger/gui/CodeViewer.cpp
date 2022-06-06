@@ -165,7 +165,7 @@ void CodeViewer::setUpMarkers() {
     MarkerDefine(MARKER_EXECUTION_CURSOR, wxSTC_MARK_ARROW, gray, yellow);
 }
 
-void CodeViewer::setInstructions(const std::vector<Instruction>& instructions) {
+void CodeViewer::setInstructions(const std::vector<InstructionView>& instructions) {
     addressMap.clear();
     lineMap.clear();
 

@@ -47,10 +47,6 @@ constexpr int32_t sign_ext(int16_t i) {
     return static_cast<int32_t>(i);
 }
 
-bool is_hex(const std::string&);
-
-bool is_integer(const std::string&);
-
 uint32_t to_uint32_t(float);
 
 uint64_t to_uin64_t(const std::vector<uint32_t>&);
@@ -60,11 +56,3 @@ std::vector<uint32_t> to_uint32_v(const std::vector<uint8_t>&);
 float to_float(uint64_t n);
 
 uint64_t to_uint64(float f);
-
-template <typename T>
-static inline constexpr bool get_bit(uint8_t n, T value) {
-    static_assert(std::is_trivial<T>::value, "Trivial type expected");
-    assert((n < sizeof(value) * 8) && "Bit index out of bound");
-
-    return (value & (static_cast<T>(1) << n)) != 0;
-}

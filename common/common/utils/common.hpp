@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bit-utils.hpp"
 #include "file-utlis.hpp"
 #include "map-utils.hpp"
 #include "optional-utlis.hpp"

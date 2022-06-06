@@ -4,11 +4,17 @@
 
 std::vector<uint8_t> Storage::read_data(uint64_t address,
                                         uint32_t offset,
-                                        uint32_t byteSize) {
+                                        uint32_t byteSize,
+                                        bool safe) {
     auto result = std::vector<uint8_t>();
     uint64_t addr = address + offset;
     for (uint64_t curAddr = addr; curAddr < addr + byteSize; ++curAddr) {
-        validate_addr(curAddr);
+        if (safe) {
+            if (!validate_addr_safe(curAddr))
+                break;
+        } else {
+            validate_addr(curAddr);
+        }
         result.push_back(_data[curAddr]);
     }
     return std::move(result);
@@ -51,9 +57,13 @@ void Storage::write_data(uint64_t addr, uint32_t offset, float value) {
 }
 
 void Storage::validate_addr(uint64_t addr) {
-    if (addr < 0 || addr >= _size) {
+    if (!validate_addr_safe(addr)) {
         throw std::runtime_error("Invalid addr in storage: " + std::to_string(addr));
     }
+}
+
+bool Storage::validate_addr_safe(uint64_t addr) {
+    return addr >= 0 && addr < _size;
 }
 
 Storage* Storage::storage_ = nullptr;
