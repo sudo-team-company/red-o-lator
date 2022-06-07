@@ -2,32 +2,21 @@
 #include <iostream>
 
 #include "icd/CLCommandQueue.h"
-#include "runtime-commons.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_command_queue CL_API_CALL
 clCreateCommandQueue(cl_context context,
                      cl_device_id device,
                      cl_command_queue_properties properties,
                      cl_int* errcode_ret) {
+    registerCall(__func__);
+
     if (!context) {
         SET_ERROR_AND_RETURN(CL_INVALID_CONTEXT, "Context is null.");
     }
 
     if (device != kDevice) {
         SET_ERROR_AND_RETURN(CL_INVALID_DEVICE, "Device is null or not valid.");
-    }
-
-    if (properties & CL_QUEUE_PROFILING_ENABLE) {
-        // TODO(clCreateCommandQueue): profiling support
-        SET_ERROR_AND_RETURN(CL_INVALID_QUEUE_PROPERTIES,
-                             "Profiling is not supported yet.");
-    }
-
-    if (properties & CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE) {
-        // TODO(clCreateCommandQueue): out-of-order exec support
-        SET_ERROR_AND_RETURN(
-            CL_INVALID_QUEUE_PROPERTIES,
-            "Out-of-order execution mode is not supported yet.");
     }
 
     const auto commandQueue =
@@ -39,6 +28,8 @@ clCreateCommandQueue(cl_context context,
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clFinish(cl_command_queue command_queue) {
+    registerCall(__func__);
+
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
@@ -49,11 +40,15 @@ CL_API_ENTRY cl_int CL_API_CALL clFinish(cl_command_queue command_queue) {
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clFlush(cl_command_queue command_queue) {
+    registerCall(__func__);
+
     return clFinish(command_queue);
 }
 
 CL_API_ENTRY cl_int CL_API_CALL
 clRetainCommandQueue(cl_command_queue command_queue) {
+    registerCall(__func__);
+
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
@@ -65,6 +60,8 @@ clRetainCommandQueue(cl_command_queue command_queue) {
 
 CL_API_ENTRY cl_int CL_API_CALL
 clReleaseCommandQueue(cl_command_queue command_queue) {
+    registerCall(__func__);
+
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }
@@ -86,6 +83,8 @@ clGetCommandQueueInfo(cl_command_queue command_queue,
                       size_t param_value_size,
                       void* param_value,
                       size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     if (!command_queue) {
         RETURN_ERROR(CL_INVALID_COMMAND_QUEUE, "Command queue is null.");
     }

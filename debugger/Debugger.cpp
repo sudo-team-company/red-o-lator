@@ -1,131 +1,284 @@
 #include "Debugger.h"
 #include <iostream>
+#include "common/logger/Logger.h"
+#include "core/Launch.h"
+#include "debugger/message/OnException.h"
+#include "debugger/message/OnPause.h"
+#include "debugger/message/OnRespondMemory.h"
+#include "debugger/message/OnRespondRegisters.h"
+#include "debugger/message/RequestMemory.h"
+#include "debugger/message/RequestRegisters.h"
+#include "debugger/message/Run.h"
+#include "debugger/message/SetBreakpoint.h"
+#include "debugger/message/Stop.h"
 #include "gui/EmulatorApp.h"
+#include "ipc/IPCWrapper.h"
+#include "src/commons/parser.h"
 
 Debugger::Debugger(EmulatorApp* app) {
     this->app = app;
+    messageReaderThread = std::make_unique<std::thread>(&Debugger::processDebuggerMessages, this);
+    currentExecutionContext = ExecutionContext();
 
-    /* mock state */
+    auto p = [this](const std::string& s) -> std::string {
+        auto proto = IPCWrapper::receiveKernelForExecution(s);
+        KernelCode kernelCode = KernelParser::parseKernelCode(proto.instructions);
+        KernelConfig config = KernelParser::parseKernelConfig(
+            proto.config.dims,
+            proto.config.globalWorkOffset,
+            proto.config.globalWorkSize,
+            proto.config.localWorkSize,
+            proto.config.parameters);
+        std::vector<KernelArgumentStore> args;
+        for (const auto& a : proto.args) {
+            KernelArgumentStore ks;
+            ks.name = a.name;
+            ks.writePermission = a.writePermission;
+            ks.readPermission = a.readPermission;
+            if (a.kind == ArgumentProto::POINTER) {
+                ks.kind = POINTER;
+            } else {
+                ks.kind = SCALAR;
+            }
+            ks.size = a.size;
+            std::vector<uint8_t> data{a.data.begin(), a.data.end()};
+            ks.data = data;
+            args.push_back(ks);
+        }
+        Kernel kernel{
+           proto.name,
+            std::move(kernelCode),
+            std::move(config),
+            args
+        };
+        addKernel(std::move(kernel));
+        return s;
+    };
 
-    app->setKernelList({"exampleKernel1", "exampleKernel2", "exampleKernel3"},
-                       2);
+    ipcServer = std::make_unique<IpcServer>(p);
+    ipcServer->listen();
 
-    app->setGlobalParameters({Parameter{"amdcl2"}, Parameter{"gpu", "Iceland"},
-                              Parameter{"64bit", "0"}});
-    app->setKernelParameters(
-        {Parameter{"dims", "xy"}, Parameter{"sgprsnum", "16"}});
-
-    app->setInstructions({
-        Instruction{0x00, "s_load_dwordx4  s[0:3], s[4:5], 0x0"},
-        Instruction{0x08, "s_waitcnt       lgkmcnt(0)"},
-        Instruction{0x0c, "s_lshl_b32      s1, s6, 4"},
-        Instruction{0x10, "v_add_u32       v0, vcc, s1, v0"},
-        Instruction{0x14, "s_lshl_b32      s1, s7, 4"},
-        Instruction{0x18, "s_add_u32       s1, s1, s2"},
-        Instruction{0x1c, "v_add_u32       v0, vcc, s0, v0"},
-        Instruction{0x20, "v_add_u32       v2, vcc, s1, v1"},
-        Instruction{0x24, "v_cmp_eq_i32    vcc, 1, v0"},
-        Instruction{0x28, "s_load_dword    s0, s[4:5], 0x30"},
-        Instruction{0x30, "s_load_dword    s1, s[4:5], 0x40"},
-        Instruction{0x38, "s_load_dwordx2  s[2:3], s[4:5], 0x38"},
-        Instruction{0x40, "s_and_saveexec_b64 s[4:5], vcc"},
-        Instruction{0x44, "v_mov_b32       v1, 0"},
-        Instruction{0x48, "s_cbranch_execz .L112_0"},
-        Instruction{0x4c, "v_lshlrev_b64   v[0:1], 2, v[0:1]"},
-        Instruction{0x54, "s_waitcnt       lgkmcnt(0)"},
-        Instruction{0x58, "v_add_u32       v0, vcc, s2, v0"},
-        Instruction{0x5c, "v_mov_b32       v3, s3"},
-        Instruction{0x60, "v_addc_u32      v1, vcc, v3, v1, vcc"},
-        Instruction{0x64, "v_mul_lo_u32    v3, v2, s0"},
-        Instruction{0x6c, "v_subrev_u32    v4, vcc, s1, v3"},
-        Instruction{0, ".L112_0:", true},
-        Instruction{0x70, "s_andn2_b64     exec, s[4:5], exec"},
-        Instruction{0x74, "s_cbranch_execz .L156_0"},
-        Instruction{0x78, "s_waitcnt       lgkmcnt(0)"},
-        Instruction{0x7c, "s_mul_i32       s1, s1, s0"},
-        Instruction{0x80, "v_mov_b32       v1, 0"},
-        Instruction{0x84, "v_lshlrev_b64   v[0:1], 2, v[0:1]"},
-        Instruction{0x8c, "v_add_u32       v0, vcc, s2, v0"},
-        Instruction{0x90, "v_mov_b32       v3, s3"},
-        Instruction{0x94, "v_addc_u32      v1, vcc, v3, v1, vcc"},
-        Instruction{0x98, "v_mov_b32       v4, s1"},
-        Instruction{0, ".L156_0:", true},
-        Instruction{0x9c, "s_mov_b64       exec, s[4:5]"},
-        Instruction{0xa0, "v_mov_b32       v3, 0"},
-        Instruction{0xa4, "v_lshlrev_b64   v[2:3], 2, v[2:3]"},
-        Instruction{0xac, "s_waitcnt       lgkmcnt(0)"},
-        Instruction{0xb0, "v_add_u32       v2, vcc, s2, v2"},
-        Instruction{0xb4, "v_mov_b32       v5, s3"},
-        Instruction{0xb8, "v_addc_u32      v3, vcc, v5, v3, vcc"},
-        Instruction{0xbc, "v_mov_b32       v5, s0"},
-        Instruction{0xc0, "flat_store_dword v[0:1], v4"},
-        Instruction{0xc8, "flat_store_dword v[2:3], v5"},
-        Instruction{0xd0, "s_endpgm"},
-    });
-
-    app->startExecution();
-    app->pauseExecution(0x70, 1);
-
-
-    app->setModelChoice(
-        {"Radeon RX Vega 56 (Vega10 XL)", "Radeon RX 590 (Polaris30 XT)",
-         "Radeon 530", "Radeon RX 480 (Ellesmere XT)", "Radeon R9 295X2 (Vesuvius)"},
-        2);
+    app->stopExecution();
 }
 
-Debugger::~Debugger() = default;
+Debugger::~Debugger() {
+    if (emulatorThread) {
+        emulatorThread->join();
+    }
+    if (messageReaderThread) {
+        inMessageChannel.close();
+        outMessageChannel.close();
+        messageReaderThread->join();
+    }
+};
 
 void Debugger::onSetBreakpoint(uint64_t address) {
-    std::cout << "set breakpoint at " << std::hex << address << std::endl;
+    std::unique_lock<std::mutex> lock(mutex);
+    auto bp = Breakpoint(address);
+    breakpointStorage.addBreakpoint(bp);
+    if (!hasKernelRuntime) return;
+    outMessageChannel.write(std::make_shared<SetBreakpoint>(bp));
 }
 
 void Debugger::onRemoveBreakpoint(uint64_t address) {
-    std::cout << "remove breakpoint at " << std::hex << address << std::endl;
+    std::unique_lock<std::mutex> lock(mutex);
+    auto bp = Breakpoint(address);
+    breakpointStorage.removeBreakpoint(bp);
+    if (!hasKernelRuntime) return;
+    outMessageChannel.write(std::make_shared<SetBreakpoint>(bp, true));
 }
 
-void Debugger::onSelectModel(size_t index) {
-    std::cout << "select gpu " << index << std::endl;
+void Debugger::onSelectExecutionContext(const ExecutionContext& context) {
+    std::unique_lock<std::mutex> lock(mutex);
+    changeExecutionContext(context);
 }
 
 void Debugger::onSelectKernel(size_t index) {
-    std::cout << "select kernel " << index << std::endl;
-}
-
-void Debugger::onRequestMemory(uint64_t address) {
-    std::cout << "request memory at " << std::hex << address << std::endl;
-
-    auto x =
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent sit "
-        "amet est neque. Ut eget placerat urna. Nulla elementum vehicula ante "
-        "eu porttitor. Suspendisse in dapibus ex, id rutrum nisl. Proin "
-        "lobortis blandit libero ullamcorper convallis. Fusce hendrerit velit "
-        "sit amet quam auctor vulputate. Nullam vulputate malesuada orci eget "
-        "convallis.";
-
-    app->setMemoryView(x, strlen(x), address);
+    if (index == currentKernelIdx)
+        return;
+    selectKernel(index);
 }
 
 void Debugger::onAttach() {
-    std::cout << "attach to emulator" << std::endl;
+    if (currentKernelIdx == KERNEL_SELECT_NONE)
+        return;
     app->startExecution();
+    runKernel();
 }
 
-void Debugger::onPause() {
-    std::cout << "pause" << std::endl;
-    app->pauseExecution(0x80, 3);
+void Debugger::onPause(uint64_t address, int workGroupId) {
+    // unused
 }
 
 void Debugger::onResume() {
-    std::cout << "resume" << std::endl;
+    if (!hasKernelRuntime) return;
+    outMessageChannel.write(std::make_shared<Run>());
     app->startExecution();
 }
 
 void Debugger::onStep() {
-    std::cout << "step" << std::endl;
-    app->pauseExecution(0x84, 0);
+    if (!hasKernelRuntime) return;
+    outMessageChannel.write(std::make_shared<Run>(true));
+    app->startExecution();
 }
 
 void Debugger::onStop() {
-    std::cout << "stop" << std::endl;
-    app->stopExecution();
+    if (!hasKernelRuntime) return;
+    outMessageChannel.write(std::make_shared<Stop>());
+}
+
+void Debugger::onRequestMemory(uint64_t address) {
+    if (!hasKernelRuntime) return;
+    outMessageChannel.write(std::make_shared<RequestMemory>(address));
+}
+
+void Debugger::addKernel(Kernel kernel) {
+    programs.emplace_back(std::make_unique<Kernel>(std::move(kernel)));
+    selectKernel(currentKernelIdx);
+}
+
+void Debugger::runKernel() {
+    if (currentKernelIdx == KERNEL_SELECT_NONE) return;
+
+    hasKernelRuntime = true;
+
+    if (emulatorThread) {
+        emulatorThread->join();
+    }
+    emulatorThread = std::make_unique<std::thread>(Executor::executeKernel,
+                                                   std::ref(*programs[currentKernelIdx]),
+                                                   std::ref(inMessageChannel),
+                                                   std::ref(outMessageChannel),
+                                                   std::ref(breakpointStorage));
+}
+
+void Debugger::processDebuggerMessages() {
+    while (!inMessageChannel.isExhausted()) {
+        auto messageOptional = inMessageChannel.read();
+        if (messageOptional.has_value()) {
+            std::shared_ptr<DebuggerMessage> msg = messageOptional.value();
+            switch (msg->type) {
+                case DebuggerMessageType::ON_STOP:
+                    app->stopExecution();
+                    break;
+                case DebuggerMessageType::ON_PAUSE: {
+                    const auto& onPause = std::dynamic_pointer_cast<OnPause>(msg);
+                    this->pauseExecution(onPause->context);
+                    break;
+                }
+                case DebuggerMessageType::ON_RES_MEM: {
+                    const auto& onResMem = std::dynamic_pointer_cast<OnRespondMemory>(msg);
+                    app->setMemoryView(onResMem->data, onResMem->address);
+                    break;
+                }
+                case DebuggerMessageType::ON_RES_REG: {
+                    const auto& onResReg =
+                        std::dynamic_pointer_cast<OnRespondRegisters>(msg);
+                    app->setRegisters(onResReg->data);
+                    break;
+                }
+                case DebuggerMessageType::ON_EXC: {
+                    const auto& onExc =
+                        std::dynamic_pointer_cast<OnException>(msg);
+                    app->setException(onExc->what);
+                    break;
+                }
+                default:
+                    throw std::runtime_error("unknown message type");
+            }
+        }
+    }
+}
+
+std::string vec_to_str(const std::vector<size_t>& vec) {
+    if (vec.empty())
+        return "";
+
+    std::ostringstream oss;
+    std::copy(vec.begin(), vec.end() - 1,
+              std::ostream_iterator<int>(oss, ","));
+    oss << vec.back();
+
+    return oss.str();
+}
+
+void Debugger::selectKernel(int kernelIdx) {
+    std::unique_lock<std::mutex> lock(mutex);
+    currentKernelIdx = kernelIdx;
+    std::vector<std::string> kernels;
+    for (const auto& p : programs) {
+        kernels.push_back(p->name);
+    }
+    app->setKernelList(kernels, currentKernelIdx);
+
+    if (kernelIdx == KERNEL_SELECT_NONE)
+        return;
+
+    auto kernel = programs[currentKernelIdx].get();
+
+    std::vector<InstructionView> instructions;
+    for (const auto& i : kernel->code.code) {
+        instructions.emplace_back(i.first, i.second->get_original_line(), false);
+    }
+    for (const auto& i : kernel->code.labels) {
+        instructions.emplace_back(i.first, i.second->name, true);
+    }
+    std::sort(instructions.begin(), instructions.end(),
+              [](const InstructionView& a, const InstructionView& b) {
+                  return a.address < b.address || a.address == b.address && a.isLabel;
+              });
+
+    app->setInstructions(instructions);
+
+    std::vector<Parameter> parameters;
+    auto config = kernel->config;
+    parameters.emplace_back("dims", std::to_string(config.dims));
+
+    if (!config.globalWorkOffset.empty()) {
+        parameters.emplace_back("globalWorkOffset", vec_to_str(config.globalWorkOffset));
+    }
+    if (!config.globalWorkSize.empty()) {
+        parameters.emplace_back("globalWorkSize", vec_to_str(config.globalWorkSize));
+    }
+    if (!config.localWorkSize.empty()) {
+        parameters.emplace_back("localWorkSize", vec_to_str(config.localWorkSize));
+    }
+
+    parameters.emplace_back("sgprsnum", std::to_string(config.sgprsnum));
+    parameters.emplace_back("vgprsnum", std::to_string(config.vgprsnum));
+    parameters.emplace_back("pgmrsrc2", std::to_string(config.pgmrsrc2));
+    parameters.emplace_back("priority", std::to_string(config.priority));
+
+    if (config.dx10clamp) {
+        parameters.emplace_back("dx10clamp", "true");
+    }
+    if (config.ieeemode) {
+        parameters.emplace_back("ieeemode", "true");
+    }
+    if (config.useargs) {
+        parameters.emplace_back("useargs", "true");
+    }
+    if (config.usesetup) {
+        parameters.emplace_back("usesetup", "true");
+    }
+    if (config.usegeneric) {
+        parameters.emplace_back("usegeneric", "true");
+    }
+
+    app->setKernelParameters(parameters);
+}
+
+void Debugger::pauseExecution(const ExecutionContext& context) {
+    changeExecutionContext(context);
+    app->pauseExecution(context);
+}
+
+void Debugger::changeExecutionContext(const ExecutionContext& context) {
+    currentExecutionContext = context;
+    this->requestRegisters(context);
+}
+
+void Debugger::requestRegisters(const ExecutionContext& context) {
+    if (!hasKernelRuntime) return;
+    outMessageChannel.write(std::make_shared<RequestRegisters>(context));
 }

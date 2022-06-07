@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+package control;
+
+message GetMemoryRequest {
+  required uint64 address = 1;
+  required uint32 size = 2;
+}
+
+message SetMemoryRequest {
+  required uint64 address = 1;
+  required bytes memory = 2;
+}
+
+message GetMemoryResponse {
+  required bytes memory = 1;
+}

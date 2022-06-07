@@ -1,5 +1,7 @@
+#include <cassert>
+
+#include "runtime/common/logger.h"
 #include "CLCommandQueue.h"
-#include <runtime-commons.h>
 
 CLCommandQueue::CLCommandQueue(IcdDispatchTable* dispatchTable,
                                CLContext* context,
@@ -12,8 +14,9 @@ CLCommandQueue::~CLCommandQueue() {
     clReleaseContext(context);
 }
 
-void CLCommandQueue::enqueue(const std::shared_ptr<const Command>& command) {
-    commands.emplace(command);
+void CLCommandQueue::enqueue(Command* command) {
+    command->requireEvent()->setQueued();
+    commands.push_back(command);
 }
 
 void CLCommandQueue::flush() {
@@ -23,15 +26,38 @@ void CLCommandQueue::flush() {
 
     flushInProcess = true;
 
+    std::vector<Command*> executedCommands;
     while (!commands.empty()) {
-        const auto command = commands.front();
+        Command* command;
+
+        if (isOutOfOrder()) {
+            command = commands.back();
+            commands.pop_back();
+        } else {
+            command = commands.front();
+            commands.pop_front();
+        }
+
         command->execute();
-        commands.pop();
+        executedCommands.push_back(command);
+    }
+
+    for (auto* command : executedCommands) {
+        command->requireEvent()->command = nullptr;
+        delete command;
     }
 
     flushInProcess = false;
 }
 
-size_t CLCommandQueue::size() {
+size_t CLCommandQueue::size() const {
     return commands.size();
+}
+
+bool CLCommandQueue::isProfilingEnabled() const {
+    return properties & CL_QUEUE_PROFILING_ENABLE;
+}
+
+bool CLCommandQueue::isOutOfOrder() const {
+    return properties & CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
 }

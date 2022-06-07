@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package control;
+
+message Command {
+  required string kernel = 1;
+  required Type type = 2;
+  required bool blocking = 3;
+
+  enum Type {
+    RUN = 0;
+    RESUME = 1;
+    STEP = 2;
+    STOP = 3;
+  }
+}

@@ -1,5 +1,6 @@
 #include "RegistersTable.h"
 #include <wx/propgrid/advprops.h>
+#include "model/reg/RegData.h"
 
 RegistersTable::RegistersTable(wxWindow* parent)
     : wxPropertyGrid(parent,
@@ -7,26 +8,14 @@ RegistersTable::RegistersTable(wxWindow* parent)
                      wxDefaultPosition,
                      wxSize(300, 250),
                      wxPG_SPLITTER_AUTO_CENTER | wxPG_NO_INTERNAL_BORDER) {
-    // TODO: get registers from emulator
-    Append(new wxPropertyCategory("State Registers"));
+    stateCategory = new wxPropertyCategory("State Registers");
+    Append(stateCategory);
 
-    createUIntRegister("vcc");
-    createBoolRegister("vccz");
-    createBoolRegister("scc");
-    createUIntRegister("exec");
-    createBoolRegister("execz");
+    scalarCategory = new wxPropertyCategory("Scalar Registers");
+    Append(scalarCategory);
 
-    Append(new wxPropertyCategory("Scalar Registers"));
-
-    for (int reg = 0; reg < 104; reg++) {
-        createUIntRegister("s" + std::to_string(reg));
-    }
-
-    Append(new wxPropertyCategory("Vector Registers"));
-
-    for (int reg = 0; reg < 256; reg++) {
-        createUIntRegister("v" + std::to_string(reg));
-    }
+    vectorCategory = new wxPropertyCategory("Vector Registers");
+    Append(vectorCategory);
 
     SetMarginColour("WHITE");
 }
@@ -43,16 +32,42 @@ void RegistersTable::setBoolRegisterValue(std::string name, bool value) {
     SetPropertyValue(wxString(name), value);
 }
 
-void RegistersTable::createUIntRegister(std::string name) {
-    auto reg = Append(new wxUIntProperty(name, wxPG_LABEL));
+wxPGProperty* RegistersTable::createUIntRegister(const std::string& name, uint64_t value) {
+    auto reg = new wxUIntProperty(name, wxPG_LABEL, wxULongLong(value));
     SetPropertyReadOnly(reg, true);
-    reg->SetValueFromInt(0);
     reg->SetAttribute(wxPG_UINT_BASE, wxPG_BASE_HEX);
     reg->SetAttribute(wxPG_UINT_PREFIX, wxPG_PREFIX_0x);
+    return reg;
 }
 
-void RegistersTable::createBoolRegister(std::string name) {
-    auto reg = Append(new wxBoolProperty(name, wxPG_LABEL));
+wxPGProperty* RegistersTable::createBoolRegister(const std::string& name, bool value) {
+    auto reg = new wxBoolProperty(name, wxPG_LABEL, value);
     SetPropertyReadOnly(reg, true);
-    reg->SetValue(false);
+    return reg;
+}
+
+void RegistersTable::updateValues(const RegData& data) {
+    stateCategory->DeleteChildren();
+    scalarCategory->DeleteChildren();
+    vectorCategory->DeleteChildren();
+
+    SetCurrentCategory(stateCategory);
+    Append(createUIntRegister("reladdr", data.RELADDR));
+    Append(createUIntRegister("exec", data.EXEC));
+    Append(createUIntRegister("vcc", data.VCC));
+    Append(createUIntRegister("m0", data.M0));
+    Append(createUIntRegister("simm16", data.SIMM16));
+    Append(createUIntRegister("scc", data.SCC));
+
+    SetCurrentCategory(scalarCategory);
+    for (size_t i = 0; i < data.sFile.size(); i++) {
+        auto prop = createUIntRegister("s" + std::to_string(i), data.sFile[i]);
+        Append(prop);
+    }
+
+    SetCurrentCategory(vectorCategory);
+    for (size_t i = 0; i < data.vFile.size(); i++) {
+        auto prop = createUIntRegister("v" + std::to_string(i), data.vFile[i]);
+        Append(prop);
+    }
 }

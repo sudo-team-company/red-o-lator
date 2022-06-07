@@ -13,7 +13,10 @@ class Toolbar : public wxAuiToolBar {
    public:
     Toolbar(wxWindow* parent);
 
-    wxChoice* choiceModel;
+    wxChoice* choiceWF;
+    wxChoice* choiceWIX;
+    wxChoice* choiceWIY;
+    wxChoice* choiceWIZ;
 };
 
 #endif  // RED_O_LATOR_TOOLBAR_H

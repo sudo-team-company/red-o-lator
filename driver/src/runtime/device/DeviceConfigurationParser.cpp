@@ -1,14 +1,15 @@
 #include <cstring>
-#include <fstream>
 #include <functional>
 #include <numeric>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
+#include "CL/cl_ext2.h"
 #include "DeviceConfigurationParser.h"
 #include "common/utils/common.hpp"
+#include "runtime/common/runtime-commons.h"
 #include "runtime/icd/CLPlatformId.hpp"
-#include "runtime/runtime-commons.h"
 
 template <typename T>
 T parseNumber(const std::string& value);
@@ -41,7 +42,8 @@ void hardcodeParameter(
     CLObjectInfoParameterValueType value,
     size_t size) {
     utils::insertOrUpdate<cl_device_info>(
-        outParameters, name, CLObjectInfoParameterValue(value, size));
+        outParameters, name,
+        CLObjectInfoParameterValue(std::move(value), size));
 }
 
 void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
@@ -70,6 +72,9 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
     hardcodeParameter(parameters, CL_DEVICE_PLATFORM, kPlatform,
                       sizeof(cl_platform_id));
 
+    hardcodeParameter(parameters, CL_DEVICE_VENDOR_ID,
+                      reinterpret_cast<void*>(0x1002), sizeof(cl_uint));
+
     hardcodeParameter(parameters, CL_DEVICE_PARENT_DEVICE, nullptr,
                       sizeof(cl_device_id));
 
@@ -81,7 +86,7 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
                       kPlatform->driverVersion.size() + 1);
 
     const auto deviceVersion = std::string(kPlatform->openClVersion) +
-                               " AMD (" + kPlatform->driverVersion + ")";
+                               " AMD-APP (" + kPlatform->driverVersion + ")";
     hardcodeParameter(parameters, CL_DEVICE_VERSION, deviceVersion,
                       deviceVersion.size() + 1);
 
@@ -105,6 +110,14 @@ void DeviceConfigurationParser::load(const std::string& configurationFilePath) {
 
     hardcodeParameter(parameters, CL_DEVICE_ERROR_CORRECTION_SUPPORT,
                       (void*) false, sizeof(cl_bool));
+
+    std::string extensions = kPlatform->extensions;
+    if (parameters.find(CL_DEVICE_EXTENSIONS) != parameters.end()) {
+        extensions += " " + std::get<std::string>(
+                                parameters.at(CL_DEVICE_EXTENSIONS).value);
+    }
+    hardcodeParameter(parameters, CL_DEVICE_EXTENSIONS, extensions,
+                      extensions.size());
 
     mConfigurationPath = configurationFilePath;
     // TODO: memory leak of arrays
@@ -191,26 +204,14 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
                                           const std::string& parameterValue) {
     size_t resultSize = 0;
     CLObjectInfoParameterValueType result;
-    bool isArray = false;
+    bool isPointer = false;
     cl_device_info clParameter = 0;
-
-    IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
-    IGNORE_PARAMETER(CL_DEVICE_PARENT_DEVICE)
-    IGNORE_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
-    IGNORE_PARAMETER(CL_DRIVER_VERSION)
-    IGNORE_PARAMETER(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
-    IGNORE_PARAMETER(CL_DEVICE_AVAILABLE)
-    IGNORE_PARAMETER(CL_DEVICE_LINKER_AVAILABLE)
-    IGNORE_PARAMETER(CL_DEVICE_COMPILER_AVAILABLE)
-    IGNORE_PARAMETER(CL_DEVICE_IMAGE_SUPPORT)
-    IGNORE_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
-    IGNORE_PARAMETER(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
 
     PARSE_PARAMETER(CL_DEVICE_TYPE, cl_device_type, parseDeviceType)
     PARSE_STRING_PARAMETER(CL_DEVICE_NAME)
-    PARSE_NUMBER_PARAMETER(
-        CL_DEVICE_VENDOR_ID,
-        cl_uint)  // TODO(parseParameter): parse hex correctly
+    //    PARSE_NUMBER_PARAMETER(
+    //        CL_DEVICE_VENDOR_ID,
+    //        cl_uint)  // TODO(parseParameter): parse hex correctly
     PARSE_STRING_PARAMETER(CL_DEVICE_VENDOR)
     PARSE_STRING_PARAMETER(CL_DEVICE_PROFILE)
     PARSE_STRING_PARAMETER(CL_DEVICE_VERSION)
@@ -225,7 +226,7 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
         auto* valuesArray = new size_t[values.size()];
         memcpy(valuesArray, values.data(), resultSize);
         result = valuesArray;
-        isArray = true;
+        isPointer = true;
     })
     PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_WORK_GROUP_SIZE, size_t)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, cl_uint)
@@ -276,9 +277,6 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     PARSE_BITFIELD_PARAMETER(CL_DEVICE_EXECUTION_CAPABILITIES,
                              cl_device_exec_capabilities,
                              parseDeviceExecCapabilities)
-    PARSE_BITFIELD_PARAMETER(CL_DEVICE_QUEUE_PROPERTIES,
-                             cl_command_queue_properties,
-                             parseCommandQueueProperties)
     PARSE_PARAMETER_WITH_BODY(CL_DEVICE_BUILT_IN_KERNELS, [&]() {
         result = parameterValue == "0" ? "" : parameterValue.c_str();
     })
@@ -291,25 +289,73 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
                              parseDeviceAffinityDomain)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PARTITION_TYPE, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_REFERENCE_COUNT, cl_uint)
+    PARSE_PARAMETER(CL_DEVICE_QUEUE_PROPERTIES, cl_command_queue_properties,
+                    parseCommandQueueProperties)
 
     /* * * * *
      * AMD extensions
      * https://www.khronos.org/registry/OpenCL/extensions/amd/cl_amd_device_attribute_query.txt
      * * * * */
     PARSE_NUMBER_PARAMETER(CL_DEVICE_PROFILING_TIMER_OFFSET_AMD, cl_uint)
-    PARSE_STRING_PARAMETER(CL_DEVICE_TOPOLOGY_AMD)
+    PARSE_PARAMETER_WITH_BODY(CL_DEVICE_TOPOLOGY_AMD, [&]() {
+        resultSize = sizeof(cl_device_topology_amd);
+
+        // PCI-E, 0000:00:04.0
+        const auto info = utils::split(parameterValue, ':');
+
+        const auto errorString =
+            "Invalid topology! Should follow format \"PCI-E, "
+            "xxxx:bb:dd.f\" where x -- domain, b -- bus, d -- device, f -- "
+            "function";
+        if (info.size() != 3) {
+            throw DeviceConfigurationParseError(errorString);
+        }
+
+        const auto suffix = utils::split(info[2], '.');
+
+        if (suffix.size() != 2) {
+            throw DeviceConfigurationParseError(errorString);
+        }
+
+        const auto bus = info[1];
+        const auto device = suffix[0];
+        const auto function = suffix[1];
+
+        auto topology = new cl_device_topology_amd();
+        topology->pcie.type = CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD;
+        topology->pcie.bus = parseNumber<cl_char>(bus);
+        topology->pcie.device = parseNumber<cl_char>(device);
+        topology->pcie.function = parseNumber<cl_char>(function);
+
+        result = topology;
+        isPointer = true;
+    })
     PARSE_STRING_PARAMETER(CL_DEVICE_BOARD_NAME_AMD)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_FREE_MEMORY_AMD, cl_ulong)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_PER_COMPUTE_UNIT_AMD, size_t)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_WIDTH_AMD, size_t)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_INSTRUCTION_WIDTH_AMD, size_t)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_WAVEFRONT_WIDTH_AMD, size_t)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNELS_AMD, size_t)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNEL_BANKS_AMD, size_t)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNEL_BANK_WIDTH_AMD, size_t)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_PER_COMPUTE_UNIT_AMD, cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_WIDTH_AMD, cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_SIMD_INSTRUCTION_WIDTH_AMD, cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_WAVEFRONT_WIDTH_AMD, cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNELS_AMD, cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNEL_BANKS_AMD, cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_GLOBAL_MEM_CHANNEL_BANK_WIDTH_AMD, cl_uint)
     PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_SIZE_PER_COMPUTE_UNIT_AMD,
-                           size_t)
-    PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, size_t)
+                           cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_LOCAL_MEM_BANKS_AMD, cl_uint)
+    PARSE_NUMBER_PARAMETER(CL_DEVICE_MAX_GLOBAL_VARIABLE_SIZE, cl_uint)
+
+    IGNORE_PARAMETER(CL_DEVICE_PLATFORM)
+    IGNORE_PARAMETER(CL_DEVICE_VENDOR_ID)
+    IGNORE_PARAMETER(CL_DEVICE_PARENT_DEVICE)
+    IGNORE_PARAMETER(CL_DEVICE_OPENCL_C_VERSION)
+    IGNORE_PARAMETER(CL_DRIVER_VERSION)
+    IGNORE_PARAMETER(CL_DEVICE_PARTITION_MAX_SUB_DEVICES)
+    IGNORE_PARAMETER(CL_DEVICE_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_LINKER_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_COMPILER_AVAILABLE)
+    IGNORE_PARAMETER(CL_DEVICE_IMAGE_SUPPORT)
+    IGNORE_PARAMETER(CL_DEVICE_HOST_UNIFIED_MEMORY)
+    IGNORE_PARAMETER(CL_DEVICE_ERROR_CORRECTION_SUPPORT)
+    IGNORE_PARAMETER(CL_DEVICE_GLOBAL_FREE_MEMORY_AMD)
 
     if (!clParameter) {
         kLogger.warn("Unknown config parameter: " + parameterName);
@@ -320,13 +366,13 @@ DeviceConfigurationParser::parseParameter(const std::string& parameterName,
     }
 
     return ParsedParameter(
-        clParameter, CLObjectInfoParameterValue(result, resultSize, isArray));
+        clParameter, CLObjectInfoParameterValue(result, resultSize, isPointer));
 }
 
 template <typename T>
 T parseNumber(const std::string& value) {
     try {
-        return static_cast<T>(std::stoul(value));
+        return static_cast<T>(std::stoull(value));
     } catch (std::invalid_argument& e) {
         throw DeviceConfigurationParseError("Failed to parse number: " + value);
     }

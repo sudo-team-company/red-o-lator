@@ -14,7 +14,7 @@ class MemoryView : public wxWindow {
    public:
     explicit MemoryView(wxWindow* parent);
 
-    void setMemoryView(const void* memory, uint64_t size, uint64_t address);
+    void setMemoryView(const std::vector<uint8_t>& memory, uint64_t address);
 
     wxTextCtrl* addressInput;
     wxButton* addressButton;

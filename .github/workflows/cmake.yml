@@ -23,6 +23,37 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Clone NNG
+        run: git clone https://github.com/nanomsg/nng.git
+
+      - name: Configure NNG
+        run: cmake -H${{github.workspace}}/nng -B ${{github.workspace}}/nng/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_SHARED_LIBS=ON
+
+      - name: Build NNG
+        run: cmake --build ${{github.workspace}}/nng/build -j 16
+
+      - name: Install NNG
+        run: cmake --install ${{github.workspace}}/nng/build --config ${{env.BUILD_TYPE}} --prefix ${{github.workspace}}/nng
+
+      - name: Clone NNGPP
+        run: git clone https://github.com/cwzx/nngpp.git
+
+      - name: Install NNGPP
+        run: cp -r ${{github.workspace}}/nngpp/include/* ${{github.workspace}}/nng/include/
+
+      - name: Get Protobuf
+        run: curl -LJO https://github.com/protocolbuffers/protobuf/releases/download/v21.1/protobuf-cpp-3.21.1.zip -o protobuf-cpp-3.21.1.zip &&
+          7z x protobuf-cpp-3.21.1.zip
+
+      - name: Configure Protobuf
+        run: cmake -H${{github.workspace}}/protobuf-3.21.1/cmake -B ${{github.workspace}}/protobuf-3.21.1/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON
+
+      - name: Build Protobuf
+        run: cmake --build ${{github.workspace}}/protobuf-3.21.1/build --config ${{env.BUILD_TYPE}} -j 16
+
+      - name: Install Protobuf
+        run: cmake --install ${{github.workspace}}/protobuf-3.21.1/build --config ${{env.BUILD_TYPE}} --prefix ${{github.workspace}}/protobuf-3.21.1
+
       - name: Install GTK 3 on Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install libgtk-3-dev
@@ -51,6 +82,7 @@ jobs:
         run: cp -r ${{github.workspace}}/OpenCL-Headers/CL ${{github.workspace}}/OpenCL-ICD-Loader/inc &&
           cmake -H${{github.workspace}}/OpenCL-ICD-Loader -B ${{github.workspace}}/OpenCL-ICD-Loader/build
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -DCMAKE_INSTALL_LIBDIR=lib
 
       - name: Build ICD Loader
         run: cmake --build ${{github.workspace}}/OpenCL-ICD-Loader/build -j ${{env.THREAD_COUNT}}
@@ -82,6 +114,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -DCMAKE_LIBRARY_PATH=${{github.workspace}}/OpenCL-ICD-Loader/lib
           -DCMAKE_INCLUDE_PATH=${{github.workspace}}/OpenCL-ICD-Loader/inc
+          -DCMAKE_PREFIX_PATH="${{github.workspace}}/nng;${{github.workspace}}/protobuf-3.21.1"
 
       - name: Build red-o-lator
         run: cmake --build ${{github.workspace}}/build -j ${{env.THREAD_COUNT}}

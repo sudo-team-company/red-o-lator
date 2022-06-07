@@ -34,7 +34,7 @@ set(SOURCES
         src/runtime/icd/CLCommandQueue.h
         src/runtime/icd/CLContext.h
         src/runtime/icd/CLDeviceId.hpp
-        src/runtime/icd/CLEvent.hpp
+        src/runtime/icd/CLEvent.h
         src/runtime/icd/CLMem.h
         src/runtime/icd/CLPlatformId.hpp
         src/runtime/icd/CLProgram.hpp
@@ -42,12 +42,12 @@ set(SOURCES
         src/runtime/icd/IcdDispatchTable.cpp
         src/runtime/icd/IcdDispatchTable.h
         src/runtime/icd/icd.h
-        src/runtime/icd/kernel/CLKernel.cpp
-        src/runtime/icd/kernel/CLKernel.h
-        src/runtime/icd/kernel/KernelArgument.hpp
-        src/runtime/icd/kernel/KernelArgumentInfo.cpp
-        src/runtime/icd/kernel/KernelArgumentInfo.h
-        src/runtime/icd/kernel/KernelArgumentValue.hpp
+        src/runtime/icd/CLKernel.cpp
+        src/runtime/icd/CLKernel.h
+        src/runtime/kernel/KernelArgument.hpp
+        src/runtime/kernel/KernelArgumentInfo.cpp
+        src/runtime/kernel/KernelArgumentInfo.h
+        src/runtime/kernel/KernelArgumentValue.hpp
         src/runtime/program/BinaryAsmParser.cpp
         src/runtime/program/BinaryAsmParser.h
         src/runtime/program/BinaryDisassembler.cpp
@@ -56,8 +56,8 @@ set(SOURCES
         src/runtime/program/KernelArgumentInfoParser.h
         src/runtime/runtime-command-queue.cpp
         src/runtime/runtime-command.cpp
-        src/runtime/runtime-commons.cpp
-        src/runtime/runtime-commons.h
+        src/runtime/common/runtime-commons.cpp
+        src/runtime/common/runtime-commons.h
         src/runtime/runtime-context.cpp
         src/runtime/runtime-device.cpp
         src/runtime/runtime-event.cpp
@@ -68,7 +68,7 @@ set(SOURCES
         src/runtime/runtime-platform.cpp
         src/runtime/runtime-program.cpp
         src/runtime/runtime-sampler.cpp
-        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp)
+        src/runtime/icd/CLMem.cpp src/runtime/command/KernelExecutionCommand.cpp src/runtime/command/Command.cpp src/runtime/icd/CLEvent.cpp src/runtime/command/BufferFillCommand.cpp src/runtime/command/BufferCopyCommand.cpp src/runtime/common/logger.h src/runtime/common/logger.cpp)
 
 set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
@@ -76,11 +76,11 @@ add_library(red-o-lator-icd SHARED ${SOURCES})
 target_link_libraries(red-o-lator-icd PUBLIC INTERFACE
         OpenCL::OpenCL
         )
-target_link_libraries(red-o-lator-icd PRIVATE
+target_link_libraries(red-o-lator-icd PUBLIC
         red-o-lator-common
         PkgConfig::LIB_CLRX_AMD_ASM
         )
-target_include_directories(red-o-lator-icd PRIVATE src/runtime)
+target_include_directories(red-o-lator-icd PUBLIC src/runtime)
 install(TARGETS red-o-lator-icd DESTINATION lib)
 
 
@@ -103,6 +103,7 @@ set(TEST_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/resources)
 # Unit tests #
 ##############
 set(UNIT_TEST_SOURCES
+        ${SOURCES}
         test/unit/runner.cpp
         test/unit/runtime/runtime-platform-test.cpp
         test/unit/unit-test-common/test-commons.h

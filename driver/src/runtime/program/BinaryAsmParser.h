@@ -4,13 +4,16 @@
 #include <string>
 #include <utility>
 
-#include "runtime/icd/kernel/CLKernel.h"
+#include "runtime/icd/CLKernel.h"
 
 struct BinaryDisassemblingResult {
     std::string gpuName;
     std::string compileOptions;
     std::vector<std::string> parameters{};
-    std::vector<CLKernel*> kernels = std::vector<CLKernel*>();
+    std::vector<std::unique_ptr<CLKernelBuilder>> kernelBuilders =
+        std::vector<std::unique_ptr<CLKernelBuilder>>();
+
+    std::string rawOutput;
 };
 
 class BinaryAsmParser {
@@ -48,7 +51,7 @@ class BinaryAsmParser {
 
     bool alreadyParsed = false;
 
-    BinaryDisassemblingResult parsingResult{};
+    std::unique_ptr<BinaryDisassemblingResult> parsingResult = nullptr;
     ParsingState parsingState = BinaryParameters;
 
     std::unique_ptr<CLKernelBuilder> currentKernelBuilder = nullptr;

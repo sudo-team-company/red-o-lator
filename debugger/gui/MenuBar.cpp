@@ -4,7 +4,7 @@
 MenuBar::MenuBar(const Preferences& preferences) {
     auto* menuFile = new wxMenu;
 
-    menuFile->Append(EXIT, "&Exit", "Close program");
+    menuFile->Append(EXIT, "&Exit", "Close kernel");
 
     auto* menuHelp = new wxMenu;
     menuHelp->Append(ABOUT);

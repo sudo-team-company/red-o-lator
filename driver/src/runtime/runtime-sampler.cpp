@@ -1,12 +1,17 @@
 #include <iostream>
 #include "icd/icd.h"
+#include "runtime/common/runtime-commons.h"
 
 CL_API_ENTRY cl_int CL_API_CALL clRetainSampler(cl_sampler sampler) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clRetainSampler" << std::endl;
     return CL_INVALID_PLATFORM;
 }
 
 CL_API_ENTRY cl_int CL_API_CALL clReleaseSampler(cl_sampler sampler) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clReleaseSampler" << std::endl;
     return CL_INVALID_PLATFORM;
 }
@@ -16,6 +21,8 @@ CL_API_ENTRY cl_int CL_API_CALL clGetSamplerInfo(cl_sampler sampler,
                                                  size_t param_value_size,
                                                  void* param_value,
                                                  size_t* param_value_size_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clGetSamplerInfo" << std::endl;
     return CL_INVALID_PLATFORM;
 }
@@ -26,6 +33,8 @@ clCreateSampler(cl_context context,
                 cl_addressing_mode addressing_mode,
                 cl_filter_mode filter_mode,
                 cl_int* errcode_ret) {
+    registerCall(__func__);
+
     std::cerr << "Unimplemented OpenCL API call: clCreateSampler" << std::endl;
     return nullptr;
 }

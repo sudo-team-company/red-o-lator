@@ -105,8 +105,8 @@ void MainFrame::enableKernelList(bool state) {
     kernelPanel->Enable(state);
 }
 
-void MainFrame::enableModelList(bool state) {
-    toolbar->choiceModel->Enable(state);
+void MainFrame::enableWorkGroupList(bool state) {
+    toolbar->choiceWF->Enable(state);
 }
 
 void MainFrame::enableMemoryPanel(bool state) {
@@ -138,7 +138,7 @@ void MainFrame::setParameters(const ParametersCategory& category,
     }
 }
 
-void MainFrame::setInstructions(const std::vector<Instruction>& instructions) {
+void MainFrame::setInstructions(const std::vector<InstructionView>& instructions) {
     textEditor->setInstructions(instructions);
 
     auiManager.GetPane(textEditor).Show();
@@ -171,15 +171,40 @@ void MainFrame::onRequestMemory(wxCommandEvent& event) {
     app->onRequestMemory(address);
 }
 
-void MainFrame::setMemoryView(const void* memory, uint64_t size, uint64_t address) {
-    memoryPanel->setMemoryView(memory, size, address);
+void MainFrame::setMemoryView(const std::vector<uint8_t>& memory, uint64_t address) {
+    memoryPanel->setMemoryView(memory, address);
 }
 
-void MainFrame::setModelChoice(const std::vector<std::string>& models,
-                               size_t currentIdx) {
-    auto choice = toolbar->choiceModel;
-    for (auto& model : models) {
-        choice->Append(model);
+void MainFrame::setExecutionContext(const ExecutionContext& context) {
+    auto wfChoice = toolbar->choiceWF;
+    auto wiXChoice = toolbar->choiceWIX;
+    auto wiYChoice = toolbar->choiceWIY;
+    auto wiZChoice = toolbar->choiceWIZ;
+    wfChoice->Clear();
+    wiXChoice->Clear();
+    wiYChoice->Clear();
+    wiZChoice->Clear();
+//    wfChoice->Append("Global");
+    for (size_t wf = 0; wf < context.info.wfSize; wf++) {
+        wfChoice->Append("Wavefront " + std::to_string(wf));
     }
-    choice->SetSelection(static_cast<int>(currentIdx));
+    wfChoice->SetSelection(context.wavefrontId);
+
+    for (size_t wi = 0; wi < context.info.sizeX; wi++) {
+        wiXChoice->Append(std::to_string(wi));
+    }
+    for (size_t wi = 0; wi < context.info.sizeY; wi++) {
+        wiYChoice->Append(std::to_string(wi));
+    }
+    for (size_t wi = 0; wi < context.info.sizeZ; wi++) {
+        wiZChoice->Append(std::to_string(wi));
+    }
+
+    wiXChoice->SetSelection(context.workItemX);
+    wiYChoice->SetSelection(context.workItemY);
+    wiZChoice->SetSelection(context.workItemZ);
+}
+
+void MainFrame::setRegisters(const RegData& data) {
+    registersPanel->updateValues(data);
 }

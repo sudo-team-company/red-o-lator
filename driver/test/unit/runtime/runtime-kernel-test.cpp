@@ -1,12 +1,10 @@
 #include <common/test/doctest.h>
 
-#include <runtime/runtime-commons.h>
 #include <common/utils/vector-utils.hpp>
 #include <vector>
 
 #include "runtime/icd/CLProgram.hpp"
 #include "runtime/icd/icd.h"
-#include "runtime/icd/kernel/CLKernel.h"
 #include "unit-test-common/test-commons.h"
 
 TEST_SUITE("Kernel API") {
@@ -210,7 +208,8 @@ TEST_SUITE("Kernel API") {
         SUBCASE("executes kernel") {
             cl_int error;
             const auto queue = test::getCommandQueue();
-            const auto kernel = test::getKernel(binaryPath, kernelName);
+            const auto kernel = test::getKernel("test/resources/kernels/sum.bin", "sum");
+//            const auto kernel = test::getKernel(binaryPath, kernelName);
 
             const size_t arraySize = 3;
             const size_t arraySizeBytes = arraySize * sizeof(cl_uint);
@@ -241,10 +240,10 @@ TEST_SUITE("Kernel API") {
             CHECK(error == CL_SUCCESS);
 
             size_t globalWorkSize[1];
-            globalWorkSize[0] = arraySizeBytes;
+            globalWorkSize[0] = 64;
 
             size_t localWorkSize[1];
-            localWorkSize[0] = 0;
+            localWorkSize[0] = 1;
 
             error = clEnqueueNDRangeKernel(queue, kernel, 1, nullptr,
                                            globalWorkSize, localWorkSize, 0,
@@ -254,14 +253,6 @@ TEST_SUITE("Kernel API") {
             error = clFlush(queue);
             CHECK(error == CL_SUCCESS);
 
-            std::vector<cl_uint> bufferData(arraySize);
-            error = clEnqueueReadBuffer(queue, mem3, true, 0, arraySizeBytes,
-                                        bufferData.data(), 0, nullptr, nullptr);
-
-            CHECK(error == CL_SUCCESS);
-            CHECK(utils::joinToString<cl_uint>(bufferData, " ", [](auto value) {
-                      return std::to_string(value);
-                  }) == "0 0 0");
         }
     }
 

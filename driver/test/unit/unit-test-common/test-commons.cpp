@@ -3,6 +3,8 @@
 
 #include "test-commons.h"
 
+#include <runtime/common/runtime-commons.h>
+
 namespace test {
 cl_platform_id getPlatform() {
     auto platformList = std::vector<cl_platform_id>(1);
@@ -45,6 +47,13 @@ cl_command_queue getCommandQueue() {
     REQUIRE(queue != nullptr);
 
     return queue;
+}
+
+Command* getDummyCommand(cl_command_queue queue) {
+    const auto command = new DummyCommand(queue);
+    const auto event = new CLEvent(kDispatchTable, queue->context, kClock, command);
+    command->setEvent(event);
+    return command;
 }
 
 std::pair<cl_mem, cl_int> createBufferSafe(cl_mem_flags flags,

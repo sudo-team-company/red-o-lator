@@ -6,8 +6,8 @@
 
 #include "icd.h"
 
-using CLMemDestructorCallbackFunction = void (*)(cl_mem mem_obj,
-                                                 void* user_data);
+using CLMemDestructorCallbackFunction = void(CL_CALLBACK*)(cl_mem mem_obj,
+                                                           void* user_data);
 
 struct CLMemDestructorCallback {
     CLMemDestructorCallback(CLMemDestructorCallbackFunction callback,
@@ -38,9 +38,8 @@ struct CLMem {
 
     unsigned int referenceCount = 1;
 
-    void registerCallback(
-        const std::shared_ptr<CLMemDestructorCallback>& callback);
+    void registerCallback(const CLMemDestructorCallback& callback);
 
    private:
-    std::stack<std::shared_ptr<CLMemDestructorCallback>> destructorCallbacks{};
+    std::stack<CLMemDestructorCallback> mDestructorCallbacks{};
 };

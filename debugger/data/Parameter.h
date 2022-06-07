@@ -5,9 +5,11 @@
 
 struct Parameter {
     std::string name;
-    std::string value;  // ok for read only view
-};
+    std::string value;
 
+    explicit Parameter(std::string name, std::string value)
+        : name{std::move(name)}, value{std::move(value)} {}
+};
 
 enum class ParametersCategory {
     GLOBAL, KERNEL

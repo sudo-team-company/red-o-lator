@@ -1,0 +1,31 @@
+syntax = "proto2";
+
+package control;
+
+message KernelRequest {
+  required string name = 1;
+  required Config config = 2;
+  repeated string instructions = 3;
+  repeated Argument args = 4;
+}
+
+message Argument {
+  enum Kind {
+    POINTER = 0;
+    SCALAR = 1;
+  }
+  required string name = 1;
+  required Kind kind = 2;
+  required bytes data = 3;
+  required uint32 size = 4;
+  required bool readPermission = 5;
+  required bool writePermission = 6;
+}
+
+message Config {
+  required uint32 dims = 1;
+  repeated uint32 globalWorkOffset = 2;
+  repeated uint32 globalWorkSize = 3;
+  repeated uint32 localWorkSize = 4;
+  repeated string parameters = 5;
+}
