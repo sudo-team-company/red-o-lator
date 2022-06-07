@@ -43,5 +43,6 @@ set(COMMON_SOURCES
         common/utils/bit-utils.hpp debugger/message/DebuggerMessage.cpp debugger/message/DebuggerMessage.h debugger/message/OnStop.h debugger/exec/ExecutionContext.h debugger/exec/ExecutionInfo.h debugger/message/Stop.h debugger/message/OnPause.h debugger/message/RequestMemory.h debugger/message/OnRespondMemory.h debugger/message/RequestRegisters.h debugger/message/OnRespondRegisters.h debugger/message/Run.h debugger/message/SetBreakpoint.h model/reg/RegData.h ipc/IPCWrapper.h ipc/IPCWrapper.cpp ipc/proto/KernelProto.h debugger/message/OnException.h)
 
 add_library(red-o-lator-common SHARED ${PROTO_SRCS} ${PROTO_HDRS} ${COMMON_SOURCES})
+target_compile_definitions(red-o-lator-common PUBLIC PROTOBUF_USE_DLLS)
 target_include_directories(red-o-lator-common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${PROTOBUF_INCLUDE_DIR})
 target_link_libraries(red-o-lator-common nng::nng ${PROTOBUF_LIBRARY})

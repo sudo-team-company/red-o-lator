@@ -65,10 +65,13 @@ TEST_CASE("c = a + b") {
     storage->write_data(72, 0, uint32_t(3));    // a = 3
     storage->write_data(76, 0, uint32_t(10));   // b = 10
 
+    Channel<std::shared_ptr<DebuggerMessage>> c1, c2;
+    BreakpointStorage b;
+    DebugContext debug{&c1, &c2, b};
     Dispatcher dispatcher = Dispatcher(&kernelConfig, &kernelCode);
     while (dispatcher.has_next_wg()) {
         std::unique_ptr<WorkGroup> workGroup(dispatcher.next_wg());
-        ComputeUnit::run_work_group(workGroup.get());
+        ComputeUnit::run_work_group(workGroup.get(), debug);
     }
 
     CHECK(storage->read_4_bytes(80, 0) == 13);
@@ -135,10 +138,15 @@ TEST_CASE("data[global_id(0)] = x + x") {
     storage->write_data(48, 0, uint64_t(dataAddress));  // write address of data
     storage->write_data(56, 0, uint32_t(x));            // write value of x
 
+
+    Channel<std::shared_ptr<DebuggerMessage>> c1, c2;
+    BreakpointStorage b;
+    DebugContext debug{&c1, &c2, b};
+
     Dispatcher dispatcher = Dispatcher(&kernelConfig, &kernelCode);
     while (dispatcher.has_next_wg()) {
         std::unique_ptr<WorkGroup> workGroup(dispatcher.next_wg());
-        ComputeUnit::run_work_group(workGroup.get());
+        ComputeUnit::run_work_group(workGroup.get(), debug);
     }
 
     for (size_t i = 0; i < 1024; i += 4) {
@@ -239,9 +247,13 @@ TEST_CASE("data[global_id(i)] = global_offset(i) + x") {
     storage->write_data(56, 0, uint64_t(dataAddress));  // write address of data
 
     Dispatcher dispatcher = Dispatcher(&kernelConfig, &kernelCode);
+
+    Channel<std::shared_ptr<DebuggerMessage>> c1, c2;
+    BreakpointStorage b;
+    DebugContext debug{&c1, &c2, b};
     while (dispatcher.has_next_wg()) {
         std::unique_ptr<WorkGroup> workGroup(dispatcher.next_wg());
-        ComputeUnit::run_work_group(workGroup.get());
+        ComputeUnit::run_work_group(workGroup.get(), debug);
     }
 
     for (size_t i = 0; i < memsize; i += 4) {
@@ -370,8 +382,12 @@ TEST_CASE("weighted_sum_kernel") {
     storage->write_data(56, 0, uint64_t(dataAddress));  // write address of data
 
     Dispatcher dispatcher = Dispatcher(&kernelConfig, &kernelCode);
+
+    Channel<std::shared_ptr<DebuggerMessage>> c1, c2;
+    BreakpointStorage b;
+    DebugContext debug{&c1, &c2, b};
     while (dispatcher.has_next_wg()) {
         std::unique_ptr<WorkGroup> workGroup(dispatcher.next_wg());
-        ComputeUnit::run_work_group(workGroup.get());
+        ComputeUnit::run_work_group(workGroup.get(), debug);
     }
 }

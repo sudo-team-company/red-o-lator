@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <list>
 #include <mutex>
+#include <thread>
 #include "core/Launch.h"
 #include "debugger/breakpoint/BreakpointStorage.h"
 #include "debugger/exec/ExecutionContext.h"

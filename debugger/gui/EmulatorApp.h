@@ -48,7 +48,7 @@ class EmulatorApp : public wxApp {
     void onRequestMemory(uint64_t address) const;
 
     void setMemoryView(const std::vector<uint8_t>& memory, uint64_t address);
-    void EmulatorApp::setRegisters(const RegData& data);
+    void setRegisters(const RegData& data);
 
 };
 

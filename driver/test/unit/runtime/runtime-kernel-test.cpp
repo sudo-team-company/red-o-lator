@@ -208,8 +208,8 @@ TEST_SUITE("Kernel API") {
         SUBCASE("executes kernel") {
             cl_int error;
             const auto queue = test::getCommandQueue();
-//            const auto kernel = test::getKernel("test/resources/kernels/addition/addition.bin", "add_x_x");
-            const auto kernel = test::getKernel(binaryPath, kernelName);
+            const auto kernel = test::getKernel("test/resources/kernels/sum.bin", "sum");
+//            const auto kernel = test::getKernel(binaryPath, kernelName);
 
             const size_t arraySize = 3;
             const size_t arraySizeBytes = arraySize * sizeof(cl_uint);
@@ -240,7 +240,7 @@ TEST_SUITE("Kernel API") {
             CHECK(error == CL_SUCCESS);
 
             size_t globalWorkSize[1];
-            globalWorkSize[0] = arraySizeBytes;
+            globalWorkSize[0] = 64;
 
             size_t localWorkSize[1];
             localWorkSize[0] = 1;

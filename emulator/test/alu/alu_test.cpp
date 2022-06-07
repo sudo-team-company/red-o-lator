@@ -12,7 +12,10 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_abs_i32 - stores absolute signed value of the SSRC0 into SDST.") {
         size_t sgprnum = 2;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0, std::string("s_abs_i32"), {"s0", "s1"});
+
+        Instruction instruction =
+            Instruction(0, std::string("s_abs_i32"), "",
+                        {Operand{REGISTER, S0, 1}, Operand{REGISTER, S1, 1}});
 
         SUBCASE("src0 is 0x80000000") {
             wavefront.scalarRegFile[1] = 0x80000000;
@@ -49,7 +52,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_bcnt0_i32_b32") {
         size_t sgprnum = 5;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_bcnt0_i32_b32"), {"s2", "s4"});
+        Instruction instruction =
+            Instruction(0, std::string("s_bcnt0_i32_b32"), "",
+                        {Operand{REGISTER, S2, 1}, Operand{REGISTER, S4, 1}});
 
         SUBCASE("S_BCNT0_I32_B32(0x00000000) => 32") {
             wavefront.scalarRegFile[4] = 0x00000000;
@@ -74,7 +79,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_bcnt0_i32_b64") {
         size_t sgprnum = 6;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_bcnt0_i32_b64"), {"s2", "s[4:5]"});
+        Instruction instruction =
+            Instruction(0, std::string("s_bcnt0_i32_b64"), "",
+                        {Operand{REGISTER, S2, 1}, Operand{REGISTER, S4, 2}});
 
         SUBCASE("S_BCNT0_I32_B64(0x00000000) => 64") {
             wavefront.scalarRegFile[4] = 0x00000000;
@@ -95,7 +102,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_bcnt1_i32_b32}") {
         size_t sgprnum = 7;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_bcnt1_i32_b32"), {"s6", "s1"});
+        Instruction instruction =
+            Instruction(0, std::string("s_bcnt1_i32_b32"), "",
+                        {Operand{REGISTER, S6, 1}, Operand{REGISTER, S1, 1}});
 
         SUBCASE("S_BCNT1_I32_B32(0x00000000) => 0") {
             wavefront.scalarRegFile[1] = 0x00000000;
@@ -120,7 +129,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_bcnt1_i32_b64}") {
         size_t sgprnum = 4;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_bcnt1_i32_b64"), {"s2", "s[2:3]"});
+        Instruction instruction =
+            Instruction(0, std::string("s_bcnt1_i32_b64"), "",
+                        {Operand{REGISTER, S2, 1}, Operand{REGISTER, S2, 2}});
         SUBCASE("S_BCNT1_I32_B64(0x00000000) => 0") {
             wavefront.scalarRegFile[2] = 0x00000000;
             wavefront.scalarRegFile[3] = 0x00000000;
@@ -140,7 +151,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_ff0_i32_b32") {
         size_t sgprnum = 1;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_ff0_i32_b32"), {"s0", "s0"});
+        Instruction instruction =
+            Instruction(0, std::string("s_ff0_i32_b32"), "",
+                        {Operand{REGISTER, S0, 1}, Operand{REGISTER, S0, 1}});
 
         SUBCASE("S_FF0_I32_B32(0xaaaaaaaa) => 0") {
             wavefront.scalarRegFile[0] = 0xaaaaaaaa;
@@ -173,7 +186,8 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_ff0_i32_b64") {
         size_t sgprnum = 101;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_ff0_i32_b64"), {"s0", "s[99:100]"});
+        Instruction instruction = Instruction(0,std::string( "s_ff0_i32_b64"), "",
+                                              {Operand{REGISTER, S0, 1}, Operand{REGISTER, S99, 2}});
 
         SUBCASE("S_FF0_I32_B64(0xffffffffffffffff) => 0xffffffff") {
             wavefront.scalarRegFile[99] = 0xffffffff;
@@ -187,7 +201,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_ff1_i32_b32") {
         size_t sgprnum = 101;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_ff1_i32_b32"), {"s99", "s100"});
+        Instruction instruction =
+            Instruction(0, std::string("s_ff1_i32_b32"), "",
+                        {Operand{REGISTER, S99, 1}, Operand{REGISTER, S100, 1}});
 
         SUBCASE("S_FF1_I32_B32(0xaaaaaaaa) => 1") {
             wavefront.scalarRegFile[100] = 0xaaaaaaaa;
@@ -214,7 +230,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_flbit_i32_b32") {
         size_t sgprnum = 1;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_flbit_i32_b32"), {"s0", "s0"});
+        Instruction instruction =
+            Instruction(0, std::string("s_flbit_i32_b32"), "",
+                        {Operand{REGISTER, S0, 1}, Operand{REGISTER, S0, 1}});
 
         SUBCASE("S_FLBIT_I32_B32(0x00000000) => 0xffffffff") {
             wavefront.scalarRegFile[0] = 0x00000000;
@@ -252,7 +270,10 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("run_s_absdiff_i32 - omputes the absolute value of difference between two values.") {
         size_t sgprnum = 12;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_absdiff_i32"), {"s6", "s10", "s11"});
+        Instruction instruction =
+            Instruction(0, std::string("s_absdiff_i32"), "",
+                        {Operand{REGISTER, S6, 1}, Operand{REGISTER, S10, 1},
+                         Operand{REGISTER, S11, 1}});
 
         SUBCASE("src0 is 0x00000002, src1 is 0x00000005") {
             wavefront.scalarRegFile[10] = 0x00000002;
@@ -287,7 +308,9 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("s_addc_u32") {
         size_t sgprnum = 12;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction(0, std::string( "s_addc_u32"), {"s0", "s10", "s11"});
+        Instruction instruction(0, std::string("s_addc_u32"), "",
+                                {Operand{REGISTER, S6, 1}, Operand{REGISTER, S10, 1},
+                                 Operand{REGISTER, S11, 1}});
 
         SUBCASE("src0 is 0x00000002, src1 is 0x00000005") {
             wavefront.scalarRegFile[10] = 0x00000002;
@@ -308,7 +331,10 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("s_add_i32") {
         size_t sgprnum = 12;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_add_i32"), {"s0", "s10", "s11"});
+        Instruction instruction =
+            Instruction(0, std::string("s_add_i32"), "",
+                        {Operand{REGISTER, S6, 1}, Operand{REGISTER, S10, 1},
+                         Operand{REGISTER, S11, 1}});
 
         SUBCASE("src0 is -2, src1 is 3") {
             wavefront.scalarRegFile[10] = -2;
@@ -338,7 +364,10 @@ TEST_SUITE("Scalar ALU test") {
     TEST_CASE("s_sub_i32") {
         size_t sgprnum = 12;
         auto wavefront = Wavefront(nullptr, wfSize, wfId, sgprnum, vgprnum);
-        Instruction instruction = Instruction(0,std::string( "s_sub_i32"), {"s0", "s10", "s11"});
+        Instruction instruction =
+            Instruction(0, std::string("s_sub_i32"), "",
+                        {Operand{REGISTER, S6, 1}, Operand{REGISTER, S10, 1},
+                         Operand{REGISTER, S11, 1}});
 
         SUBCASE("src0 is -2, src1 is 3") {
             wavefront.scalarRegFile[10] = -2;

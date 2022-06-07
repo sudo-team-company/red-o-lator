@@ -73,7 +73,6 @@ void KernelExecutionCommand::executeImpl() const {
                 a.readPermission = argValue->kernelCanRead;
                 a.writePermission = argValue->kernelCanWrite;
                 proto.args.push_back(a);
-                memset(argValue->address, 0, argValue->size);
             }
         }
     }
