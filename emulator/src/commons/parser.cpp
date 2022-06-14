@@ -31,10 +31,13 @@ bool KernelParser::is_integer(const std::string& str) {
 }
 std::pair<RegisterType, size_t> KernelParser::get_register(const std::string& arg) {
     if (arg == "vcc") {
-        return std::make_pair(VCC, 1);
+        return std::make_pair(VCC, 2);
     }
     if (arg == "scc") {
         return std::make_pair(SCC, 1);
+    }
+    if (arg == "exec") {
+        return std::make_pair(EXEC, 2);
     }
     if (utils::startsWith(arg, "lgkmcnt")) {
         return std::make_pair(LGKMCNT, 1);
@@ -152,7 +155,7 @@ KernelConfig KernelParser::parseKernelConfig(uint32_t dims,
     }
     validateSizes(dims, config.globalWorkSize, "Global work size");
     std::copy_n(globalWorkSize.begin(), dims, config.globalWorkSize.begin());
-    if (!config.localWorkSize.empty()) {
+    if (!localWorkSize.empty()) {
         std::copy_n(localWorkSize.begin(), dims, config.localWorkSize.begin());
         validateSizes(dims, config.localWorkSize, "Local work size");
     }

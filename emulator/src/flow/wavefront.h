@@ -52,13 +52,13 @@ struct Wavefront {
 public:
     std::vector<uint32_t> scalarRegFile;
     std::vector<uint32_t> vectorRegFile;
+    std::unique_ptr<StatusReg> statusReg;
+    std::unique_ptr<ModeReg> modeReg;
+    std::unique_ptr<ProgramCounter> programCounter;
     uint64_t execReg;
     uint64_t vccReg;
     uint32_t m0Reg = 0;
-    std::unique_ptr<StatusReg> statusReg;
-    std::unique_ptr<ModeReg> modeReg;
     bool sccReg = false;
-
     bool atBarrier = false;
 
     explicit Wavefront(const WorkGroup *, size_t size, size_t id, size_t sgprnum, size_t vgprnum);
@@ -151,7 +151,6 @@ private:
     const WorkGroup *const workGroup = nullptr;
     size_t id, size;
     size_t sgprsnum, vgprsnum;
-    std::unique_ptr<ProgramCounter> programCounter;
     bool completed = false;
 
     std::vector<uint32_t> read_reg_operand(const Operand &, int);

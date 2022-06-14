@@ -423,9 +423,9 @@ std::vector<uint32_t> Wavefront::read_reg_operand(const Operand &operand, int wi
     bool isScalarReg = is_s_reg(regType);
     bool isVectorReg = is_v_reg(regType);
 
-    if (operand.regAmount > 1 && !isScalarReg && !isVectorReg)
-        throw std::runtime_error(
-            "Only scalar or vector register can be multiple operands");
+//    if (operand.regAmount > 1 && !isScalarReg && !isVectorReg)
+//        throw std::runtime_error(
+//            "Only scalar or vector register can be multiple operands");
 
     if (isScalarReg) {
         std::vector<uint32_t> data(0);
@@ -471,7 +471,9 @@ void Wavefront::write_data_to_gpr(const Operand &operand,
 }
 
 void Wavefront::write_data_to_gpr(const Operand &operand, uint64_t data, int wiInd) {
+    assert(operand.type == REGISTER);
     assert(operand.regAmount <= 2);
+
     auto vData = std::vector<uint32_t>();
     if (operand.regAmount == 2) {
         vData.push_back(uint32_t(data >> 32));
@@ -483,7 +485,6 @@ void Wavefront::write_data_to_gpr(const Operand &operand, uint64_t data, int wiI
 void Wavefront::write_data_to_gpr(const Operand &operand,
                                   const std::vector<uint32_t> &data,
                                   int wiInd) {
-    assert(operand.type == REGISTER);
     auto reg = std::get<RegisterType>(operand.value);
 
     if (is_s_reg(reg)) {
@@ -505,8 +506,16 @@ void Wavefront::write_data_to_gpr(const Operand &operand,
                    "Vector register is out of range");
             set_vgpr(wiInd, vRegInd, data[data.size() - 1 - i]);
         }
+    } else if (reg == VCC) {
+        assert(data.size() == 2);
+        vccReg = data[data.size() - 2];
+        vccReg = (vccReg << 32) |  data[data.size() - 1];
+    } else if (reg == EXEC) {
+        assert(data.size() == 2);
+        execReg = data[data.size() - 2];
+        execReg = (execReg << 32) |  data[data.size() - 1];
     } else {
-        logger.error(std::string("Unexpected operand for writing into GPR: ") + std::to_string(operand.type));
+        logger.error(std::string("Unexpected operand for writing: " + std::to_string(reg)));
     }
 }
 

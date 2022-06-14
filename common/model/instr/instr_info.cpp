@@ -435,6 +435,7 @@ static inline const InstructionView instructionRepo[] = {
     // VOP3A
     {"v_lshlrev_b64", V_LSHLREV_B64, UNDEFINED, VOP3A},
     {"v_mul_lo_u32", V_MUL_LO_U32, UNDEFINED, VOP3A},
+    {"v_add3_u32", V_ADD3_U32, UNDEFINED, VOP3A},
     // VOP3B
     {"v_div_scale_f32", V_DIV_SCALE_F32, UNDEFINED, VOP3B},
     {"v_div_scale_f64", V_DIV_SCALE_F64, UNDEFINED, VOP3B},
@@ -483,7 +484,7 @@ static inline const InstructionView instructionRepo[] = {
     {"v_cmp_ge_i32", V_CMP_GE_I32, VOPC, VOP3A},
     {"v_cmp_tru_i32", V_CMP_TRU_I32, VOPC, VOP3A},
     {"v_cmp_f_u32", V_CMP_F_U32, VOPC, VOP3A},
-    {"v_cmp_lt_u32", V_CMP_LT_U32, VOPC, VOP3A},
+    {"v_cmp_lt_u32", V_CMP_LT_U32, VOPC, UNDEFINED},
     {"v_cmp_eq_u32", V_CMP_EQ_U32, VOPC, VOP3A},
     {"v_cmp_le_u32", V_CMP_LE_U32, VOPC, VOP3A},
     {"v_cmp_gt_u32", V_CMP_GT_U32, VOPC, VOP3A},
@@ -612,7 +613,31 @@ static inline const InstructionView instructionRepo[] = {
     {"flat_load_dword", FLAT_LOAD_DWORD, UNDEFINED, FLAT},
     {"flat_load_dwordx2", FLAT_LOAD_DWORDX2, UNDEFINED, FLAT},
     {"flat_load_dwordx3", FLAT_LOAD_DWORDX3, UNDEFINED, FLAT},
-    {"flat_load_dwordx4", FLAT_LOAD_DWORDX4, UNDEFINED, FLAT}};
+    {"flat_load_dwordx4", FLAT_LOAD_DWORDX4, UNDEFINED, FLAT},
+
+    {"flat_atomic_add", FLAT_ATOMIC_ADD, UNDEFINED, FLAT},
+    {"flat_atomic_add_x2", FLAT_ATOMIC_ADD_X2, UNDEFINED, FLAT},
+    {"flat_atomic_sub", FLAT_ATOMIC_SUB, UNDEFINED, FLAT},
+    {"flat_atomic_sub_x2", FLAT_ATOMIC_SUB_X2, UNDEFINED, FLAT},
+    {"flat_atomic_smin", FLAT_ATOMIC_SMIN, UNDEFINED, FLAT},
+    {"flat_atomic_smin_x2", FLAT_ATOMIC_SMIN_X2, UNDEFINED, FLAT},
+    {"flat_atomic_umin", FLAT_ATOMIC_UMIN, UNDEFINED, FLAT},
+    {"flat_atomic_umin_x2", FLAT_ATOMIC_UMIN_X2, UNDEFINED, FLAT},
+    {"flat_atomic_smax", FLAT_ATOMIC_SMAX, UNDEFINED, FLAT},
+    {"flat_atomic_smax_x2", FLAT_ATOMIC_SMAX_X2, UNDEFINED, FLAT},
+    {"flat_atomic_umax", FLAT_ATOMIC_UMAX, UNDEFINED, FLAT},
+    {"flat_atomic_umax_x2", FLAT_ATOMIC_UMAX_X2, UNDEFINED, FLAT},
+    {"flat_atomic_and", FLAT_ATOMIC_AND, UNDEFINED, FLAT},
+    {"flat_atomic_and_x2", FLAT_ATOMIC_AND_X2, UNDEFINED, FLAT},
+    {"flat_atomic_or", FLAT_ATOMIC_OR, UNDEFINED, FLAT},
+    {"flat_atomic_or_x2", FLAT_ATOMIC_OR_X2, UNDEFINED, FLAT},
+    {"flat_atomic_xor", FLAT_ATOMIC_XOR, UNDEFINED, FLAT},
+    {"flat_atomic_xor_x2", FLAT_ATOMIC_XOR_X2, UNDEFINED, FLAT},
+    {"flat_atomic_inc", FLAT_ATOMIC_INC, UNDEFINED, FLAT},
+    {"flat_atomic_inc_x2", FLAT_ATOMIC_INC_X2, UNDEFINED, FLAT},
+    {"flat_atomic_dec", FLAT_ATOMIC_DEC, UNDEFINED, FLAT},
+    {"flat_atomic_dec_x2", FLAT_ATOMIC_DEC_X2, UNDEFINED, FLAT},
+};
 
 InstrKey get_instr_key(const std::string& instruction) {
     auto it =

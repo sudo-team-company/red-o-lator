@@ -7,7 +7,7 @@ void run_s_absdiff_i32(WfStateSOP2& state) {
     state.SCC = state.SDST != 0;
 }
 void run_s_addc_u32(WfStateSOP2& state) {
-    uint64_t temp = state.SSRC0 + state.SSRC1;
+    uint64_t temp = state.SSRC0 + state.SSRC1 + (state.SCC ? 1 : 0);
     state.SDST = temp;
     state.SCC = temp >> 32;
 }
@@ -81,16 +81,16 @@ void run_s_bfe_i64(WfStateSOP2& state) {
     state.SCC = state.SDST != 0;
 }
 
-void run_s_bfe_u32(WfStateSOP2& state) {
+void run_s_bfe_u32(WfStateSOP2& state) { //todo wrong description in CLRX
     uint8_t shift = state.SSRC1 & 31;
     uint8_t length = (state.SSRC1 >> 16) & 0x7f;
+    auto SRC0 = static_cast<uint32_t>(state.SSRC0);
     if (length == 0) {
         state.SDST = 0;
-    }
-    if (shift + length < 32) {
-        state.SDST = (state.SSRC0 << (32 - shift - length)) >> (32 - length);
+    } else if (shift + length < 32) {
+        state.SDST = (SRC0 << (32 - shift - length)) >> (32 - length);
     } else {
-        state.SDST = state.SSRC0 >> shift;
+        state.SDST = SRC0 >> shift;
     }
     state.SCC = state.SDST != 0;
 }
@@ -227,7 +227,7 @@ void run_s_mul_hi_u32(WfStateSOP2& state) {
 }
 
 void run_s_mul_i32(WfStateSOP2& state) {
-    state.SDST = static_cast<int32_t>(state.SSRC0) * int32_t(state.SSRC1);
+    state.SDST = static_cast<int32_t>(state.SSRC0 * state.SSRC1);
 }
 
 void run_s_nand_b32(WfStateSOP2& state) {

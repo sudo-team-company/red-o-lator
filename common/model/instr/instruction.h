@@ -42,8 +42,8 @@ struct Instruction {
 
     size_t get_operands_count() const noexcept { return operands.size(); }
 
-    void set_width_and_format(size_t w) {
-        widthInBytes = w;
+    void set_width_and_format(size_t width) {
+        widthInBytes = width;
         format = get_instr_format(instrKey, widthInBytes);
     }
 

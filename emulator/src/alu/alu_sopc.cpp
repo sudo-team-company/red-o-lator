@@ -1,89 +1,89 @@
 #include <stdexcept>
 #include "alu.h"
-
-static inline void run_s_bitcmp0_b32(WfStateSOPC& state) {
+namespace {
+void run_s_bitcmp0_b32(WfStateSOPC& state) {
     state.SCC = (state.SSRC0 & (uint32_t(1) << (state.SSRC1 & 31))) == 0;
 }
 
-static inline void run_s_bitcmp0_b64(WfStateSOPC& state) {
+void run_s_bitcmp0_b64(WfStateSOPC& state) {
     state.SCC = (state.SSRC0 & (uint64_t(1) << (state.SSRC1 & 63))) == 0;
 }
 
-static inline void run_s_bitcmp1_b32(WfStateSOPC& state) {
+void run_s_bitcmp1_b32(WfStateSOPC& state) {
     state.SCC = (state.SSRC0 & (uint32_t(1) << (state.SSRC1 & 31))) != 0;
 }
 
-static inline void run_s_bitcmp1_b64(WfStateSOPC& state) {
+void run_s_bitcmp1_b64(WfStateSOPC& state) {
     state.SCC = (state.SSRC0 & (uint64_t(1) << (state.SSRC1 & 63))) != 0;
 }
 
-static inline void run_s_cmp_eq_u64(WfStateSOPC& state) {
+void run_s_cmp_eq_u64(WfStateSOPC& state) {
     state.SCC = state.SSRC0 == state.SSRC1;
 }
 
-static inline void run_s_cmp_eq_i32(WfStateSOPC& state) {
+void run_s_cmp_eq_i32(WfStateSOPC& state) {
     run_s_cmp_eq_u64(state);
 }
 
-static inline void run_s_cmp_eq_u32(WfStateSOPC& state) {
+void run_s_cmp_eq_u32(WfStateSOPC& state) {
     run_s_cmp_eq_u64(state);
 }
 
-static inline void run_s_cmp_ge_i32(WfStateSOPC& state) {
+void run_s_cmp_ge_i32(WfStateSOPC& state) {
     state.SCC = int32_t(state.SSRC0) >= int32_t(state.SSRC1);
 }
 
-static inline void run_s_cmp_ge_u32(WfStateSOPC& state) {
+void run_s_cmp_ge_u32(WfStateSOPC& state) {
     state.SCC = uint32_t(state.SSRC0) >= uint32_t(state.SSRC1);
 }
 
-static inline void run_s_cmp_gt_i32(WfStateSOPC& state) {
+void run_s_cmp_gt_i32(WfStateSOPC& state) {
     state.SCC = int32_t(state.SSRC0) > int32_t(state.SSRC1);
 }
 
-static inline void run_s_cmp_gt_u32(WfStateSOPC& state) {
+void run_s_cmp_gt_u32(WfStateSOPC& state) {
     state.SCC = uint32_t(state.SSRC0) > uint32_t(state.SSRC1);
 }
 
-static inline void run_s_cmp_le_i32(WfStateSOPC& state) {
+void run_s_cmp_le_i32(WfStateSOPC& state) {
     state.SCC = int32_t(state.SSRC0) <= int32_t(state.SSRC1);
 }
 
-static inline void run_s_cmp_le_u32(WfStateSOPC& state) {
+void run_s_cmp_le_u32(WfStateSOPC& state) {
     state.SCC = uint32_t(state.SSRC0) <= uint32_t(state.SSRC1);
 }
 
-static inline void run_s_cmp_lg_u64(WfStateSOPC& state) {
+void run_s_cmp_lg_u64(WfStateSOPC& state) {
     state.SCC = state.SSRC0 != state.SSRC1;
 }
 
-static inline void run_s_cmp_lg_i32(WfStateSOPC& state) {
+void run_s_cmp_lg_i32(WfStateSOPC& state) {
     run_s_cmp_lg_u64(state);
 }
-static inline void run_s_cmp_lg_u32(WfStateSOPC& state) {
-    run_s_cmp_lg_u64(state);
-}
-
-static inline void run_s_cmp_ne_u64(WfStateSOPC& state) {
+void run_s_cmp_lg_u32(WfStateSOPC& state) {
     run_s_cmp_lg_u64(state);
 }
 
-static inline void run_s_cmp_lt_i32(WfStateSOPC& state) {
+void run_s_cmp_ne_u64(WfStateSOPC& state) {
+    run_s_cmp_lg_u64(state);
+}
+
+void run_s_cmp_lt_i32(WfStateSOPC& state) {
     state.SCC = int32_t(state.SSRC0) < int32_t(state.SSRC1);
 }
-static inline void run_s_cmp_lt_u32(WfStateSOPC& state) {
+void run_s_cmp_lt_u32(WfStateSOPC& state) {
     state.SCC = state.SSRC0 < state.SSRC1;
 }
 
-static inline void run_s_set_gpr_idx_on(WfStateSOPC& state) {
+void run_s_set_gpr_idx_on(WfStateSOPC& state) {
     state.MODE->gpr_idx_en(true);
     //SRC1 -> IMM8
     state.M0 = ((state.SSRC1 & 15) << 12) | (state.SSRC0 & 0xff);
 }
-static inline void run_s_setvskip(WfStateSOPC& state) {
+void run_s_setvskip(WfStateSOPC& state) {
     state.MODE->vskip((state.SSRC0 & 1 << (state.SSRC1 & 31)) != 0);
 }
-
+}
 void run_sopc(const Instruction& instr, Wavefront* wavefront)  {
     auto state = wavefront->get_sopc_state(instr);
 

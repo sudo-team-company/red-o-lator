@@ -108,11 +108,11 @@ public:
 };
 
 struct WfStateVOP2 {
-    bool CLAMP = false;
     std::vector<uint64_t> VDST;
     std::vector<uint64_t> SRC0;
     std::vector<uint64_t> SRC1;
     uint64_t VCC;
+    bool CLAMP = false;
 
     WfStateVOP2(std::vector<uint64_t> VDST,
                 std::vector<uint64_t> SRC0,
@@ -146,6 +146,7 @@ struct WfStateFLATStore {
     std::vector<uint64_t> VADDR;
     std::vector<uint32_t> VDATA;
     size_t vdataAmountPerWi = 0;
+
     WfStateFLATStore(std::vector<uint64_t> VADDR, std::vector<uint32_t> VDATA, size_t vdataAmountPerWi)
         : VADDR(std::move(VADDR)), VDATA(std::move(VDATA)), vdataAmountPerWi(vdataAmountPerWi) {}
 };
@@ -156,6 +157,16 @@ struct WfStateFLATLoad {
     size_t vdstAmountPerWi = 0;
     WfStateFLATLoad(std::vector<uint64_t> VADDR, size_t vdstAmount, size_t vdstAmountPerWi)
         : VADDR(std::move(VADDR)), VDST(std::vector<uint32_t>(vdstAmount)), vdstAmountPerWi(vdstAmountPerWi) {}
+};
+
+struct WfStateFLATAtomic {
+    std::vector<uint64_t> VADDR;
+    std::vector<uint32_t> VDST;
+    std::vector<uint32_t> VDATA;
+    bool GLC = false;
+
+    WfStateFLATAtomic(std::vector<uint64_t> VADDR, std::vector<uint32_t> VDATA, size_t vdstAmount, size_t vdstAmountPerWi)
+        : VADDR(std::move(VADDR)), VDATA(std::move(VDATA)), VDST(std::vector<uint32_t>(vdstAmount)) {}
 };
 
 struct WfStateVOPC {

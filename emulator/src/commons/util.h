@@ -51,6 +51,8 @@ uint32_t to_uint32_t(float);
 
 uint64_t to_uin64_t(const std::vector<uint32_t>&);
 
+uint64_t to_uin64_t(uint32_t, uint32_t);
+
 std::vector<uint32_t> to_uint32_v(const std::vector<uint8_t>&);
 
 float to_float(uint64_t n);

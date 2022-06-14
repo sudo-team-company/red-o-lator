@@ -41,6 +41,7 @@ void run_s_cbranch_scc0(WfStateSOPP& state) {
     if (state.SCC == 0) state.PC->set_value(state.RELADDR);
 }
 
+//// Behaviour differs from spec. Pc is not incremented because it jumps to next instr later.
 void run_s_cbranch_scc1(WfStateSOPP& state) {
     if (state.SCC) state.PC->set_value(state.RELADDR);
 }
