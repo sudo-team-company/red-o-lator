@@ -7,6 +7,7 @@
 
 struct KernelConfig {
     uint64_t kernArgAddr = 0;
+    uint64_t kernSetupPtr = 0;
 
     explicit KernelConfig() = default;
 

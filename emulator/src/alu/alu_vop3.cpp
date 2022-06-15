@@ -433,7 +433,7 @@ void run_v_xad_u32(WfStateVOP3& state, size_t i) {
 }
 
 void run_v_mul_lo_u32(WfStateVOP3& state, size_t i) {
-    state.VDST[i] = state.SRC0[i] * state.SRC1[i];
+    state.VDST[i] = static_cast<uint32_t>(state.SRC0[i] * state.SRC1[i]);
 }
 }
 void run_vop3(const Instruction& instr, Wavefront* wf) {

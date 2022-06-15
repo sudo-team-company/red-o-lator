@@ -18,6 +18,9 @@ uint64_t to_uin64_t(const std::vector<uint32_t> &data) {
 
     return result;
 }
+uint64_t to_uin64_t(uint32_t msb, uint32_t lsb) {
+    return to_uin64_t({msb, lsb});
+}
 
 /**
  *  result[n-1] contains LSB

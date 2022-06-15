@@ -1,6 +1,7 @@
 #include "alu.h"
 
 namespace {
+
 void run_flat_store_dwordxn(WfStateFLATStore& state,
                                           size_t wiInd,
                                           size_t n) {
@@ -47,6 +48,32 @@ std::function<void(WfStateFLATLoad&, size_t)> execute_flat_load(
         case FLAT_LOAD_DWORDX4: return std::bind(run_flat_load_dwordxn, _1, _2, 4); //NOLINT
         default: UNSUPPORTED_INSTRUCTION("FLAT", get_mnemonic(instr.get_key()));
     }
+}
+void run_flat_atomic_add(WfStateFLATAtomic& state, size_t wiInd) {
+    auto data = Storage::get_instance()->read_4_bytes(state.VADDR[wiInd], 0);
+    uint32_t sum = data + state.VDATA[wiInd];
+    Storage::get_instance()->write_data(state.VADDR[wiInd], 0, sum);
+    state.VDST[wiInd] = state.GLC ? data : sum;
+}
+void run_flat_atomic_add_x2(WfStateFLATAtomic& state, size_t wiInd) {
+    auto data = Storage::get_instance()->read_8_bytes(state.VADDR[wiInd]);
+    uint64_t sum = data + to_uin64_t(state.VDATA[wiInd], state.VDATA[wiInd + 1]);
+    Storage::get_instance()->write_data(state.VADDR[wiInd], 0, sum);
+    state.VDST[wiInd] = state.GLC ? static_cast<uint32_t>(data >> 32) : static_cast<uint32_t>(sum >> 32);
+    state.VDST[wiInd + 1] = state.GLC ? static_cast<uint32_t>(data) : static_cast<uint32_t>(sum);
+}
+void run_flat_atomic_sub(WfStateFLATAtomic& state, size_t wiInd) {
+    auto data = Storage::get_instance()->read_4_bytes(state.VADDR[wiInd], 0);
+    uint32_t sum = data - state.VDATA[wiInd];
+    Storage::get_instance()->write_data(state.VADDR[wiInd], 0, sum);
+    state.VDST[wiInd] = state.GLC ? data : sum;
+}
+void run_flat_atomic_sub_x2(WfStateFLATAtomic& state, size_t wiInd) {
+    auto data = Storage::get_instance()->read_8_bytes(state.VADDR[wiInd]);
+    uint64_t sum = data - to_uin64_t(state.VDATA[wiInd], state.VDATA[wiInd + 1]);
+    Storage::get_instance()->write_data(state.VADDR[wiInd], 0, sum);
+    state.VDST[wiInd] = state.GLC ? static_cast<uint32_t>(data >> 32) : static_cast<uint32_t>(sum >> 32);
+    state.VDST[wiInd + 1] = state.GLC ? static_cast<uint32_t>(data) : static_cast<uint32_t>(sum);
 }
 }
 void run_flat(const Instruction &instr, Wavefront *wf) {

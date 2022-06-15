@@ -56,7 +56,15 @@ add_executable(red-o-lator-emulator-alu-test
         src/alu/alu_sop2.cpp
         src/alu/alu_vop1.cpp
         src/commons/util.cpp
-        test/alu/alu_test.cpp
+        test/alu/sop1_test.cpp
+        test/alu/sop2_test.cpp
+        test/alu/sopc_test.cpp
+        test/alu/sopp_test.cpp
+        test/alu/vop1_test.cpp
+        test/alu/vop2_test.cpp
+        test/alu/vop3_test.cpp
+        test/alu/vopc_test.cpp
+        test/alu/runner.cpp
         src/flow/wavefront.cpp
         src/flow/register.cpp
         src/commons/commons.cpp

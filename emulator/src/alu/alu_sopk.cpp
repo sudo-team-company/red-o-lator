@@ -1,17 +1,17 @@
 #include <stdexcept>
 #include "alu.h"
-
-static inline void run_s_addk_i32(WfStateSOPK& state) {
+namespace {
+void run_s_addk_i32(WfStateSOPK& state) {
     state.SDST = static_cast<int32_t>(state.SDST) + static_cast<int32_t>(state.IMM16);
     int64_t temp = static_cast<int64_t>(state.SDST) + static_cast<int64_t>(state.IMM16);
     state.SCC = get_bit(31, temp) == get_bit(15, state.IMM16) &&
                 get_bit(31, temp) != get_bit(31, static_cast<int32_t>(state.SDST));
 }
-static inline void run_s_call_b64(WfStateSOPK& state) {
+void run_s_call_b64(WfStateSOPK& state) {
     state.SDST = state.PC->get_value() + 4;
     state.PC->set_value(state.RELADDR);
 }
-static inline void run_s_cbranch_i_fork(WfStateSOPK& state, Wavefront* wf) {
+void run_s_cbranch_i_fork(WfStateSOPK& state, Wavefront* wf) {
     uint64_t passes = (wf->execReg & state.SSRC0);
     uint64_t failures = (wf->execReg & ~state.SSRC0);
     uint8_t CSP = wf->modeReg->csp();
@@ -33,52 +33,52 @@ static inline void run_s_cbranch_i_fork(WfStateSOPK& state, Wavefront* wf) {
         state.PC->set_value(state.RELADDR); /* jump to passes */
     }
 }
-static inline void run_s_cmovk_i32(WfStateSOPK& state) {
+void run_s_cmovk_i32(WfStateSOPK& state) {
     if (state.SCC) state.SDST = static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_cmpk_eq_i32(WfStateSOPK& state) {
+void run_s_cmpk_eq_i32(WfStateSOPK& state) {
     state.SCC = static_cast<int32_t>(state.SDST) == static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_cmpk_eq_u32(WfStateSOPK& state) {
+void run_s_cmpk_eq_u32(WfStateSOPK& state) {
     state.SCC = state.SDST == state.IMM16;
 }
-static inline void run_s_cmpk_ge_i32(WfStateSOPK& state) {
+void run_s_cmpk_ge_i32(WfStateSOPK& state) {
     state.SCC = static_cast<int32_t>(state.SDST) >= static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_cmpk_ge_u32(WfStateSOPK& state) {
+void run_s_cmpk_ge_u32(WfStateSOPK& state) {
     state.SCC = state.SDST >= state.IMM16;
 }
-static inline void run_s_cmpk_gt_i32(WfStateSOPK& state) {
+void run_s_cmpk_gt_i32(WfStateSOPK& state) {
     state.SCC = static_cast<int32_t>(state.SDST) >= static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_cmpk_gt_u32(WfStateSOPK& state) {
+void run_s_cmpk_gt_u32(WfStateSOPK& state) {
     state.SCC = state.SDST > state.IMM16;
 }
-static inline void run_s_cmpk_le_i32(WfStateSOPK& state) {
+void run_s_cmpk_le_i32(WfStateSOPK& state) {
     state.SCC = static_cast<int32_t>(state.SDST) <= static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_cmpk_le_u32(WfStateSOPK& state) {
+void run_s_cmpk_le_u32(WfStateSOPK& state) {
     state.SCC = state.SDST <= state.IMM16;
 }
-static inline void run_s_cmpk_lg_i32(WfStateSOPK& state) {
+void run_s_cmpk_lg_i32(WfStateSOPK& state) {
     state.SCC = static_cast<int32_t>(state.SDST) != static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_cmpk_lg_u32(WfStateSOPK& state) {
+void run_s_cmpk_lg_u32(WfStateSOPK& state) {
     state.SCC = state.SDST != state.IMM16;
 }
-static inline void run_s_cmpk_lt_i32(WfStateSOPK& state) {
+void run_s_cmpk_lt_i32(WfStateSOPK& state) {
     state.SCC = static_cast<int32_t>(state.SDST) < static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_cmpk_lt_u32(WfStateSOPK& state) {
+void run_s_cmpk_lt_u32(WfStateSOPK& state) {
     state.SCC = state.SDST < state.IMM16;
 }
-static inline void run_s_movk_i32(WfStateSOPK& state) {
+void run_s_movk_i32(WfStateSOPK& state) {
     state.SCC = static_cast<int32_t>(state.IMM16);
 }
-static inline void run_s_mulk_i32(WfStateSOPK& state) {
+void run_s_mulk_i32(WfStateSOPK& state) {
     state.SDST = static_cast<int32_t>(state.SDST) * static_cast<int32_t>(state.IMM16);
 }
-
+}
 void run_sopk(const Instruction& instruction, Wavefront* wf) {
     auto instrKey = instruction.get_key();
 
