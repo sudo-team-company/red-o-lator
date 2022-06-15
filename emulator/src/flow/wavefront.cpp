@@ -74,11 +74,13 @@ void WorkGroup::init_wf_regs(Wavefront& wavefront, const KernelConfig &kernelCon
         sgprInd++;
     }
 
-    if (kernelConfig.use_setup()) {
-        wavefront.set_sgpr_pair(6, kernelConfig.kernArgAddr);
-    }
     if (kernelConfig.use_args()) {
         wavefront.set_sgpr_pair(4, kernelConfig.kernArgAddr);
+    }
+
+    if (kernelConfig.use_setup()) {
+        wavefront.set_sgpr_pair(4, kernelConfig.kernSetupPtr);
+        wavefront.set_sgpr_pair(6, kernelConfig.kernArgAddr);
     }
 
     //MODE register initialization

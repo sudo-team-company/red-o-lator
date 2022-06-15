@@ -266,8 +266,9 @@ TEST_SUITE("SOP1 format instructions test") {
         size_t sgprnum = 2;
         auto wavefront = Wavefront(nullptr, wfSize, sop1WfId, sgprnum, vgprnum);
         Instruction instruction =
-            Instruction(0, std::string("s_bcnt1_i32_b32"), "",
-                        {Operand{REGISTER, S0, 2}, Operand{REGISTER, VCC, 2}});
+            Instruction(0, std::string("s_and_saveexec_b64"), "",
+                        {Operand{REGISTER, S0, 2},
+                         Operand{REGISTER, VCC, 2}});
 
         SUBCASE("EXEC != 1") {
             wavefront.execReg = 0xfffffffffffff321;

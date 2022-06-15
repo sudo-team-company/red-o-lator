@@ -20,7 +20,7 @@ TEST_SUITE("VOP3 format instructions test") {
         Instruction instruction =
             Instruction(0, std::string("v_lshlrev_b64"), "",
                         {Operand{REGISTER, V0, 2},
-                         Operand{REGISTER, INT_CONST, 1},
+                         Operand{INT_CONST, 2, 1},
                          Operand{REGISTER, V0, 2}});
 
         auto wavefront = Wavefront(nullptr, vop3WfSize, vop3WfId, sgprnum, vgprnum);
@@ -59,7 +59,11 @@ TEST_SUITE("VOP3 format instructions test") {
         size_t sgprnum = 3;
         size_t vgprnum = 2;
         Instruction instruction =
-            Instruction(0, std::string("v_mul_lo_u32"), {"v1", "v1", "s2"});
+            Instruction(0, std::string("v_mul_lo_u32"), "",
+                        {Operand{REGISTER, V1, 1},
+                         Operand{REGISTER, V1, 1},
+                         Operand{REGISTER, S2, 1}});
+
         auto wavefront = Wavefront(nullptr, vop3WfSize, vop3WfId, sgprnum, vgprnum);
         init_wf(wavefront, vop3WfSize);
 

@@ -48,7 +48,8 @@ TEST_SUITE("SOP2 format instructions test") {
         size_t sgprnum = 12;
         auto wavefront = Wavefront(nullptr, sop2WfSize, sop2WfId, sgprnum, sop2Vgprnum);
         Instruction instruction(0, std::string("s_addc_u32"), "",
-                                {Operand{REGISTER, S6, 1}, Operand{REGISTER, S10, 1},
+                                {Operand{REGISTER, S6, 1},
+                                 Operand{REGISTER, S10, 1},
                                  Operand{REGISTER, S11, 1}});
 
         SUBCASE("src0 is 0x00000002, src1 is 0x00000005") {
@@ -56,7 +57,7 @@ TEST_SUITE("SOP2 format instructions test") {
             wavefront.scalarRegFile[10] = 0x00000002;
             wavefront.scalarRegFile[11] = 0x00000005;
             run_sop2(instruction, &wavefront);
-            CHECK(wavefront.scalarRegFile[0] == 0x00000008);
+            CHECK(wavefront.scalarRegFile[6] == 0x00000008);
             CHECK(!wavefront.sccReg);
         }
 
@@ -65,14 +66,14 @@ TEST_SUITE("SOP2 format instructions test") {
             wavefront.scalarRegFile[10] = 0x80000000;
             wavefront.scalarRegFile[11] = 0x00000005;
             run_sop2(instruction, &wavefront);
-            CHECK(wavefront.scalarRegFile[0] == 0x80000005);
+            CHECK(wavefront.scalarRegFile[6] == 0x80000005);
             CHECK(!wavefront.sccReg);
         }
         SUBCASE("src0 is 0x7fffffff, src1 is 0x00000001 => overflow") {
             wavefront.scalarRegFile[10] = 0xffffffff;
             wavefront.scalarRegFile[11] = 0x00000001;
             run_sop2(instruction, &wavefront);
-            CHECK(wavefront.scalarRegFile[0] == 0);
+            CHECK(wavefront.scalarRegFile[6] == 0);
             CHECK(wavefront.sccReg);
         }
     }
@@ -105,7 +106,8 @@ TEST_SUITE("SOP2 format instructions test") {
         auto wavefront = Wavefront(nullptr, sop2WfSize, sop2WfId, sgprnum, sop2Vgprnum);
         Instruction instruction =
             Instruction(0, std::string("s_add_i32"), "",
-                        {Operand{REGISTER, S6, 1}, Operand{REGISTER, S10, 1},
+                        {Operand{REGISTER, S0, 1},
+                         Operand{REGISTER, S10, 1},
                          Operand{REGISTER, S11, 1}});
         SUBCASE("src0 is -2, src1 is 3") {
             wavefront.scalarRegFile[10] = -2;
@@ -137,7 +139,8 @@ TEST_SUITE("SOP2 format instructions test") {
         auto wavefront = Wavefront(nullptr, sop2WfSize, sop2WfId, sgprnum, sop2Vgprnum);
         Instruction instruction =
             Instruction(0, std::string("s_sub_i32"), "",
-                        {Operand{REGISTER, S6, 1}, Operand{REGISTER, S10, 1},
+                        {Operand{REGISTER, S0, 1},
+                         Operand{REGISTER, S10, 1},
                          Operand{REGISTER, S11, 1}});
         SUBCASE("src0 is -2, src1 is 3") {
             wavefront.scalarRegFile[10] = -2;

@@ -15,8 +15,8 @@
         .pgmrsrc2 0x00000994
         .dx10clamp
         .ieeemode
-        .useargs
-        .usesetup
+        .useargs //4-5 user data are kernel setup pointer.
+        .usesetup //6-7 user data regs are argument's pointer.
         .priority 0
         .arg _.global_offset_0, "size_t", long
         .arg _.global_offset_1, "size_t", long
